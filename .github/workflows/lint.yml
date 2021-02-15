@@ -1,0 +1,25 @@
+name: Lint
+
+on: push
+
+jobs:
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+          architecture: x64
+
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Install dependencies
+        run: pip install -r python-final-diplom/requirements.txt
+
+      - name: Run flake8
+        run: flake8 python-final-diplom
+
+      - name: run pytest
+        run: pytest python-final-diplom/web_shop/tests
