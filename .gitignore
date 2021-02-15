@@ -117,5 +117,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-./reference/
-./data/
+
+*/reference/
+*/data/
+*/tmp.py
