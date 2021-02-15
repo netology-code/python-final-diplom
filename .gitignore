@@ -118,6 +118,19 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+/reference/
 */reference/
+*/reference/*
+/reference
+/data/
 */data/
+*/data/*
+/data
+/orders/
+*/orders/
+*/orders/*
+/orders
+
+
 */tmp.py
+/old_project/
