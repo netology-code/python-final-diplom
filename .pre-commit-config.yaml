@@ -24,7 +24,7 @@ repos:
           - flake8-bugbear
           - flake8-pytest-style
           - flake8-docstrings
-#          - darglint
+          - darglint
 
   - repo: https://github.com/psf/black
     rev: 20.8b1

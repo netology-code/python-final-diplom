@@ -8,10 +8,8 @@ from web_shop.hello import hello
 def test_hello(name, result):
     """Test function.
 
-    Args:
-        name: string
-        result: string
-    Returns:
-        assertion
+    :param name string
+    :param result string
+    :return assertion
     """
     assert hello(name) == result

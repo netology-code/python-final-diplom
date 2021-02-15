@@ -4,9 +4,7 @@
 def hello(name):
     """Test function.
 
-    Args:
-        name: some string
-    Returns:
-        another string
+    :param name: some string
+    :return another string
     """
     return f"Hello {name}"
