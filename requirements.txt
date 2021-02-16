@@ -6,6 +6,7 @@ black==19.10b0
 cfgv==3.2.0
 click==7.1.2
 colorama==0.4.4
+coverage==5.4
 distlib==0.3.1
 filelock==3.0.12
 flake8==3.8.4
@@ -22,6 +23,7 @@ Jinja2==2.11.3
 Mako==1.1.4
 MarkupSafe==1.1.1
 marshmallow==3.10.0
+marshmallow-sqlalchemy==0.24.2
 mccabe==0.6.1
 nodeenv==1.5.0
 packaging==20.9
@@ -29,12 +31,16 @@ pathspec==0.8.1
 pep8-naming==0.11.1
 pluggy==0.13.1
 pre-commit==2.10.1
+psycopg2==2.8.6
+psycopg2-binary==2.8.6
 py==1.10.0
 pycodestyle==2.6.0
 pyflakes==2.2.0
 pyparsing==2.4.7
 pytest==6.2.2
+pytest-cov==2.11.1
 python-dateutil==2.8.1
+python-dotenv==0.15.0
 python-editor==1.0.4
 PyYAML==5.4.1
 regex==2020.11.13

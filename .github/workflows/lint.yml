@@ -20,7 +20,7 @@ jobs:
             pip install -r requirements.txt
 
       - name: Test with pytest
-        run: pytest web_shop
+        run: pytest tests
 
       - name: Run flake8
         run: flake8 web_shop

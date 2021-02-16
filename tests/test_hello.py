@@ -4,7 +4,7 @@ import pytest
 from web_shop.hello import hello
 
 
-@pytest.mark.parametrize(("name", "result"), [("world", "Hello world"), ("serge", "Hello serge")])
+@pytest.mark.parametrize(("name", "result"), [("world", "Hello world"), ("Sergey", "Hello Sergey")])
 def test_hello(name, result):
     """Test function.
 
@@ -13,3 +13,7 @@ def test_hello(name, result):
     :return assertion
     """
     assert hello(name) == result
+
+
+if __name__ == "__main__":
+    pytest.main()
