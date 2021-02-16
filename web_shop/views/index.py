@@ -9,4 +9,5 @@ from web_shop.config import app
 @app.route("/")
 def hello():
     """Index view."""
+    app.logger.info("Going to index")
     return "Hello, World!"

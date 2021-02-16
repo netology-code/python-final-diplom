@@ -1,7 +1,7 @@
 """Runs web_shop."""
 
 from web_shop.config import app
-import views
+from web_shop import views
 
 
 if __name__ == "__main__":

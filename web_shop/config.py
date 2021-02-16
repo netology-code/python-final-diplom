@@ -4,7 +4,10 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 from flask_marshmallow import Marshmallow
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+
+ROOT_URL = "/api/v1/"
 
 load_dotenv()
 
@@ -24,4 +27,5 @@ db = SQLAlchemy(app)
 # Init ma
 ma = Marshmallow(app)
 
-ROOT_URL = "/api/v1/"
+migrate = Migrate(app, db)
+from web_shop.database import models
