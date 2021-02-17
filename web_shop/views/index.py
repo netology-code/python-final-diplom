@@ -3,7 +3,7 @@
 In future shall redirect to ROOT_URL.
 """
 
-from web_shop.config import app
+from web_shop import app
 
 
 @app.route("/")

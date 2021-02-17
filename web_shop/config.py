@@ -2,30 +2,16 @@
 
 import os
 from dotenv import load_dotenv
-from flask import Flask
-from flask_marshmallow import Marshmallow
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
 
 ROOT_URL = "/api/v1/"
 
 load_dotenv()
 
-# Init app
-app = Flask(__name__)
-basedir = os.path.abspath(os.path.dirname(__file__))
 
-# Database
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["JSON_AS_ASCII"] = False
+class Config:
+    """Application configurations."""
 
-# Init db
-db = SQLAlchemy(app)
-
-# Init ma
-ma = Marshmallow(app)
-
-migrate = Migrate(app, db)
-from web_shop.database import models
+    SECRET_KEY = os.getenv("SECRET_KEY")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    JSON_AS_ASCII = False

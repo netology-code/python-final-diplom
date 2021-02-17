@@ -1,5 +1,5 @@
 """Database tables' schemas."""
-from web_shop.config import ma
+from web_shop import ma
 from web_shop.database import User
 
 

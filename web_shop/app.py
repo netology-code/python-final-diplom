@@ -1,6 +1,6 @@
 """Runs web_shop."""
 
-from web_shop.config import app
+from web_shop import app
 from web_shop import views
 
 

@@ -1,7 +1,7 @@
 """Test app initiation."""
 
 import pytest
-from web_shop.config import app
+from web_shop import app
 from web_shop.views import index
 
 
