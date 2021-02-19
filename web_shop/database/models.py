@@ -1,11 +1,9 @@
 """Database table models."""
 import datetime
-from typing import Any, Optional
 
 import jwt
 from flask import jsonify
 from flask_login import UserMixin
-from flask_security import RoleMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from web_shop import app, db, login_manager
@@ -23,11 +21,6 @@ class User(UserMixin, db.Model):
     token = db.Column(db.String(255), nullable=False, unique=True)
     expires_at = db.Column(db.DateTime(), nullable=False)
     is_admin = db.Column(db.Boolean(), default=False)
-    last_login_at = db.Column(db.DateTime())
-    current_login_at = db.Column(db.DateTime())
-    last_login_ip = db.Column(db.String(100))
-    current_login_ip = db.Column(db.String(100))
-    login_count = db.Column(db.Integer())
     active = db.Column(db.Boolean(), default=True)
     confirmed_at = db.Column(db.DateTime())
     roles = db.relationship("Role", secondary="roles_users", backref=db.backref("users", lazy="dynamic"))
@@ -61,7 +54,8 @@ class User(UserMixin, db.Model):
         self.expires_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=600)
         self.token = jwt.encode({"username": self.email, "exp": self.expires_at}, app.config["SECRET_KEY"])
 
-    def check_token(self, token: str):
+    @staticmethod
+    def check_token(token: str):
         """Check tokens."""
         try:
             # jwt.decode() возвращает словарь с исходными ключами
@@ -75,7 +69,7 @@ class User(UserMixin, db.Model):
             return jsonify({"message": e.args[0]}), 401
 
 
-class Role(db.Model, RoleMixin):
+class Role(db.Model):
     """Role model."""
 
     __tablename__ = "role"
@@ -95,5 +89,9 @@ class RolesUsers(db.Model):
 
 @login_manager.user_loader
 def load_user(id):
-    """Loader for login."""
+    """Loader for login.
+
+    :param id - user id
+    :return user string or None
+    """
     return User.query.get(int(id))

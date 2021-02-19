@@ -11,27 +11,37 @@
 <body>
 <div align="right">
     {% if title %}
-    <text style="float: left;"> {{ title }} </text>
-    <a href="/">На главную</a>
-
+        <text style="float: left;"> {{ title }} </text>
+        <a href="/">На главную</a>
     {% else %}
-    <text style="float: left;"> Добро пожаловать в магазин WebShop </text>
-
+        {% if current_user.is_anonymous %}
+            <text style="float: left;"> Добро пожаловать в магазин WebShop</text>
+        {% else %}
+            <text style="float: left;"> Добрый день {{ current_user.first_name }}! Добро пожаловать в личный кабинет магазина
+                WebShop!
+            </text>
+        {% endif %}
     {% endif %}
-    <a href="/register">Регистрация</a>
-    <a href="/login">Войти</a></p>
+
+    {% if current_user.is_anonymous %}
+        <a href="/register">Регистрация</a>
+        <a href="{{ url_for('login') }}">Войти</a>
+    {% else %}
+        <a href="{{ url_for('logout') }}">Выйти из системы</a>
+    {% endif %}
+
 </div>
 
 <hr>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <p class=flashes>
-                {% for message in messages %}
-                    <text style="color:RED">{{ message }}</text>
-                {% endfor %}
-            </p>
-        {% endif %}
-    {% endwith %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <p class=flashes>
+            {% for message in messages %}
+                <text style="color:RED">{{ message }}</text>
+            {% endfor %}
+        </p>
+    {% endif %}
+{% endwith %}
 {% block content %}{% endblock %}
 </body>
 </html>

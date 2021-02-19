@@ -3,7 +3,7 @@
 from flask_wtf import FlaskForm
 
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, ValidationError
-from wtforms.validators import DataRequired, EqualTo
+from wtforms.validators import DataRequired, Email, EqualTo
 
 from web_shop.database import User
 
@@ -15,7 +15,6 @@ class MyLoginForm(FlaskForm):
     password = PasswordField("Пароль учётной записи", validators=[DataRequired(message="Пароль не указан")])
     remember_me = BooleanField("Запомнить меня")
     submit = SubmitField("Войти")
-    retrieve_password = SubmitField("Восстановить пароль")
 
 
 class MyRegisterForm(FlaskForm):
@@ -23,13 +22,19 @@ class MyRegisterForm(FlaskForm):
 
     first_name = StringField("Имя", validators=[DataRequired(message="Имя не указано")])
     last_name = StringField("Фамилия", validators=[DataRequired(message="Фамилия не указана")])
-    email = StringField("Адрес электронной почты", validators=[DataRequired(message="Адрес не указан")])
+    email = StringField(
+        "Адрес электронной почты",
+        validators=[
+            DataRequired(message="Адрес не указан"),
+            Email(message="Введите адрес электронной почты"),
+        ],
+    )
     password = PasswordField("Пароль учётной записи", validators=[DataRequired(message="Пароль не указан")])
     password_confirm = PasswordField(
         "Повторите пароль",
         validators=[
             DataRequired(message="Пароль не указан"),
-            EqualTo(fieldname=password, message="Пароли не совпадают"),
+            EqualTo(fieldname="password", message="Пароли не совпадают"),
         ],
     )
     submit = SubmitField("Зарегистрироваться")
@@ -38,7 +43,7 @@ class MyRegisterForm(FlaskForm):
         """Email validator."""
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
-            raise ValidationError("Please use a different email address.")
+            raise ValidationError("Данный адрес электронной почты уже используется")
 
 
 class MyResetPasswordForm(FlaskForm):
