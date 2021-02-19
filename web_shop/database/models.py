@@ -1,66 +1,99 @@
 """Database table models."""
-# from datetime import datetime
+import datetime
+from typing import Any, Optional
 
-# from sqlalchemy.orm import validates
-from sqlalchemy.schema import CheckConstraint
+import jwt
+from flask import jsonify
+from flask_login import UserMixin
+from flask_security import RoleMixin
+from werkzeug.security import check_password_hash, generate_password_hash
 
-from web_shop import db
+from web_shop import app, db, login_manager
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     """Unified user model."""
 
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(50), nullable=False)
-    last_name = db.Column(db.String(50), nullable=False)
-    username = db.Column(db.String(50), nullable=False, unique=True)
-    password = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(50), nullable=False, unique=True)
-    token = db.Column(db.String(50), nullable=False, unique=True)
-    expires_at = db.Column(db.DateTime, nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
-    is_active = db.Column(db.Boolean, default=True)
+    email = db.Column(db.String(255), nullable=False, unique=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    first_name = db.Column(db.String(255), nullable=False)
+    last_name = db.Column(db.String(255), nullable=False)
+    token = db.Column(db.String(255), nullable=False, unique=True)
+    expires_at = db.Column(db.DateTime(), nullable=False)
+    is_admin = db.Column(db.Boolean(), default=False)
+    last_login_at = db.Column(db.DateTime())
+    current_login_at = db.Column(db.DateTime())
+    last_login_ip = db.Column(db.String(100))
+    current_login_ip = db.Column(db.String(100))
+    login_count = db.Column(db.Integer())
+    active = db.Column(db.Boolean(), default=True)
+    confirmed_at = db.Column(db.DateTime())
+    roles = db.relationship("Role", secondary="roles_users", backref=db.backref("users", lazy="dynamic"))
 
-    __table_args__ = (CheckConstraint("8 <= char_length(password) <= 12", name="password_length"),)
-
-    # @validates('password')
-    # def validate_password(self, password) -> str:
-    #     if 8 < len(password):
-    #         raise ValueError('Password is too short')
-    #     elif len(password) > 12:
-    #         raise ValueError('Password is too long')
-    #     return password
-    #
-    # def __init__(self, username: str, password: str, email: str, is_admin: bool, token: str, expiry: datetime):
-    #     self.username = username
-    #     self.password = password if len(password) > 8 else None
+    # def __init__(self, email: str, is_admin: bool, token: str, expiry: datetime):
     #     self.email = email
     #     self.is_admin = is_admin
     #     self.token = token
     #     self.expires_at = expiry
-    #
-    # def __str__(self):
-    #         return f'{self.first_name} {self.last_name}'
-    #
-    # def __repr__(self):
-    #     return f"<User {self.username!r} {self.password!r} {self.is_admin!r} {self.expires_at!r}>"
+
+    def __repr__(self):
+        return f"<User {self.username!r} {self.password!r} {self.is_admin!r} {self.expires_at!r}>"
+
+    def set_password(self, password: str) -> None:
+        """User password hash setter.
+
+        :param password - raw password string
+        """
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        """User password hash checker.
+
+        :param password - raw password string
+        :return bool
+        """
+        return check_password_hash(self.password_hash, password)
+
+    def create_checking_token(self):
+        """Create a token to send it via email."""
+        self.expires_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=600)
+        self.token = jwt.encode({"username": self.email, "exp": self.expires_at}, app.config["SECRET_KEY"])
+
+    def check_token(self, token: str):
+        """Check tokens."""
+        try:
+            # jwt.decode() возвращает словарь с исходными ключами
+            # параметр algorithms обязательный
+            jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
+            current_user = User.query.filter_by(token=token).first()
+            if current_user:
+                return True
+            return False
+        except Exception as e:
+            return jsonify({"message": e.args[0]}), 401
 
 
-# class Advertisement(db.Model):
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     title = db.Column(db.String(250), nullable=False)
-#     description = db.Column(db.String, nullable=True)
-#     created = db.Column(db.DateTime, nullable=False)
-#     modified = db.Column(db.DateTime, nullable=True)
-#     owner_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-#     owner = db.relationship("User", backref=db.backref("advertisements"))
-#
-#     def __init__(self, title, desc, created, owner_id):
-#         self.title = title
-#         self.description = desc
-#         self.created = created
-#         self.owner_id = owner_id
-#
-#     def __repr__(self):
-#         return f"<Advertisement {self.title!r} {self.description!r} {self.created!r} {self.owner_id!r} >"
+class Role(db.Model, RoleMixin):
+    """Role model."""
+
+    __tablename__ = "role"
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255), nullable=True)
+
+
+class RolesUsers(db.Model):
+    """x-table User Roles."""
+
+    __tablename__ = "roles_users"
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column("user_id", db.Integer(), db.ForeignKey("user.id"))
+    role_id = db.Column("role_id", db.Integer(), db.ForeignKey("role.id"))
+
+
+@login_manager.user_loader
+def load_user(id):
+    """Loader for login."""
+    return User.query.get(int(id))

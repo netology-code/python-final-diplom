@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% if title %}
+        <title>Flask WebShop - {{ title }} </title>
+    {% else %}
+        <title>Flask WebShop</title>
+    {% endif %}
+
+</head>
+<body>
+<div align="right">
+    {% if title %}
+    <text style="float: left;"> {{ title }} </text>
+    <a href="/">На главную</a>
+
+    {% else %}
+    <text style="float: left;"> Добро пожаловать в магазин WebShop </text>
+
+    {% endif %}
+    <a href="/register">Регистрация</a>
+    <a href="/login">Войти</a></p>
+</div>
+
+<hr>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <p class=flashes>
+                {% for message in messages %}
+                    <text style="color:RED">{{ message }}</text>
+                {% endfor %}
+            </p>
+        {% endif %}
+    {% endwith %}
+{% block content %}{% endblock %}
+</body>
+</html>

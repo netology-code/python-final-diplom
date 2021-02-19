@@ -40,7 +40,7 @@
 1. Общее описание сервиса
 1. [Спецификация (API) - 1 шт.](old_project/reference/screens.md)
 1. [Файлы yaml для импорта товаров - 1 шт.](old_project/data/shop1.yaml)
-1. [Пример API Сервиса для магазина](old_project/reference//netology_pd_diplom/) 
+1. [Пример API Сервиса для магазина](old_project/reference/netology_pd_diplom/readme.md) 
 
 ## Этапы разработки
 
