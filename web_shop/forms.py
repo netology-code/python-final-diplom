@@ -24,10 +24,7 @@ class MyRegisterForm(FlaskForm):
     last_name = StringField("Фамилия", validators=[DataRequired(message="Фамилия не указана")])
     email = StringField(
         "Адрес электронной почты",
-        validators=[
-            DataRequired(message="Адрес не указан"),
-            Email(message="Введите адрес электронной почты"),
-        ],
+        validators=[DataRequired(message="Адрес не указан"), Email(message="Введите адрес электронной почты"),],
     )
     password = PasswordField("Пароль учётной записи", validators=[DataRequired(message="Пароль не указан")])
     password_confirm = PasswordField(
