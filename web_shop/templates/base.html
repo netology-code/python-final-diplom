@@ -17,8 +17,7 @@
         {% if current_user.is_anonymous %}
             <text style="float: left;"> Добро пожаловать в магазин WebShop</text>
         {% else %}
-            <text style="float: left;"> Добрый день {{ current_user.first_name }}! Добро пожаловать в личный кабинет магазина
-                WebShop!
+            <text style="float: left;"> Добрый день {{ current_user.first_name }}! Добро пожаловать в личный кабинет!
             </text>
         {% endif %}
     {% endif %}

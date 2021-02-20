@@ -89,7 +89,7 @@ class RolesUsers(db.Model):
 
 @login_manager.user_loader
 def load_user(id):
-    """Loader for login.
+    """Load user from database for login.
 
     :param id - user id
     :return user string or None

@@ -24,7 +24,7 @@ class MyRegisterForm(FlaskForm):
     last_name = StringField("Фамилия", validators=[DataRequired(message="Фамилия не указана")])
     email = StringField(
         "Адрес электронной почты",
-        validators=[DataRequired(message="Адрес не указан"), Email(message="Введите адрес электронной почты"),],
+        validators=[DataRequired(message="Адрес не указан"), Email(message="Введите адрес электронной почты")],
     )
     password = PasswordField("Пароль учётной записи", validators=[DataRequired(message="Пароль не указан")])
     password_confirm = PasswordField(
@@ -36,7 +36,8 @@ class MyRegisterForm(FlaskForm):
     )
     submit = SubmitField("Зарегистрироваться")
 
-    def validate_email(self, email):
+    @staticmethod
+    def validate_email(email):
         """Email validator."""
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
