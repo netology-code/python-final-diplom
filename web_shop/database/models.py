@@ -1,4 +1,5 @@
 """Database table models."""
+import enum
 import datetime
 
 import jwt
@@ -7,6 +8,25 @@ from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from web_shop import app, db, login_manager
+
+
+class OrderStateChoices(enum.Enum):
+    """Order state choices."""
+
+    basket = "Статус корзины"
+    new = "Новый"
+    confirmed = "Подтвержден"
+    assembled = "Собран"
+    sent = "Отправлен"
+    delivered = "Доставлен"
+    canceled = "Отменен"
+
+
+class UserTypeChoices(enum.Enum):
+    """User types choices."""
+
+    shop = "Магазин"
+    buyer = "Покупатель"
 
 
 class User(UserMixin, db.Model):
@@ -23,7 +43,7 @@ class User(UserMixin, db.Model):
     is_admin = db.Column(db.Boolean(), default=False)
     active = db.Column(db.Boolean(), default=True)
     confirmed_at = db.Column(db.DateTime())
-    roles = db.relationship("Role", secondary="roles_users", backref=db.backref("users", lazy="dynamic"))
+    user_type = db.Column(db.Enum(UserTypeChoices), default=UserTypeChoices.buyer, nullable=False)
 
     # def __init__(self, email: str, is_admin: bool, token: str, expiry: datetime):
     #     self.email = email
@@ -69,22 +89,51 @@ class User(UserMixin, db.Model):
             return jsonify({"message": e.args[0]}), 401
 
 
-class Role(db.Model):
-    """Role model."""
-
-    __tablename__ = "role"
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(80), unique=True)
-    description = db.Column(db.String(255), nullable=True)
-
-
-class RolesUsers(db.Model):
-    """x-table User Roles."""
-
-    __tablename__ = "roles_users"
-    id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column("user_id", db.Integer(), db.ForeignKey("user.id"))
-    role_id = db.Column("role_id", db.Integer(), db.ForeignKey("role.id"))
+#
+# Shop
+# - name
+# - url
+# - filename
+# 2.
+# Category
+# - shops(m2m)
+# - name
+# 3.
+# Product
+# - category
+# - name
+# 4.
+# ProductInfo
+# - product
+# - shop
+# - name
+# - quantity
+# - price
+# - price_rrc
+# 5.
+# Parameter
+# - name
+# 6.
+# ProductParameter
+# - product_info
+# - parameter
+# - value
+# 7.
+# Order
+# - user
+# - dt
+# - status
+# 8.
+# OrderItem
+# - order
+# - product
+# - shop
+# - quantity
+# 9.
+# Contact
+# - type
+# - user
+# - value
 
 
 @login_manager.user_loader

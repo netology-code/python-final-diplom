@@ -2,10 +2,10 @@
 
 from flask_wtf import FlaskForm
 
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, ValidationError
+from wtforms import SelectField, StringField, PasswordField, BooleanField, SubmitField, ValidationError
 from wtforms.validators import DataRequired, Email, EqualTo
 
-from web_shop.database import User
+from web_shop.database import User, UserTypeChoices
 
 
 class MyLoginForm(FlaskForm):
@@ -34,10 +34,19 @@ class MyRegisterForm(FlaskForm):
             EqualTo(fieldname="password", message="Пароли не совпадают"),
         ],
     )
+    user_type = SelectField(
+        "Тип пользователя",
+        choices=[
+            (UserTypeChoices.buyer.name, UserTypeChoices.buyer.value),
+            (UserTypeChoices.shop.name, UserTypeChoices.shop.value),
+        ],
+        # choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')],
+        coerce=str,
+        validators=[DataRequired()],
+    )
     submit = SubmitField("Зарегистрироваться")
 
-    @staticmethod
-    def validate_email(email):
+    def validate_email(self, email):
         """Email validator."""
         user = User.query.filter_by(email=email.data).first()
         if user is not None:

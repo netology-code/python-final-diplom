@@ -7,36 +7,40 @@
             {{ form.first_name.label }}<br>
             {{ form.first_name(size=32) }}
             {% for error in form.first_name.errors %}
-            <span style="color: red;">[{{ error }}]</span>
+                <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
         <p>
             {{ form.last_name.label }}<br>
             {{ form.last_name(size=32) }}
             {% for error in form.last_name.errors %}
-            <span style="color: red;">[{{ error }}]</span>
+                <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
         <p>
             {{ form.email.label }}<br>
             {{ form.email(size=32) }}
             {% for error in form.email.errors %}
-            <span style="color: red;">[{{ error }}]</span>
+                <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
         <p>
             {{ form.password.label }}<br>
             {{ form.password(size=32) }}
             {% for error in form.password.errors %}
-            <span style="color: #ff0000;">[{{ error }}]</span>
+                <span style="color: #ff0000;">[{{ error }}]</span>
             {% endfor %}
         </p>
         <p>
             {{ form.password_confirm.label }}<br>
             {{ form.password_confirm(size=32) }}
             {% for error in form.password_confirm.errors %}
-            <span style="color: red;">[{{ error }}]</span>
+                <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
+        </p>
+        <p>
+            {{ form.user_type.label }}<br>
+            {{ form.user_type() }}
         </p>
         <p>{{ form.submit() }}</p>
     </form>
