@@ -1,10 +1,12 @@
 """Test app initiation."""
 import pytest
+
 # from selenium import webdriver
 # from selenium.webdriver import ActionChains
 # from selenium.webdriver.common.by import By
 # from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
+
 # from unittest.mock import patch
 #
 from flask import Response, request
