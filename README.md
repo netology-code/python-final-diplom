@@ -1,3 +1,16 @@
+1) pip install -r requirements.txt
+2) in root create ".env" with DATABASE_URI and SECRET_KEY
+3)  set FLASK_APP=web_shop\app.py (for Linux: export FLASK_APP=web_shop\app.py)
+   3.1) set FLASK_DEBUG=1 - to turn debug mode on (for Linux: export FLASK_DEBUG=1) 
+   3.2) set FLASK_DEBUG=0 - to turn debug mode off (for Linux: export FLASK_DEBUG=0)   
+4) flask db upgrade
+5) flask run
+6) register first user
+7) in database manually set first user "is_admin" field to true.
+
+Admin panel is reachable at /admin (is_admin=true required)
+
+
 # Дипломная работа к профессии Python-разработчик «API Сервис заказа товаров для розничных сетей».
 
 ## Описание
