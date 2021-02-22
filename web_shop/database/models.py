@@ -1,6 +1,6 @@
 """Database table models."""
 import enum
-import datetime
+from datetime import datetime, timedelta, timezone
 
 import jwt
 from flask import jsonify
@@ -38,8 +38,6 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     first_name = db.Column(db.String(255), nullable=False)
     last_name = db.Column(db.String(255), nullable=False)
-    token = db.Column(db.String(255), nullable=False, unique=True)
-    expires_at = db.Column(db.DateTime(), nullable=False)
     is_admin = db.Column(db.Boolean(), default=False)
     active = db.Column(db.Boolean(), default=True)
     confirmed_at = db.Column(db.DateTime())
@@ -52,7 +50,7 @@ class User(UserMixin, db.Model):
     #     self.expires_at = expiry
 
     def __repr__(self):
-        return f"<User {self.username!r} {self.password!r} {self.is_admin!r} {self.expires_at!r}>"
+        return f"<User {self.first_name!r} {self.last_name!r} {self.is_admin!r} >"
 
     def set_password(self, password: str) -> None:
         """User password hash setter.
@@ -69,24 +67,24 @@ class User(UserMixin, db.Model):
         """
         return check_password_hash(self.password_hash, password)
 
-    def create_checking_token(self):
-        """Create a token to send it via email."""
-        self.expires_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=600)
-        self.token = jwt.encode({"username": self.email, "exp": self.expires_at}, app.config["SECRET_KEY"])
-
-    @staticmethod
-    def check_token(token: str):
-        """Check tokens."""
-        try:
-            # jwt.decode() возвращает словарь с исходными ключами
-            # параметр algorithms обязательный
-            jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
-            current_user = User.query.filter_by(token=token).first()
-            if current_user:
-                return True
-            return False
-        except Exception as e:
-            return jsonify({"message": e.args[0]}), 401
+    # def create_access_token(self):
+    #     """Create a token to send it via email."""
+    #     expires_at = datetime.utcnow() + timedelta(seconds=10)
+    #     return jwt.encode({"username": self.email, "exp": expires_at}, app.config["SECRET_KEY"])
+    #
+    # @staticmethod
+    # def check_access_token(token: str):
+    #     """Check tokens."""
+    #     try:
+    #         # jwt.decode() возвращает словарь с исходными ключами
+    #         # параметр algorithms обязательный
+    #         jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
+    #         current_user = User.query.filter_by(token=token).first()
+    #         if current_user:
+    #             return True
+    #         return False
+    #     except Exception as e:
+    #         return jsonify({"message": e.args[0]}), 401
 
 
 #

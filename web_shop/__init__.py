@@ -5,10 +5,13 @@ import os
 from flask import Flask
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from flask_jwt_extended import JWTManager
 from flask_login import LoginManager
+from flask_mail import Mail
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from itsdangerous import URLSafeTimedSerializer
 
 from web_shop.config import Config, basedir
 
@@ -21,6 +24,13 @@ db = SQLAlchemy(app)
 
 # Init ma
 ma = Marshmallow(app)
+
+# Init admin
+jwt = JWTManager(app)
+
+# Init mail
+mail = Mail(app)
+token_serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
 # Init login
 login_manager = LoginManager(app)

@@ -10,7 +10,14 @@
       - `set FLASK_DEBUG=1` - to turn debug mode on (for Linux: `export FLASK_DEBUG=1`) 
       - `set FLASK_DEBUG=0` - to turn debug mode off (for Linux: `export FLASK_DEBUG=0`)   
 4) Create a new clean database 
-5) In project root create ".env" with DATABASE_URI and SECRET_KEY
+5) In project root create ".env" with following keys: 
+   - DATABASE_URI 
+   - SECRET_KEY,
+   - SMTP_SERVER,
+   - SMTP_NAME,
+   - SMTP_USERNAME,
+   - SMTP_PASSWORD
+   providing that "SMTP" keys shall represent an acting email-service smtp-configuration.
 6) Create tables from migrations: `flask db upgrade`
 7) Start app: `flask run`
 7) Register first user at `/register`
