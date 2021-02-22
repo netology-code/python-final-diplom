@@ -26,6 +26,9 @@
         <a href="/register">Регистрация</a>
         <a href="{{ url_for('login') }}">Войти</a>
     {% else %}
+        {% if current_user.is_admin %}
+            <a href="{{ url_for('admin.index') }}">Админка</a>
+        {% endif %}
         <a href="{{ url_for('logout') }}">Выйти из системы</a>
     {% endif %}
 
