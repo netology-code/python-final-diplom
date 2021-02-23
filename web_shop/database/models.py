@@ -40,7 +40,7 @@ class User(UserMixin, db.Model):
     first_name = db.Column(db.String(255), nullable=False)
     last_name = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean(), default=False)
-    active = db.Column(db.Boolean(), default=True)
+    is_active = db.Column(db.Boolean(), default=False)
     confirmed_at = db.Column(db.DateTime())
     user_type = db.Column(db.Enum(UserTypeChoices), default=UserTypeChoices.buyer, nullable=False)
 

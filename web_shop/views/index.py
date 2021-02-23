@@ -48,7 +48,7 @@ def login():
             return make_response(redirect(url_for("login")))
 
         if not user.check_password(form.password.data):
-            flash("Ошибка при вводе адреса почты или пароля")
+            flash("Ошибка при вводе пароля")
             return make_response(redirect(url_for("login")))
         login_user(user, remember=form.remember_me.data)
 
@@ -106,6 +106,7 @@ def confirm_email(token):
         try:
             token_serializer.loads(token, salt=app.config["SECRET_KEY"], max_age=60)
             user.confirmed_at = datetime.now()
+            user.is_active = True
             db.session.commit()
             flash("Учётная запись подтверждена")
             return make_response(redirect(url_for("login")))
