@@ -134,3 +134,4 @@ venv.bak/
 
 */tmp.py
 /old_project/
+/tests/test.db

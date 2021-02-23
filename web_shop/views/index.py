@@ -17,7 +17,7 @@ from web_shop.forms import MyLoginForm, MyRegisterForm
 # @jwt_required(locations=['cookies'])
 def index():
     """Index view."""
-    print(request.cookies)
+    # print(request.cookies)
     return render_template("base.html")
 
 
