@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, PasswordField, BooleanField, SubmitField, ValidationError
 from wtforms.validators import DataRequired, Email, EqualTo
 
+from web_shop.validators.email import MyEmailValidator
 from web_shop.database import User, UserTypeChoices
 
 
@@ -24,9 +25,19 @@ class MyRegisterForm(FlaskForm):
     last_name = StringField("Фамилия", validators=[DataRequired(message="Фамилия не указана")])
     email = StringField(
         "Адрес электронной почты",
-        validators=[DataRequired(message="Адрес не указан"), Email(message="Введите адрес электронной почты")],
+        validators=[
+            DataRequired(message="Адрес не указан"),
+            Email(message="Введите адрес электронной почты"),
+            MyEmailValidator("Введите адрес электронной почты"),
+        ],
     )
-    password = PasswordField("Пароль учётной записи", validators=[DataRequired(message="Пароль не указан")])
+    password = PasswordField(
+        "Пароль учётной записи",
+        validators=[
+            DataRequired(message="Пароль не указан"),
+            EqualTo(fieldname="password_confirm", message="Пароли не совпадают"),
+        ],
+    )
     password_confirm = PasswordField(
         "Повторите пароль",
         validators=[

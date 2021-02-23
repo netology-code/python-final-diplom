@@ -1,7 +1,6 @@
 """Test app initiation."""
 
 import pytest
-from bs4 import BeautifulSoup
 from flask import Response
 
 

@@ -42,7 +42,7 @@ def login():
             return make_response(redirect(url_for("login")))
 
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data.lower()).first()
         if user is None:
             flash("Пользователь не зарегистрирован")
             return make_response(redirect(url_for("login")))
@@ -82,7 +82,7 @@ def register():
 
     form = MyRegisterForm()
     if form.validate_on_submit():
-        user = User(email=form.email.data, first_name=form.first_name.data, last_name=form.last_name.data)
+        user = User(email=form.email.data.lower(), first_name=form.first_name.data, last_name=form.last_name.data)
         user.set_password(form.password.data)
         user.user_type = getattr(UserTypeChoices, form.user_type.data).name
         db.session.add(user)

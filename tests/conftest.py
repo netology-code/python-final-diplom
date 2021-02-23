@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from web_shop import app, db
 from web_shop.database import User
@@ -20,12 +21,20 @@ def database(test_app):
     """Database for tests."""
     from web_shop.database import models
 
-    db.create_all()
-    users = create_db_confirmed_users() + create_db_unconfirmed_users()
-    db.session.bulk_save_objects(users)
-    db.session.commit()
-    yield db
-    db.drop_all()
+    try:
+        db.create_all()
+        users = create_db_confirmed_users() + create_db_unconfirmed_users()
+        db.session.bulk_save_objects(users)
+        db.session.commit()
+        yield db
+    except IntegrityError:
+        db.drop_all()
+        users = create_db_confirmed_users() + create_db_unconfirmed_users()
+        db.session.bulk_save_objects(users)
+        db.session.commit()
+        yield db
+    finally:
+        db.drop_all()
 
 
 @pytest.fixture(scope="session")
@@ -38,6 +47,25 @@ def test_app():
     app.config["WTF_CSRF_ENABLED"] = False
     app.config.testing = True
     return app
+
+
+@pytest.fixture()
+def empty_register_data():
+    """Empty data for register view."""
+    return dict(email="", first_name="", last_name="", password="", password_confirm="", user_type="")
+
+
+@pytest.fixture()
+def register_data():
+    """Data for register view."""
+    return dict(
+        first_name="test_name",
+        last_name="test_surname",
+        email="email@email.com",
+        password="password",
+        password_confirm="password",
+        user_type="shop",
+    )
 
 
 def create_db_confirmed_users():
