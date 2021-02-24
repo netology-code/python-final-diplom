@@ -2,6 +2,7 @@
 import pytest
 from bs4 import BeautifulSoup
 from flask import Response, request, url_for
+from flask_login import current_user
 
 from web_shop.database import User
 
@@ -21,9 +22,12 @@ def test_get_register_logged_in(client, login_admin):
     """Test get-register by a logged-in user."""
     with client:
         client.post("/login", data=login_admin, follow_redirects=True)
-        client.get(URL, content_type="html/text", follow_redirects=True)
+        response: Response = client.get(URL, content_type="html/text", follow_redirects=True)
+        assert "Выйти" in response.get_data(as_text=True)
+        assert current_user.is_authenticated
         assert request.path == url_for("index")
         client.get("/logout", content_type="html/text")
+        assert current_user.is_anonymous
 
 
 def test_register_empty_form(client):

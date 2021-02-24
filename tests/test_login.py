@@ -14,6 +14,14 @@ class TestNormalLogin:
             response: Response = client.get("/login", content_type="html/text")
             assert response.get_data(as_text=True).lower().count("вход") == 2
 
+    def test_get_login_logged_in(self, client, login_admin):
+        """Test get-login by logged-in user."""
+        with client:
+            client.post("/login", data=login_admin, follow_redirects=True)
+            assert current_user.is_authenticated
+            client.get("/login", content_type="html/text", follow_redirects=True)
+            assert request.path == url_for("index")
+
     @pytest.mark.parametrize(
         ("username", "pwd", "is_admin", "user_type"),
         [
@@ -31,7 +39,6 @@ class TestNormalLogin:
             )
             assert response.status_code == 302
             assert current_user.is_admin == is_admin
-            assert current_user.is_active is True
             assert current_user.user_type.name == user_type
             assert "Админка" not in response.get_data(as_text=True)
             client.get("/logout")

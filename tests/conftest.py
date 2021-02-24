@@ -10,7 +10,7 @@ from web_shop import app, db
 from web_shop.database import User
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()  # scope="session"
 def client(test_app):
     """Test client."""
     return test_app.test_client()
@@ -62,6 +62,12 @@ def login_admin():
 
 
 @pytest.fixture()
+def login_non_admin():
+    """Data for login view."""
+    return dict(email="non_admin_buyer@test.mail", password="testpass3")
+
+
+@pytest.fixture()
 def register_data():
     """Data for register view."""
     return dict(
@@ -80,7 +86,7 @@ def create_db_confirmed_users():
     admin_buyer.set_password("testpass1")
     admin_buyer.user_type = "buyer"
     admin_buyer.is_admin = True
-    admin_buyer.is_active = True
+    admin_buyer.is_active = False
     admin_buyer.confirmed_at = datetime.now()
 
     admin_shop = User(email="admin_shop@test.mail", first_name="Admin", last_name="Shop")

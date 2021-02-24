@@ -18,14 +18,14 @@ from web_shop.forms import MyLoginForm, MyRegisterForm
 def index():
     """Index view."""
     # print(request.cookies)
-    return render_template("base.html")
+    return make_response(render_template("base.html"))
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """User login route handler."""
     if current_user.is_authenticated:
-        return redirect(url_for("index"))
+        return make_response(redirect(url_for("index")))
 
     form = MyLoginForm()
     if form.is_submitted():
@@ -50,11 +50,12 @@ def login():
         if not user.check_password(form.password.data):
             flash("Ошибка при вводе пароля")
             return make_response(redirect(url_for("login")))
-        login_user(user, remember=form.remember_me.data)
+
+        login_user(user, remember=form.remember_me.data, force=True)
 
         if not user.confirmed_at:
             flash("Проверьте почту и активируйте учётную запись")
-            return redirect(url_for("index"))
+            return make_response(redirect(url_for("index")))
 
         if request.args.get("next"):
             resp: Response = make_response(redirect(url_for(request.args.get("next"))))
@@ -127,6 +128,5 @@ class MyAdminIndexView(AdminIndexView):
         return current_user.is_authenticated and current_user.is_admin
 
     def inaccessible_callback(self, name, **kwargs):
-        """Redirects user to login view on admin view entering if user is not logged in."""
-        # redirect to login page if user doesn't have access
+        """Redirects user to login view from admin view if user is anonymous."""
         return make_response(redirect(url_for("login", next="admin.index")))
