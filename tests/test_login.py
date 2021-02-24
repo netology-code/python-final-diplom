@@ -17,10 +17,10 @@ class TestNormalLogin:
     @pytest.mark.parametrize(
         ("username", "pwd", "is_admin", "user_type"),
         [
-            ("admin_buyer@test.email", "testpass1", True, "buyer"),
-            ("admin_shop@test.email", "testpass2", True, "shop"),
-            ("non_admin_buyer@test.email", "testpass3", False, "buyer"),
-            ("non_admin_shop@test.email", "testpass4", False, "shop"),
+            ("admin_buyer@test.mail", "testpass1", True, "buyer"),
+            ("admin_shop@test.mail", "testpass2", True, "shop"),
+            ("non_admin_buyer@test.mail", "testpass3", False, "buyer"),
+            ("non_admin_shop@test.mail", "testpass4", False, "shop"),
         ],
     )
     def test_login_post_form_existing_users_no_redirection(self, username, pwd, is_admin, user_type, client):
@@ -39,10 +39,10 @@ class TestNormalLogin:
     @pytest.mark.parametrize(
         ("username", "pwd", "is_admin", "user_type"),
         [
-            ("admin_buyer@test.email", "testpass1", True, "buyer"),
-            ("admin_shop@test.email", "testpass2", True, "shop"),
-            ("non_admin_buyer@test.email", "testpass3", False, "buyer"),
-            ("non_admin_shop@test.email", "testpass4", False, "shop"),
+            ("admin_buyer@test.mail", "testpass1", True, "buyer"),
+            ("admin_shop@test.mail", "testpass2", True, "shop"),
+            ("non_admin_buyer@test.mail", "testpass3", False, "buyer"),
+            ("non_admin_shop@test.mail", "testpass4", False, "shop"),
         ],
     )
     def test_login_post_form_existing_users_redirection(self, username, pwd, is_admin, user_type, client):
@@ -61,10 +61,10 @@ class TestNormalLogin:
     @pytest.mark.parametrize(
         ("username", "pwd"),
         [
-            ("admin_buyer_unc@test.email", "testpass1"),
-            ("admin_shop_unc@test.email", "testpass2"),
-            ("non_admin_buyer_unc@test.email", "testpass3"),
-            ("non_admin_shop_unc@test.email", "testpass4"),
+            ("admin_buyer_unc@test.mail", "testpass1"),
+            ("admin_shop_unc@test.mail", "testpass2"),
+            ("non_admin_buyer_unc@test.mail", "testpass3"),
+            ("non_admin_shop_unc@test.mail", "testpass4"),
         ],
     )
     def test_login_post_form_existing_unconfirmed_users_redirection(self, username, pwd, client):
@@ -107,7 +107,7 @@ class TestFailedLogin:
         with client:
             response: Response = client.post(
                 "/login",
-                data=dict(email="admin_buyer@test.email", password="", remember_me=False),
+                data=dict(email="admin_buyer@test.mail", password="", remember_me=False),
                 follow_redirects=True,
             )
             assert "Пароль не указан" in response.get_data(as_text=True)
@@ -119,7 +119,7 @@ class TestFailedLogin:
         with client:
             response: Response = client.post(
                 "/login",
-                data=dict(email="admin_buyer@test.emai_", password="testpass1", remember_me=False),
+                data=dict(email="admin_buyer@test.mai_", password="testpass1", remember_me=False),
                 follow_redirects=True,
             )
             assert "Пользователь не зарегистрирован" in response.get_data(as_text=True)
@@ -131,7 +131,7 @@ class TestFailedLogin:
         with client:
             response: Response = client.post(
                 "/login",
-                data=dict(email="admin_buyer@test.email", password="testpass1_", remember_me=False),
+                data=dict(email="admin_buyer@test.mail", password="testpass1_", remember_me=False),
                 follow_redirects=True,
             )
             assert "Ошибка при вводе пароля" in response.get_data(as_text=True)
@@ -143,7 +143,7 @@ class TestFailedLogin:
         with client:
             response: Response = client.post(
                 "/login",
-                data=dict(email="admin_buyer@test.emai_", password="testpass1_", remember_me=False),
+                data=dict(email="admin_buyer@test.mai_", password="testpass1_", remember_me=False),
                 follow_redirects=True,
             )
             assert "Пользователь не зарегистрирован" in response.get_data(as_text=True)

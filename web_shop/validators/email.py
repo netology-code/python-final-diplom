@@ -57,7 +57,7 @@ def check_prohibited(email) -> bool:
         "{",
         "}",
         "[",
-        "]/",
+        "]",
         '"',
         "'",
         "/",

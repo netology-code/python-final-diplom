@@ -57,7 +57,7 @@ class MyRegisterForm(FlaskForm):
     )
     submit = SubmitField("Зарегистрироваться")
 
-    def validate_email(self, email):
+    def validate_email(self, email):  # INFO: do not turn into static method
         """Email validator."""
         user = User.query.filter_by(email=email.data).first()
         if user is not None:

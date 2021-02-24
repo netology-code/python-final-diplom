@@ -56,6 +56,12 @@ def empty_register_data():
 
 
 @pytest.fixture()
+def login_admin():
+    """Data for login view."""
+    return dict(email="admin_buyer@test.mail", password="testpass1")
+
+
+@pytest.fixture()
 def register_data():
     """Data for register view."""
     return dict(
@@ -70,27 +76,27 @@ def register_data():
 
 def create_db_confirmed_users():
     """Users with confirmed email."""
-    admin_buyer = User(email="admin_buyer@test.email", first_name="Admin", last_name="Buyer")
+    admin_buyer = User(email="admin_buyer@test.mail", first_name="Admin", last_name="Buyer")
     admin_buyer.set_password("testpass1")
     admin_buyer.user_type = "buyer"
     admin_buyer.is_admin = True
     admin_buyer.is_active = True
     admin_buyer.confirmed_at = datetime.now()
 
-    admin_shop = User(email="admin_shop@test.email", first_name="Admin", last_name="Shop")
+    admin_shop = User(email="admin_shop@test.mail", first_name="Admin", last_name="Shop")
     admin_shop.set_password("testpass2")
     admin_shop.user_type = "shop"
     admin_shop.is_admin = True
     admin_shop.is_active = True
     admin_shop.confirmed_at = datetime.now()
 
-    non_admin_buyer = User(email="non_admin_buyer@test.email", first_name="NonAdmin", last_name="Buyer")
+    non_admin_buyer = User(email="non_admin_buyer@test.mail", first_name="NonAdmin", last_name="Buyer")
     non_admin_buyer.set_password("testpass3")
     non_admin_buyer.user_type = "buyer"
     non_admin_buyer.is_active = True
     non_admin_buyer.confirmed_at = datetime.now()
 
-    non_admin_shop = User(email="non_admin_shop@test.email", first_name="NonAdmin", last_name="Shop")
+    non_admin_shop = User(email="non_admin_shop@test.mail", first_name="NonAdmin", last_name="Shop")
     non_admin_shop.set_password("testpass4")
     non_admin_shop.user_type = "shop"
     non_admin_shop.is_active = True
@@ -101,21 +107,21 @@ def create_db_confirmed_users():
 
 def create_db_unconfirmed_users():
     """Users with unconfirmed email."""
-    admin_buyer_unc = User(email="admin_buyer_unc@test.email", first_name="Admin_unc", last_name="Buyer_unc")
+    admin_buyer_unc = User(email="admin_buyer_unc@test.mail", first_name="Admin_unc", last_name="Buyer_unc")
     admin_buyer_unc.set_password("testpass1")
     admin_buyer_unc.user_type = "buyer"
     admin_buyer_unc.is_admin = True
 
-    admin_shop_unc = User(email="admin_shop_unc@test.email", first_name="Admin_unc", last_name="Shop_unc")
+    admin_shop_unc = User(email="admin_shop_unc@test.mail", first_name="Admin_unc", last_name="Shop_unc")
     admin_shop_unc.set_password("testpass2")
     admin_shop_unc.user_type = "shop"
     admin_shop_unc.is_admin = True
 
-    non_admin_buyer_unc = User(email="non_admin_buyer_unc@test.email", first_name="NonAdmin_unc", last_name="Buyer_unc")
+    non_admin_buyer_unc = User(email="non_admin_buyer_unc@test.mail", first_name="NonAdmin_unc", last_name="Buyer_unc")
     non_admin_buyer_unc.set_password("testpass3")
     non_admin_buyer_unc.user_type = "buyer"
 
-    non_admin_shop_unc = User(email="non_admin_shop_unc@test.email", first_name="NonAdmin_unc", last_name="Shop_unc")
+    non_admin_shop_unc = User(email="non_admin_shop_unc@test.mail", first_name="NonAdmin_unc", last_name="Shop_unc")
     non_admin_shop_unc.set_password("testpass4")
     non_admin_shop_unc.user_type = "shop"
 

@@ -12,9 +12,29 @@ def test_get_register(client):
     """Test get-register."""
     with client:
         response = client.get(URL, content_type="html/text")
-    assert response.status_code == 200
-    response.text = BeautifulSoup(response.data, "html.parser").text
-    assert response.text.lower().count("регистрация") == 3
+        assert response.status_code == 200
+        response.text = BeautifulSoup(response.data, "html.parser").text
+        assert response.text.lower().count("регистрация") == 3
+
+
+def test_get_register_logged_in(client, login_admin):
+    """Test get-register by a logged-in user."""
+    with client:
+        client.post("/login", data=login_admin, follow_redirects=True)
+        client.get(URL, content_type="html/text", follow_redirects=True)
+        assert request.path == url_for("index")
+        client.get("/logout", content_type="html/text")
+
+
+def test_register_empty_form(client):
+    """Empty form is submitted."""
+    with client:
+        response: Response = client.post(URL, follow_redirects=True)
+        alerts = ["Имя не указано", "Фамилия не указана", "Адрес не указан", "Пароль не указан"]
+        page = response.get_data(as_text=True)
+        assert all(x in page for x in alerts)
+        assert page.count("Пароль не указан") == 2
+        assert request.path == URL
 
 
 class TestNormalRegister:
@@ -49,17 +69,6 @@ class TestNormalRegister:
             response: Response = client.post(URL, data=register_data, follow_redirects=False)
             assert response.status_code == 302
             assert request.path == URL
-
-
-def test_register_empty_form(client):
-    """Empty form is submitted."""
-    with client:
-        response: Response = client.post(URL, follow_redirects=True)
-        alerts = ["Имя не указано", "Фамилия не указана", "Адрес не указан", "Пароль не указан"]
-        page = response.get_data(as_text=True)
-        assert all(x in page for x in alerts)
-        assert page.count("Пароль не указан") == 2
-        assert request.path == URL
 
 
 class TestOneFieldPassedFail:
@@ -215,7 +224,7 @@ class TestMistakesFail:
             "@",
             ",",
             "mama@",
-            "папa@a.c",
+            "папa@a.c",  # russian vowels
             "sud@a.com",
             "sud@ar.c",
             "sudo@a.com",
@@ -233,6 +242,53 @@ class TestMistakesFail:
             register_data["email"] = string
             response: Response = client.post(URL, data=register_data, follow_redirects=True)
             assert "Введите адрес электронной почты" in response.get_data(as_text=True)
+
+    @pytest.mark.parametrize(
+        "string",
+        [
+            "admin_buyer_unc@test.mail",
+            "admin_shop_unc@test.mail",
+            "non_admin_buyer_unc@test.mail",
+            "non_admin_shop_unc@test.mail",
+        ],
+    )
+    def test_register_same_email(self, string, client, register_data):
+        """Passing an email that was already registered and stored in database."""
+        with client:
+            register_data["email"] = string
+            response: Response = client.post(URL, data=register_data, follow_redirects=True)
+            assert "Данный адрес электронной почты уже используется" in response.get_data(as_text=True)
+            assert request.path == URL
+
+    @pytest.mark.parametrize(
+        ("password", "password_confirm"),
+        [
+            ("testpass", ""),
+            ("testpass", " "),
+            ("testpass", "1"),
+            ("testpass", "12345678"),
+            ("testpass", "a"),
+            ("testpass", "Testpass"),
+            ("testpass", "TESTPASS"),
+            ("testpass", "TeStPaSs"),
+            ("Testpass", "TeStPaSs"),
+            ("TESTPASS", "testpass"),
+            ("testpass", "testpas"),
+            ("testpass", "_testpass"),
+            ("testpass", "estpass"),
+            ("", "testpass"),
+            ("testpass", "tеstpаss"),  # russian vowels
+        ],
+    )
+    def test_register_password_confirmation_mistake(self, password, password_confirm, client, register_data):
+        """Passing different strings in password and password_confirm fields."""
+        with client:
+            register_data["password"] = password
+            register_data["password_confirm"] = password_confirm
+            response: Response = client.post(URL, data=register_data, follow_redirects=True)
+            assert "Пароли не совпадают" in response.get_data(as_text=True)
+            assert response.get_data(as_text=True).count("Пароли не совпадают") in range(1, 3)
+            assert request.path == URL
 
 
 if __name__ == "__main__":
