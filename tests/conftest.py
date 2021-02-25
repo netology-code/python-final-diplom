@@ -10,7 +10,7 @@ from web_shop import app, db
 from web_shop.database import User
 
 
-@pytest.fixture()  # scope="session"
+@pytest.fixture()
 def client(test_app):
     """Test client."""
     return test_app.test_client()
@@ -40,12 +40,13 @@ def database(test_app):
 @pytest.fixture(scope="session")
 def test_app():
     """Application modifications for tests."""
-    DB_URI = f"sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'test.db')}"
-    app.config["SECRET_KEY"] = "TEST_SECRET_KEY"
-    app.config["SQLALCHEMY_DATABASE_URI"] = DB_URI
+    TEST_DB_URI = f"sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'test.db')}"
+    app.config["SQLALCHEMY_DATABASE_URI"] = TEST_DB_URI
     # app.config["SQLALCHEMY_ECHO"] = True
     app.config["WTF_CSRF_ENABLED"] = False
     app.config.testing = True
+    app_context = app.test_request_context()
+    app_context.push()
     return app
 
 
@@ -74,8 +75,8 @@ def register_data():
         first_name="test_name",
         last_name="test_surname",
         email="email@email.com",
-        password="password",
-        password_confirm="password",
+        password="Password.1",
+        password_confirm="Password.1",
         user_type="shop",
     )
 

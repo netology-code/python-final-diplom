@@ -1,12 +1,11 @@
 """Forms for rendering html templates."""
 
 from flask_wtf import FlaskForm
-
-from wtforms import SelectField, StringField, PasswordField, BooleanField, SubmitField, ValidationError
+from wtforms import BooleanField, PasswordField, SelectField, StringField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo
 
-from web_shop.validators.email import MyEmailValidator
-from web_shop.database import User, UserTypeChoices
+from web_shop.database import UserTypeChoices
+from web_shop.validators.validators import MyEmailValidator, MyPasswordValidator
 
 
 class MyLoginForm(FlaskForm):
@@ -24,17 +23,13 @@ class MyRegisterForm(FlaskForm):
     first_name = StringField("Имя", validators=[DataRequired(message="Имя не указано")])
     last_name = StringField("Фамилия", validators=[DataRequired(message="Фамилия не указана")])
     email = StringField(
-        "Адрес электронной почты",
-        validators=[
-            DataRequired(message="Адрес не указан"),
-            Email(message="Введите адрес электронной почты"),
-            MyEmailValidator("Введите адрес электронной почты"),
-        ],
+        "Адрес электронной почты", validators=[DataRequired(message="Адрес не указан"), MyEmailValidator()]
     )
     password = PasswordField(
         "Пароль учётной записи",
         validators=[
             DataRequired(message="Пароль не указан"),
+            MyPasswordValidator(),
             EqualTo(fieldname="password_confirm", message="Пароли не совпадают"),
         ],
     )
@@ -56,12 +51,6 @@ class MyRegisterForm(FlaskForm):
         validators=[DataRequired()],
     )
     submit = SubmitField("Зарегистрироваться")
-
-    def validate_email(self, email):  # INFO: do not turn into static method
-        """Email validator."""
-        user = User.query.filter_by(email=email.data).first()
-        if user is not None:
-            raise ValidationError("Данный адрес электронной почты уже используется")
 
 
 class MyResetPasswordForm(FlaskForm):

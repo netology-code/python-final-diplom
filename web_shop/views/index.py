@@ -99,13 +99,13 @@ def register():
 
 
 @app.route("/confirm/<token>")
-def confirm_email(token):
+def confirm_email(token, token_age=None):
     """Confirm email after registration."""
     email = token_serializer.loads(token, salt=app.config["SECRET_KEY"])
     user = User.query.filter_by(email=email).first()
     if user:
         try:
-            token_serializer.loads(token, salt=app.config["SECRET_KEY"], max_age=60)
+            token_serializer.loads(token, salt=app.config["SECRET_KEY"], max_age=token_age if token_age else 60)
             user.confirmed_at = datetime.now()
             user.is_active = True
             db.session.commit()
@@ -116,7 +116,7 @@ def confirm_email(token):
                 return make_response(redirect(url_for("login")))
             db.session.delete(user)
             db.session.commit()
-    flash("Ссылка больше недействительна. Пройдите регистрацию заново.")
+    flash("Ссылка недействительна. Пройдите регистрацию.")
     return make_response(redirect(url_for("register")))
 
 

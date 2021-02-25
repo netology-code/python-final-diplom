@@ -220,32 +220,41 @@ class TestMistakesFail:
     """Test of registration fails caused by mistakes on submit."""
 
     @pytest.mark.parametrize(
-        "string",
+        ("string", "message"),
         [
-            "a",
-            "1",
-            "mama",
-            "@",
-            ",",
-            "mama@",
-            "папa@a.c",  # russian vowels
-            "sud@a.com",
-            "sud@ar.c",
-            "sudo@a.com",
-            "sudo@ar.c",
-            "sudo@ar.compa",
-            "supermario[2021]@gmail.com",
-            "supermario@gmail,com",
-            "supеrmаriо@gmаil.com",  # russian vowels
-            "supermario+dendy@gmail.com",
+            ("", "Адрес не указан"),
+            (" ", "Адрес не указан"),
+            ("  ", "Адрес не указан"),
+            ("              ", "Адрес не указан"),
+            ("a", "Длина имени адреса до символа"),
+            ("1", "Длина имени адреса до символа"),
+            ("@", "Длина имени адреса до символа"),
+            ("sud@a.com", "Длина имени адреса до символа"),
+            ("sud@ar.c", "Длина имени адреса до символа"),
+            ("mama", "В адресе почты должен быть один символ"),
+            ("12345", "В адресе почты должен быть один символ"),
+            ("mama@@", "В адресе почты может быть только один символ"),
+            ("super@mario@gmail.com", "В адресе почты может быть только один символ"),
+            ("mama@", "Длина доменного имени должна быть не менее 2 символов"),
+            ("sudo@a.com", "Длина доменного имени должна быть не менее 2 символов"),
+            ("sudo@ar.c", "Длина доменной зоны должна быть не менее 2 и не более 4 символов"),
+            ("sudo@ar.compa", "Длина доменной зоны должна быть не менее 2 и не более 4 символов"),
+            ("supеrmаriо@gmаil.com", "Буквы могут быть только латинскими"),  # russian vowels
+            ("папa@a.c", "Буквы могут быть только латинскими"),  # russian letters
+            ("supermario[2021]@gmail.com", "Недопустимые знаки препинания в адресе почты"),
+            (",", "Недопустимые знаки препинания в адресе почты"),
+            ("supermario@gmail,com", "Недопустимые знаки препинания в адресе почты"),
+            ("supermario+dendy@gmail.com", "Недопустимые знаки препинания в адресе почты"),
+            ("         @", "Недопустимые знаки препинания в адресе почты"),
+            ("         @          .    ", "Недопустимые знаки препинания в адресе почты"),
         ],
     )
-    def test_register_wrong_email(self, string, client, register_data):
-        """Random string passed as email is not validated as email."""
+    def test_register_wrong_email(self, string, client, register_data, message):
+        """String passed to email field is not valid."""
         with client:
             register_data["email"] = string
             response: Response = client.post(URL, data=register_data, follow_redirects=True)
-            assert "Введите адрес электронной почты" in response.get_data(as_text=True)
+            assert message in response.get_data(as_text=True)
 
     @pytest.mark.parametrize(
         "string",
@@ -281,6 +290,7 @@ class TestMistakesFail:
             ("testpass", "_testpass"),
             ("testpass", "estpass"),
             ("", "testpass"),
+            (" ", "testpass"),
             ("testpass", "tеstpаss"),  # russian vowels
         ],
     )
@@ -293,6 +303,44 @@ class TestMistakesFail:
             assert "Пароли не совпадают" in response.get_data(as_text=True)
             assert response.get_data(as_text=True).count("Пароли не совпадают") in range(1, 3)
             assert request.path == URL
+
+    @pytest.mark.parametrize(
+        ("string", "message"),
+        [
+            ("", "Пароль не указан"),
+            (" ", "Пароль не указан"),
+            ("  ", "Пароль не указан"),
+            ("              ", "Пароль не указан"),
+            ("a", "Длина пароля должна быть не менее 8 и не более 14 символов"),
+            ("q1!W2@e", "Длина пароля должна быть не менее 8 и не более 14 символов"),
+            ("q1!W2@e3#R4$t5%", "Длина пароля должна быть не менее 8 и не более 14 символов"),
+            ("1", "Пароль должен содержать хотя бы одну букву"),
+            ("1234567", "Пароль должен содержать хотя бы одну букву"),
+            ("12345678", "Пароль должен содержать хотя бы одну букву"),
+            ("1.3<5[6]7", "Пароль должен содержать хотя бы одну букву"),
+            (",./<>?';:", "Пароль должен содержать хотя бы одну букву"),
+            ("а", "Пароль должен содержать хотя бы одну букву"),  # russian vowels
+            ("абвг@д.Е1", "Пароль должен содержать хотя бы одну букву"),  # russian letters
+            ("abcdefhg", "Пароль должен содержать хотя бы одну цифру"),
+            ("a.b!c@d#e%f&", "Пароль должен содержать хотя бы одну цифру"),
+            ("A.b!c@d#e%f&", "Пароль должен содержать хотя бы одну цифру"),
+            ("abcdefg1", "Пароль должен содержать хотя бы один знак препинания"),
+            ("Abcdefg1", "Пароль должен содержать хотя бы один знак препинания"),
+            ("1234567a", "Пароль должен содержать хотя бы один знак препинания"),
+            ("1234567a.", "Пароль должен содержать буквы в разных регистрах"),
+            ("1234567A.", "Пароль должен содержать буквы в разных регистрах"),
+            ("abcdef1.", "Пароль должен содержать буквы в разных регистрах"),
+            ("ABCDEF1.", "Пароль должен содержать буквы в разных регистрах"),
+            ("абвг@д.Z1", "Буквы могут быть только латинскими"),  # russian letters
+            ("q1!W2@ê3#R", "Буквы могут быть только латинскими"),  # french ê
+        ],
+    )
+    def test_register_invalid_password(self, string, client, register_data, message):
+        """String passed to password field is not valid."""
+        with client:
+            register_data["password"] = string
+            response: Response = client.post(URL, data=register_data, follow_redirects=True)
+            assert message in response.get_data(as_text=True)
 
 
 if __name__ == "__main__":
