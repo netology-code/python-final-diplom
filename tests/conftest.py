@@ -41,10 +41,10 @@ def database(test_app):
 def test_app():
     """Application modifications for tests."""
     TEST_DB_URI = f"sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'test.db')}"
+    app.config["TESTING"] = True
+    app.config["WTF_CSRF_ENABLED"] = False
     app.config["SQLALCHEMY_DATABASE_URI"] = TEST_DB_URI
     # app.config["SQLALCHEMY_ECHO"] = True
-    app.config["WTF_CSRF_ENABLED"] = False
-    app.config.testing = True
     app_context = app.test_request_context()
     app_context.push()
     return app

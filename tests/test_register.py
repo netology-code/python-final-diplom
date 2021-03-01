@@ -9,36 +9,37 @@ from web_shop.database import User
 URL = "/register"
 
 
-def test_get_register(client):
-    """Test get-register."""
-    with client:
-        response = client.get(URL, content_type="html/text")
-        assert response.status_code == 200
-        response.text = BeautifulSoup(response.data, "html.parser").text
-        assert response.text.lower().count("регистрация") == 3
+class TestCommonRegister:
+    """Common tests."""
 
+    def test_get_register(self, client):
+        """Test get-register."""
+        with client:
+            response = client.get(URL, content_type="html/text")
+            assert response.status_code == 200
+            response.text = BeautifulSoup(response.data, "html.parser").text
+            assert response.text.lower().count("регистрация") == 3
 
-def test_get_register_logged_in(client, login_admin):
-    """Test get-register by a logged-in user."""
-    with client:
-        client.post("/login", data=login_admin, follow_redirects=True)
-        response: Response = client.get(URL, content_type="html/text", follow_redirects=True)
-        assert "Выйти" in response.get_data(as_text=True)
-        assert current_user.is_authenticated
-        assert request.path == url_for("index")
-        client.get("/logout", content_type="html/text")
-        assert current_user.is_anonymous
+    def test_get_register_logged_in(self, client, login_admin):
+        """Test get-register by a logged-in user."""
+        with client:
+            client.post("/login", data=login_admin, follow_redirects=True)
+            response: Response = client.get(URL, content_type="html/text", follow_redirects=True)
+            assert "Выйти" in response.get_data(as_text=True)
+            assert current_user.is_authenticated
+            assert request.path == url_for("index")
+            client.get("/logout", content_type="html/text")
+            assert current_user.is_anonymous
 
-
-def test_register_empty_form(client):
-    """Empty form is submitted."""
-    with client:
-        response: Response = client.post(URL, follow_redirects=True)
-        alerts = ["Имя не указано", "Фамилия не указана", "Адрес не указан", "Пароль не указан"]
-        page = response.get_data(as_text=True)
-        assert all(x in page for x in alerts)
-        assert page.count("Пароль не указан") == 2
-        assert request.path == URL
+    def test_register_empty_form(self, client):
+        """Empty form is submitted."""
+        with client:
+            response: Response = client.post(URL, follow_redirects=True)
+            alerts = ["Имя не указано", "Фамилия не указана", "Адрес не указан", "Пароль не указан"]
+            page = response.get_data(as_text=True)
+            assert all(x in page for x in alerts)
+            assert page.count("Пароль не указан") == 2
+            assert request.path == URL
 
 
 class TestNormalRegister:

@@ -1,2 +1,2 @@
 from .models import *
-from .schemas import *
+from .admin_model_views import UserAdmin

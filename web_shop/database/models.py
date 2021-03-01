@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from flask import jsonify
 from flask_login import UserMixin
+from sqlalchemy.orm import backref, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from web_shop import app, db, login_manager
@@ -36,7 +37,7 @@ class User(UserMixin, db.Model):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=False, unique=True)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
     first_name = db.Column(db.String(255), nullable=False)
     last_name = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean(), default=False)
@@ -44,21 +45,13 @@ class User(UserMixin, db.Model):
     confirmed_at = db.Column(db.DateTime())
     user_type = db.Column(db.Enum(UserTypeChoices), default=UserTypeChoices.buyer, nullable=False)
 
-    # def __init__(self, email: str, is_admin: bool, token: str, expiry: datetime):
-    #     self.email = email
-    #     self.is_admin = is_admin
-    #     self.token = token
-    #     self.expires_at = expiry
-
-    def __repr__(self):
-        return f"<User {self.first_name!r} {self.last_name!r} {self.is_admin!r} >"
-
     def set_password(self, password: str) -> None:
         """User password hash setter.
 
         :param password - raw password string
         """
-        self.password_hash = generate_password_hash(password)
+        self.password = generate_password_hash(password)
+        return self.password
 
     def check_password(self, password: str) -> bool:
         """User password hash checker.
@@ -66,7 +59,7 @@ class User(UserMixin, db.Model):
         :param password - raw password string
         :return bool
         """
-        return check_password_hash(self.password_hash, password)
+        return check_password_hash(self.password, password)
 
     # def create_access_token(self):
     #     """Create a token to send it via email."""
@@ -88,50 +81,69 @@ class User(UserMixin, db.Model):
     #         return jsonify({"message": e.args[0]}), 401
 
 
+# class Shop(db.Model):
+#     __tablename__ = "shop"
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(255), nullable=False, unique=True)
+#     url = db.Column(db.String(255), nullable=True, unique=True)
+#     filename = db.Column(db.String(255), nullable=True, unique=True)
 #
-# Shop
-# - name
-# - url
-# - filename
-# 2.
-# Category
-# - shops(m2m)
-# - name
-# 3.
-# Product
-# - category
-# - name
-# 4.
-# ProductInfo
-# - product
-# - shop
-# - name
-# - quantity
-# - price
-# - price_rrc
-# 5.
-# Parameter
-# - name
-# 6.
-# ProductParameter
-# - product_info
-# - parameter
-# - value
-# 7.
-# Order
-# - user
-# - dt
-# - status
-# 8.
-# OrderItem
-# - order
-# - product
-# - shop
-# - quantity
-# 9.
-# Contact
-# - type
-# - user
+#
+# class Category(db.Model):
+#     __tablename__ = "category"
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(50), nullable=False, name="Название")
+#
+#
+# class Product(db.Model):
+#     __tablename__ = "product"
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(255), nullable=False, unique=True)
+#     category = db.Column(db.Integer(), db.ForeignKey("category.id"), nullable=False)
+#
+#
+# class ProductInfo(db.Model):
+#     __tablename__ = "product_info"
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(255), nullable=False, unique=True)
+#     product = db.Column(db.Integer(), db.ForeignKey("product.id"), nullable=False)
+#     shop = db.Column(db.Integer(), db.ForeignKey("shop.id"), nullable=False)
+#     price = db.Column(db.Integer(), nullable=False)
+#     quantity = db.Column(db.Integer(), nullable=False)
+#     # - price_rrc
+#
+#
+# class Parameter(db.Model):
+#     __tablename__ = "parameter"
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(255), nullable=False, unique=True)
+#
+#
+# class ProductParameter(db.Model):
+#     __tablename__ = "x_product_parameter"
+#     product_info = db.Column(db.Integer(), db.ForeignKey("product_info.id"), primary_key=True, nullable=False)
+#     parameter = db.Column(db.Integer(), db.ForeignKey("parameter.id"), primary_key=True, nullable=False)
+#     value = name = db.Column(db.String(255), nullable=False)
+#
+#
+# class Order(db.Model):
+#     user = db.Column(db.Integer(), db.ForeignKey("user.id"), nullable=False)
+#
+#
+# # - dt
+# # - status
+#
+# # 8.
+# # OrderItem
+# # - order
+# # - product
+# # - shop
+# # - quantity
+#
+# # 9.
+# # Contact
+# # - type
+# # - user
 # - value
 
 

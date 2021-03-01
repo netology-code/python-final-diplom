@@ -1,6 +1,7 @@
 """Web_shop configs."""
 
 import os
+
 from dotenv import load_dotenv
 
 ROOT_URL = "/api/v1/"
@@ -25,3 +26,5 @@ class Config:
     MAIL_PORT = 465
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
+    CELERY_BROKER_URL = "redis://localhost:6379/0"
+    CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
