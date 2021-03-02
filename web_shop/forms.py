@@ -2,7 +2,7 @@
 
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, PasswordField, SelectField, StringField, SubmitField
-from wtforms.validators import DataRequired, Email, EqualTo
+from wtforms.validators import DataRequired, EqualTo
 
 from web_shop.database import UserTypeChoices
 from web_shop.validators.validators import MyEmailValidator, MyPasswordValidator
@@ -56,10 +56,11 @@ class MyRegisterForm(FlaskForm):
 class MyResetPasswordForm(FlaskForm):
     """Form for password reset template."""
 
-    pass
+    email = StringField("Адрес электронной почты", validators=[DataRequired(message="Адрес не указан")])
+    submit = SubmitField("Отправить")
 
 
-class MyForgotPasswordForm(FlaskForm):
+class MyForgotPasswordForm(MyResetPasswordForm):
     """Form for forgotten password template."""
 
     pass
@@ -68,4 +69,19 @@ class MyForgotPasswordForm(FlaskForm):
 class MyChangePasswordForm(FlaskForm):
     """Form for password change template."""
 
-    pass
+    password = PasswordField(
+        "Пароль учётной записи",
+        validators=[
+            DataRequired(message="Пароль не указан"),
+            MyPasswordValidator(),
+            EqualTo(fieldname="password_confirm", message="Пароли не совпадают"),
+        ],
+    )
+    password_confirm = PasswordField(
+        "Повторите пароль",
+        validators=[
+            DataRequired(message="Пароль не указан"),
+            EqualTo(fieldname="password", message="Пароли не совпадают"),
+        ],
+    )
+    submit = SubmitField("Отправить")

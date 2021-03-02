@@ -50,8 +50,7 @@ def login():
             resp: Response = make_response(redirect(url_for(request.args.get("next"))))
         else:
             resp: Response = make_response(redirect(url_for("index")))
-        token = create_access_token(identity=user.email, expires_delta=timedelta(seconds=30))
-        resp.set_cookie("access_token_cookie", token)
+
         return resp
 
     return make_response(render_template("login.html", title="Вход в учётную запись", form=form))

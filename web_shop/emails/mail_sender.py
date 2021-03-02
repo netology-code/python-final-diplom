@@ -5,9 +5,9 @@ from flask_mail import Message
 from web_shop import app, celery, mail, token_serializer
 
 
-def create_confirmation_token(email):
+def create_confirmation_token(obj):
     """Create confirmation token to be sent via email after registration."""
-    return token_serializer.dumps(email, salt=app.config["SECRET_KEY"])
+    return token_serializer.dumps(obj, salt=app.config["SECRET_KEY"])
 
 
 def create_message(topic, recipients_addresses):

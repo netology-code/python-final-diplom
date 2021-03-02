@@ -1,10 +1,9 @@
 """Admin-model views."""
 
 from flask_admin.contrib.sqla import ModelView
-from werkzeug.security import generate_password_hash
 
 from web_shop.database import User
-from web_shop.emails import create_confirmation_token, create_message, send_message
+from web_shop.views import retrieve_password
 
 
 class UserAdmin(ModelView):
@@ -25,16 +24,9 @@ class UserAdmin(ModelView):
     can_edit = True
     can_create = True
     can_delete = True
-    can_export = True
 
     def on_model_change(self, form, model, is_created):
-        raw_password = model.password
-        model.password = generate_password_hash(model.password)
-        user = User.query.filter_by(email=model.email).first()
-        token = create_confirmation_token(user.email)
-        message = create_message(model.email, token)
-        if not user.confirmed_at:
-            message.body += f"\n\nЛогин: {model.email}\nВаш пароль: {raw_password}"
-        else:
-            message.body = f"Ваш новый пароль: {raw_password}"
-        send_message(message)
+        if not is_created:
+            user = User.query.filter_by(email=model.email).first()
+            if not user.password.startswith("pbkdf2:sha256:150000"):
+                retrieve_password(user)
