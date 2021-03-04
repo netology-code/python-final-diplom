@@ -1,4 +1,6 @@
 """Tests for admin-view."""
+from datetime import datetime
+from unittest.mock import patch
 
 import pytest
 from flask import Response, request, url_for
@@ -75,6 +77,24 @@ class TestEnterAdminUsers:
             fields = list(user.__dict__.keys())
             fields.remove("_sa_instance_state")
             assert all(field in response.get_data(as_text=True) for field in fields)
+
+    # def test_post_admin_users_change_user_password(self, login_admin, client):
+    #     """Change user password at admin-users panel."""
+    #     id = 4
+    #     user = User.query.get(id)
+    #     old_pwd = user.password
+    #     del user
+    #     with client:
+    #         with patch("web_shop.views.acc_management_view.send_message"):
+    #             client.post("/login", data=login_admin)
+    #             data = dict(email="non_admin_buyer@test.mail", first_name="NonAdmin", last_name="Buyer",
+    #                         password="test",
+    #                         user_type="buyer",
+    #                         is_active=True,
+    #                         confirmed_at=datetime.now())
+    #             client.post(URL + f"user/edit/?id={id}", data=data, follow_redirects=True)
+    #             user = User.query.get(id)
+    #             assert old_pwd != user.password
 
 
 if __name__ == "__main__":

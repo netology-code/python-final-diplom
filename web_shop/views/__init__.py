@@ -1,6 +1,6 @@
-from .admin_index import MyAdminIndexView
-from .acc_management import confirm_email, retrieve, retrieve_password
-from .index import index
-from .login import login
-from .logout import logout
-from .register import register
+from .admin_index_view import MyAdminIndexView
+from .acc_management_view import confirm_email, retrieve, retrieve_password
+from .index_view import index
+from .login_view import login
+from .logout_view import logout
+from .register_view import register

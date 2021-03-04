@@ -1,6 +1,7 @@
 """Test registration."""
+from unittest.mock import patch
+
 import pytest
-from bs4 import BeautifulSoup
 from flask import Response, request, url_for
 from flask_login import current_user
 
@@ -15,18 +16,17 @@ class TestCommonRegister:
     def test_get_register(self, client):
         """Test get-register."""
         with client:
-            response = client.get(URL, content_type="html/text")
+            response: Response = client.get(URL, content_type="html/text")
             assert response.status_code == 200
-            response.text = BeautifulSoup(response.data, "html.parser").text
-            assert response.text.lower().count("регистрация") == 3
+            assert response.get_data(as_text=True).lower().count("регистрация") == 3
 
     def test_get_register_logged_in(self, client, login_admin):
         """Test get-register by a logged-in user."""
         with client:
             client.post("/login", data=login_admin, follow_redirects=True)
+            assert current_user.is_authenticated
             response: Response = client.get(URL, content_type="html/text", follow_redirects=True)
             assert "Выйти" in response.get_data(as_text=True)
-            assert current_user.is_authenticated
             assert request.path == url_for("index")
             client.get("/logout", content_type="html/text")
             assert current_user.is_anonymous
@@ -45,35 +45,29 @@ class TestCommonRegister:
 class TestNormalRegister:
     """Tests for normal registration of a new user."""
 
-    @pytest.mark.xfail(reason="No SMTP credentials for tests at GIT-actions")
     def test_post_register_normal(self, client, register_data):
-        """Test normal registration of a new user. Follow redirection.
-
-        Marked xfail for git actions.
-        """
+        """Test normal registration of a new user. Follow redirection."""
         assert not User.query.filter_by(email=register_data["email"]).first()
         with client:
-            response: Response = client.post(URL, data=register_data, follow_redirects=True)
-            assert response.status_code == 200
-            assert "Регистрация прошла успешно!" in response.get_data(as_text=True)
-            assert request.path == url_for("index")
-            user = User.query.filter_by(email=register_data["email"]).first()
-            assert user.user_type.name == register_data["user_type"]
-            assert user.is_active is False
-            assert user.confirmed_at is None
+            with patch("web_shop.views.register_view.send_message"):
+                response: Response = client.post(URL, data=register_data, follow_redirects=True)
+                assert response.status_code == 200
+                assert "Регистрация прошла успешно!" in response.get_data(as_text=True)
+                assert request.path == url_for("index")
+                user = User.query.filter_by(email=register_data["email"]).first()
+                assert user.user_type.name == register_data["user_type"]
+                assert user.is_active is False
+                assert user.confirmed_at is None
 
-    @pytest.mark.xfail(reason="No SMTP credentials for tests at GIT-actions")
     def test_post_register_normal_no_redirect(self, client, register_data):
-        """Test normal registration of a new user. No redirection.
-
-        Marked xfail for git actions.
-        """
+        """Test normal registration of a new user. No redirection."""
         register_data["email"] = "email1@email.com"
         assert not User.query.filter_by(email=register_data["email"]).first()
         with client:
-            response: Response = client.post(URL, data=register_data, follow_redirects=False)
-            assert response.status_code == 302
-            assert request.path == URL
+            with patch("web_shop.views.register_view.send_message"):
+                response: Response = client.post(URL, data=register_data, follow_redirects=False)
+                assert response.status_code == 302
+                assert request.path == URL
 
 
 class TestOneFieldPassedFail:

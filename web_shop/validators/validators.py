@@ -43,7 +43,7 @@ class MyValidator(object):
             raise ValueError('Длина имени адреса до символа "@" не может быть меньше 4 символов')
         if key == "pass":
             """Password length must be 4 or greater."""
-            if 8 <= len(string) <= 12:
+            if 8 <= len(string) <= 14:
                 return True
             raise ValueError("Длина пароля должна быть не менее 8 и не более 14 символов")
 

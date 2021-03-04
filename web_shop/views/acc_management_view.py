@@ -1,16 +1,16 @@
 """View for confirmation emails and tokens."""
 import random
 from datetime import datetime
-from string import ascii_letters as letters, digits, punctuation as punc
+from string import ascii_lowercase, ascii_uppercase, digits, punctuation
 
-from flask import flash, make_response, redirect, render_template, request, url_for
+from flask import abort, flash, make_response, redirect, render_template, request, url_for
 from itsdangerous import BadPayload, BadSignature, SignatureExpired
 from werkzeug.security import generate_password_hash
 
-from web_shop.forms import MyChangePasswordForm, MyResetPasswordForm
 from web_shop import app, db, token_serializer
 from web_shop.database import User
 from web_shop.emails import create_confirmation_token, create_message, send_message
+from web_shop.forms import MyChangePasswordForm, MyResetPasswordForm
 
 
 @app.route("/confirm/<token>")
@@ -55,16 +55,15 @@ def retrieve():
         form = MyChangePasswordForm()
         if not request.args.get("token"):
             flash("Ссылка недействительна")
-            return make_response(render_template("retrieve_password.html", form=form))
+            return make_response(abort(404))
 
-        email, code, date = token_serializer.loads(request.args["token"], salt=app.config["SECRET_KEY"])
+        try:
+            email, code, date = token_serializer.loads(request.args["token"], salt=app.config["SECRET_KEY"])
+        except (BadSignature, ValueError):
+            return make_response(abort(404))
 
-        if code != "retrieve_password":
+        if code != "retrieve_password" or datetime.utcnow().timestamp() - date > 300:
             flash("Ссылка недействительна")
-            return make_response(render_template("retrieve_password.html", form=form))
-
-        if datetime.utcnow().timestamp() - date > 300:
-            flash("Ссылка больше не действительна")
             return make_response(redirect(url_for("retrieve")))
 
         user = User.query.filter_by(email=email).first()
@@ -78,15 +77,26 @@ def retrieve():
     return make_response(render_template("retrieve_password.html", title="Восстановление доступа", form=form))
 
 
-def get_random_password():
-    """Create random password."""
-    result_str = "".join(i for _ in range(15) for i in random.choice(letters + digits + punc))
+def create_random_password() -> str:
+    """Create a random password."""
+    random_password = []
+    random_password.extend(i for _ in range(3) for i in random.choice(ascii_lowercase))
+    random_password.extend(i for _ in range(3) for i in random.choice(ascii_uppercase))
+    random_password.extend(i for _ in range(3) for i in random.choice(digits))
+    random_password.extend(i for _ in range(3) for i in random.choice(punctuation))
+    random.shuffle(random_password)
+    return "".join(random_password)
+
+
+def get_random_password_hash() -> str:
+    """Create random password hash."""
+    result_str = create_random_password()
     return generate_password_hash(result_str)
 
 
 def retrieve_password(user) -> None:
     """Change stored password by a random one and send a letter with a link for retrieve."""
-    user.password = get_random_password()
+    user.password = get_random_password_hash()
     db.session.commit()
     token = create_confirmation_token((user.email, "retrieve_password", datetime.utcnow().timestamp()))
     link = url_for("retrieve", token=token, _external=True)

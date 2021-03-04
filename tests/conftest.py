@@ -16,7 +16,7 @@ def client(test_app):
     return test_app.test_client()
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def database(test_app):
     """Database for tests."""
     from web_shop.database import models

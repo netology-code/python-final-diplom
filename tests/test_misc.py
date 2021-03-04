@@ -1,5 +1,7 @@
 """Tests for different functions."""
 import time
+from unittest.mock import patch
+
 from flask_mail import Message
 
 import pytest
@@ -70,7 +72,6 @@ class TestEmailSender:
         confirm_email(token, 1)
         assert User.query.filter_by(email=email).first()
 
-    @pytest.mark.xfail(reason="No SMTP credentials for tests at GIT-actions")
     @pytest.mark.parametrize("email", ["new_user1@test.mail", "new_user2@test.mail"])
     def test_confirm_email_new_users(self, email, register_data, client):
         """Confirmation url got by a new user."""
@@ -78,25 +79,26 @@ class TestEmailSender:
         token = create_confirmation_token(email)
         link = url_for("confirm_email", token=token, _external=True)
         with client:
-            client.post(url_for("register"), data=register_data, follow_redirects=True)
-            response: Response = client.get(link, content_type="html/text", follow_redirects=True)
-            assert request.path == url_for("login")
-            assert "Учётная запись подтверждена" in response.get_data(True)
-            user = User.query.filter_by(email=email).first()
-            assert user.is_active
+            with patch("web_shop.views.register_view.send_message"):
+                client.post(url_for("register"), data=register_data, follow_redirects=True)
+                response: Response = client.get(link, content_type="html/text", follow_redirects=True)
+                assert request.path == url_for("login")
+                assert "Учётная запись подтверждена" in response.get_data(True)
+                user = User.query.filter_by(email=email).first()
+                assert user.is_active
 
-    @pytest.mark.xfail(reason="No SMTP credentials for tests at GIT-actions")
     @pytest.mark.parametrize("email", ["new_user3@test.mail", "new_user4@test.mail"])
     def test_confirm_email_expired_confirmation(self, email, register_data, client):
         """Confirmation url got by a new user too late."""
         register_data["email"] = email
         token = create_confirmation_token(email)
         with client:
-            client.post(url_for("register"), data=register_data, follow_redirects=True)
-            assert User.query.filter_by(email=email).first()
-            time.sleep(2)
-            confirm_email(token, 1)
-            assert not User.query.filter_by(email=email).first()
+            with patch("web_shop.views.register_view.send_message"):
+                client.post(url_for("register"), data=register_data, follow_redirects=True)
+                assert User.query.filter_by(email=email).first()
+                time.sleep(2)
+                confirm_email(token, 1)
+                assert not User.query.filter_by(email=email).first()
 
 
 if __name__ == "__main__":
