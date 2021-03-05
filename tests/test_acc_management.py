@@ -159,7 +159,7 @@ class TestRetrieve:
                 response: Response = client.post(url_for("retrieve"), data=data, follow_redirects=True)
                 assert "Ваш предыдущий пароль был сброшен. Проверьте свою почту." in response.get_data(True)
                 assert "Пароль" not in response.get_data(True)
-                assert request.path == url_for("retrieve")
+                assert request.path == url_for("index")
 
     @pytest.mark.parametrize(
         "email",

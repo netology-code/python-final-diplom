@@ -15,6 +15,10 @@ def register():
         return make_response(redirect(url_for("index")))
 
     form = MyRegisterForm()
+
+    if form.cancel.data:
+        return make_response(redirect(url_for("index")))
+
     if form.validate_on_submit():
         user = User(email=form.email.data.lower(), first_name=form.first_name.data, last_name=form.last_name.data)
         user.set_password(form.password.data)

@@ -1,0 +1,49 @@
+{% extends "account.html" %}
+
+{% block content %}
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        {% if 'name' in request.args %}
+            <p>
+                {{ form.first_name.label }}
+                {{ form.first_name(placeholder=current_user.first_name, size=32) }}
+            {% for error in form.first_name.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+            </p>
+            <p>
+                {{ form.last_name.label }}
+                {{ form.last_name(placeholder=current_user.last_name, size=32) }}
+            {% for error in form.last_name.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+            </p>
+
+        {% elif 'password' in request.args %}
+            <p>
+                {{ form.password.label }}
+                {{ form.password(size=32) }}
+            {% for error in form.password.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+            </p>
+            <p>
+                {{ form.password_confirm.label }}
+                {{ form.password_confirm(size=32) }}
+            {% for error in form.password_confirm.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+            </p>
+        {% elif 'email' in request.args %}
+            <p>
+                {{ form.email.label }}
+                {{ form.email(placeholder=current_user.email, size=32) }}
+            {% for error in form.email.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+            </p>
+        {% endif %}
+        <p>{{ form.submit() }} {{ form.cancel() }}  </p>
+    </form>
+{% endblock %}

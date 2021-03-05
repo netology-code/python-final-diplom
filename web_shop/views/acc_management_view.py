@@ -4,13 +4,70 @@ from datetime import datetime
 from string import ascii_lowercase, ascii_uppercase, digits, punctuation
 
 from flask import abort, flash, make_response, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 from itsdangerous import BadPayload, BadSignature, SignatureExpired
 from werkzeug.security import generate_password_hash
 
 from web_shop import app, db, token_serializer
 from web_shop.database import User
 from web_shop.emails import create_confirmation_token, create_message, send_message
-from web_shop.forms import MyChangePasswordForm, MyResetPasswordForm
+from web_shop.forms import (
+    MyEmailChangeForm,
+    MyNameChangeForm,
+    MyPasswordChangeForm,
+    MyResetPasswordForm,
+)
+
+
+@app.route("/account")
+@login_required
+def account():
+    """View for account data."""
+    return make_response(render_template("account.html"))
+
+
+@app.route("/account/edit", methods=["GET", "POST"])
+@login_required
+def account_edit():
+    """View for edit account data."""
+    if "status" in request.args:
+        user = User.query.filter_by(email=current_user.email).first()
+        if user.is_active:
+            user.is_active = False
+        else:
+            user.is_active = True
+        db.session.commit()
+        return make_response(redirect(url_for("account")))
+
+    if "name" in request.args:
+        form = MyNameChangeForm()
+    elif "password" in request.args:
+        form = MyPasswordChangeForm()
+    elif "email" in request.args:
+        form = MyEmailChangeForm()
+    else:
+        return make_response(abort(404))
+
+    if form.cancel.data:
+        return make_response(redirect(url_for("account")))
+
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=current_user.email).first()
+        if isinstance(form, MyEmailChangeForm):
+            if form.email.data:
+                user.email = form.email.data.lower()
+        elif isinstance(form, MyNameChangeForm):
+            if form.first_name.data:
+                user.first_name = form.first_name.data
+            if form.last_name.data:
+                user.last_name = form.last_name.data
+        elif isinstance(form, MyPasswordChangeForm):
+            if form.password.data:
+                user.password = user.set_password(form.password.data)
+        db.session.commit()
+        return make_response(redirect(url_for("account")))
+
+    return make_response(render_template("account_edit.html", form=form))
 
 
 @app.route("/confirm/<token>")
@@ -51,8 +108,9 @@ def retrieve():
             else:
                 retrieve_password(user)
                 flash("Ваш предыдущий пароль был сброшен. Проверьте свою почту.")
+                return make_response(redirect(url_for("index")))
     else:
-        form = MyChangePasswordForm()
+        form = MyPasswordChangeForm()
         if not request.args.get("token"):
             flash("Ссылка недействительна")
             return make_response(abort(404))

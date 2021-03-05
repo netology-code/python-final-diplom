@@ -46,11 +46,11 @@ class MyRegisterForm(FlaskForm):
             (UserTypeChoices.buyer.name, UserTypeChoices.buyer.value),
             (UserTypeChoices.shop.name, UserTypeChoices.shop.value),
         ],
-        # choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')],
         coerce=str,
         validators=[DataRequired()],
     )
     submit = SubmitField("Зарегистрироваться")
+    cancel = SubmitField("Отмена")
 
 
 class MyResetPasswordForm(FlaskForm):
@@ -66,8 +66,30 @@ class MyForgotPasswordForm(MyResetPasswordForm):
     pass
 
 
-class MyChangePasswordForm(FlaskForm):
-    """Form for password change template."""
+class MyForm(FlaskForm):
+    """Buttons in change-forms."""
+
+    submit = SubmitField("Сохранить")
+    cancel = SubmitField("Отмена")
+
+
+class MyNameChangeForm(MyForm):
+    """Name change form."""
+
+    first_name = StringField("Имя")
+    last_name = StringField("Фамилия")
+
+
+class MyEmailChangeForm(MyForm):
+    """Email change form."""
+
+    email = StringField(
+        "Адрес электронной почты", validators=[DataRequired(message="Адрес не указан"), MyEmailValidator()]
+    )
+
+
+class MyPasswordChangeForm(MyForm):
+    """Password change form."""
 
     password = PasswordField(
         "Пароль учётной записи",
@@ -84,4 +106,3 @@ class MyChangePasswordForm(FlaskForm):
             EqualTo(fieldname="password", message="Пароли не совпадают"),
         ],
     )
-    submit = SubmitField("Отправить")

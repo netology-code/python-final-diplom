@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
+     <style>
+   .b1 {
+    background: red; /* Синий цвет фона */
+    color: white; /* Белые буквы */
+   }
+  </style>
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>
@@ -42,6 +48,6 @@
             {{ form.user_type.label }}<br>
             {{ form.user_type() }}
         </p>
-        <p>{{ form.submit() }}</p>
+        <p>{{ form.submit() }}  {{ form.cancel() }}  </p>
     </form>
 {% endblock %}

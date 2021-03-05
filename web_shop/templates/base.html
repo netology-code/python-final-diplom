@@ -14,22 +14,22 @@
         <text style="float: left;"> {{ title }} </text>
         <a href="/">На главную</a>
     {% else %}
+
+
         {% if current_user.is_anonymous %}
             <text style="float: left;"> Добро пожаловать в магазин WebShop</text>
+            <a href="/register">Регистрация</a>
+            <a href="{{ url_for('login') }}">Войти</a>
+
         {% else %}
             <text style="float: left;"> Добрый день {{ current_user.first_name }}! Добро пожаловать в личный кабинет!
             </text>
+            {% if current_user.is_admin %}
+                <a href="{{ url_for('admin.index') }}">Админка</a>
+            {% endif %}
+            <a href="{{ url_for('account') }}">Личный кабинет</a>
+            <a href="{{ url_for('logout') }}">Выйти из системы</a>
         {% endif %}
-    {% endif %}
-
-    {% if current_user.is_anonymous %}
-        <a href="/register">Регистрация</a>
-        <a href="{{ url_for('login') }}">Войти</a>
-    {% else %}
-        {% if current_user.is_admin %}
-            <a href="{{ url_for('admin.index') }}">Админка</a>
-        {% endif %}
-        <a href="{{ url_for('logout') }}">Выйти из системы</a>
     {% endif %}
 
 </div>

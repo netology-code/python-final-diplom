@@ -18,7 +18,7 @@ class TestCommonRegister:
         with client:
             response: Response = client.get(URL, content_type="html/text")
             assert response.status_code == 200
-            assert response.get_data(as_text=True).lower().count("регистрация") == 3
+            assert response.get_data(as_text=True).lower().count("регистрация") == 2
 
     def test_get_register_logged_in(self, client, login_admin):
         """Test get-register by a logged-in user."""

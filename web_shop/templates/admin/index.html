@@ -1,7 +1,8 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-    <p><a href="{{ url_for("index")}}">WebShop Home page</a></p>
-    <p><a href="{{ url_for("logout")}}">Logout</a></p>
+    <p><a href="{{ url_for("index")}}">В магазин</a></p>
+    <p><a href="{{ url_for("account")}}">Личный кабинет</a></p>
+    <p><a href="{{ url_for("logout")}}">Выйти из системы</a></p>
 
 {% endblock %}
