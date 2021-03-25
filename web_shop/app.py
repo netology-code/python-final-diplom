@@ -1,6 +1,6 @@
 """Runs web_shop."""
 
-from web_shop import app, db, views
+from web_shop import app, db
 from web_shop.database import User
 
 

@@ -25,10 +25,10 @@ class TestNormalLogin:
     @pytest.mark.parametrize(
         ("username", "pwd", "is_admin", "user_type"),
         [
-            ("admin_buyer@test.mail", "testpass1", True, "buyer"),
-            ("admin_shop@test.mail", "testpass2", True, "shop"),
-            ("non_admin_buyer@test.mail", "testpass3", False, "buyer"),
-            ("non_admin_shop@test.mail", "testpass4", False, "shop"),
+            ("admin_buyer@test.mail", "testpass1", True, "customer"),
+            ("admin_shop@test.mail", "testpass2", True, "seller"),
+            ("non_admin_buyer@test.mail", "testpass3", False, "customer"),
+            ("non_admin_shop@test.mail", "testpass4", False, "seller"),
         ],
     )
     def test_login_post_form_existing_users_no_redirection(self, username, pwd, is_admin, user_type, client):
@@ -46,10 +46,10 @@ class TestNormalLogin:
     @pytest.mark.parametrize(
         ("username", "pwd", "is_admin", "user_type"),
         [
-            ("admin_buyer@test.mail", "testpass1", True, "buyer"),
-            ("admin_shop@test.mail", "testpass2", True, "shop"),
-            ("non_admin_buyer@test.mail", "testpass3", False, "buyer"),
-            ("non_admin_shop@test.mail", "testpass4", False, "shop"),
+            ("admin_buyer@test.mail", "testpass1", True, "customer"),
+            ("admin_shop@test.mail", "testpass2", True, "seller"),
+            ("non_admin_buyer@test.mail", "testpass3", False, "customer"),
+            ("non_admin_shop@test.mail", "testpass4", False, "seller"),
         ],
     )
     def test_login_post_form_existing_users_redirection(self, username, pwd, is_admin, user_type, client):

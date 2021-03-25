@@ -16,7 +16,7 @@ def client(test_app):
     return test_app.test_client()
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="class", autouse=True)
 def database(test_app):
     """Database for tests."""
     from web_shop.database import models
@@ -44,7 +44,7 @@ def test_app():
     app.config["TESTING"] = True
     app.config["WTF_CSRF_ENABLED"] = False
     app.config["SQLALCHEMY_DATABASE_URI"] = TEST_DB_URI
-    # app.config["SQLALCHEMY_ECHO"] = True
+    app.config["SQLALCHEMY_ECHO"] = False
     app_context = app.test_request_context()
     app_context.push()
     return app
@@ -68,6 +68,13 @@ def login_non_admin():
     return dict(email="non_admin_buyer@test.mail", password="testpass3")
 
 
+# @pytest.fixture()
+# def logged_in_admin(login_admin, client):
+#     with client:
+#
+#         yield client
+
+
 @pytest.fixture()
 def register_data():
     """Data for register view."""
@@ -77,7 +84,7 @@ def register_data():
         email="email@email.com",
         password="Password.1",
         password_confirm="Password.1",
-        user_type="shop",
+        user_type="seller",
     )
 
 
@@ -85,27 +92,27 @@ def create_db_confirmed_users():
     """Users with confirmed email."""
     admin_buyer = User(email="admin_buyer@test.mail", first_name="Admin", last_name="Buyer")
     admin_buyer.set_password("testpass1")
-    admin_buyer.user_type = "buyer"
+    admin_buyer.user_type = "customer"
     admin_buyer.is_admin = True
     admin_buyer.is_active = False
     admin_buyer.confirmed_at = datetime.now()
 
     admin_shop = User(email="admin_shop@test.mail", first_name="Admin", last_name="Shop")
     admin_shop.set_password("testpass2")
-    admin_shop.user_type = "shop"
+    admin_shop.user_type = "seller"
     admin_shop.is_admin = True
     admin_shop.is_active = True
     admin_shop.confirmed_at = datetime.now()
 
     non_admin_buyer = User(email="non_admin_buyer@test.mail", first_name="NonAdmin", last_name="Buyer")
     non_admin_buyer.set_password("testpass3")
-    non_admin_buyer.user_type = "buyer"
+    non_admin_buyer.user_type = "customer"
     non_admin_buyer.is_active = True
     non_admin_buyer.confirmed_at = datetime.now()
 
     non_admin_shop = User(email="non_admin_shop@test.mail", first_name="NonAdmin", last_name="Shop")
     non_admin_shop.set_password("testpass4")
-    non_admin_shop.user_type = "shop"
+    non_admin_shop.user_type = "seller"
     non_admin_shop.is_active = True
     non_admin_shop.confirmed_at = datetime.now()
 
@@ -116,20 +123,20 @@ def create_db_unconfirmed_users():
     """Users with unconfirmed email."""
     admin_buyer_unc = User(email="admin_buyer_unc@test.mail", first_name="Admin_unc", last_name="Buyer_unc")
     admin_buyer_unc.set_password("testpass1")
-    admin_buyer_unc.user_type = "buyer"
+    admin_buyer_unc.user_type = "customer"
     admin_buyer_unc.is_admin = True
 
     admin_shop_unc = User(email="admin_shop_unc@test.mail", first_name="Admin_unc", last_name="Shop_unc")
     admin_shop_unc.set_password("testpass2")
-    admin_shop_unc.user_type = "shop"
+    admin_shop_unc.user_type = "seller"
     admin_shop_unc.is_admin = True
 
     non_admin_buyer_unc = User(email="non_admin_buyer_unc@test.mail", first_name="NonAdmin_unc", last_name="Buyer_unc")
     non_admin_buyer_unc.set_password("testpass3")
-    non_admin_buyer_unc.user_type = "buyer"
+    non_admin_buyer_unc.user_type = "customer"
 
     non_admin_shop_unc = User(email="non_admin_shop_unc@test.mail", first_name="NonAdmin_unc", last_name="Shop_unc")
     non_admin_shop_unc.set_password("testpass4")
-    non_admin_shop_unc.user_type = "shop"
+    non_admin_shop_unc.user_type = "seller"
 
     return admin_buyer_unc, admin_shop_unc, non_admin_shop_unc, non_admin_buyer_unc

@@ -156,9 +156,11 @@ class MyPasswordValidator(MyValidator):
     @staticmethod
     def check_letters(password: str) -> bool:
         """Check if letters are in password."""
-        if re.findall(r"[A-Za-z]", password):
+        from unicodedata import category
+
+        if any(category(i).startswith("L") for i in password):
             return True
-        raise ValueError("Пароль должен содержать хотя бы одну букву")
+        raise ValueError("Пароль должен содержать хотя бы две буквы")
 
     @staticmethod
     def check_punctuation(password: str) -> bool:

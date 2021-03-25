@@ -43,8 +43,8 @@ class MyRegisterForm(FlaskForm):
     user_type = SelectField(
         "Тип пользователя",
         choices=[
-            (UserTypeChoices.buyer.name, UserTypeChoices.buyer.value),
-            (UserTypeChoices.shop.name, UserTypeChoices.shop.value),
+            (UserTypeChoices.customer.name, UserTypeChoices.customer.value),
+            (UserTypeChoices.seller.name, UserTypeChoices.seller.value),
         ],
         coerce=str,
         validators=[DataRequired()],

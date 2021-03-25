@@ -26,8 +26,8 @@ class OrderStateChoices(enum.Enum):
 class UserTypeChoices(enum.Enum):
     """User types choices."""
 
-    shop = "Магазин"
-    buyer = "Покупатель"
+    seller = "Продавец"
+    customer = "Покупатель"
 
 
 class User(UserMixin, db.Model):
@@ -43,7 +43,10 @@ class User(UserMixin, db.Model):
     is_admin = db.Column(db.Boolean(), default=False)
     is_active = db.Column(db.Boolean(), default=False)
     confirmed_at = db.Column(db.DateTime())
-    user_type = db.Column(db.Enum(UserTypeChoices), default=UserTypeChoices.buyer, nullable=False)
+    user_type = db.Column(db.Enum(UserTypeChoices), default=UserTypeChoices.customer, nullable=False)
+
+    def __str__(self):
+        return self.email
 
     def set_password(self, password: str) -> None:
         """User password hash setter.
@@ -61,34 +64,24 @@ class User(UserMixin, db.Model):
         """
         return check_password_hash(self.password, password)
 
-    # def create_access_token(self):
-    #     """Create a token to send it via email."""
-    #     expires_at = datetime.utcnow() + timedelta(seconds=10)
-    #     return jwt.encode({"username": self.email, "exp": expires_at}, app.config["SECRET_KEY"])
-    #
-    # @staticmethod
-    # def check_access_token(token: str):
-    #     """Check tokens."""
-    #     try:
-    #         # jwt.decode() возвращает словарь с исходными ключами
-    #         # параметр algorithms обязательный
-    #         jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
-    #         current_user = User.query.filter_by(token=token).first()
-    #         if current_user:
-    #             return True
-    #         return False
-    #     except Exception as e:
-    #         return jsonify({"message": e.args[0]}), 401
+
+class Shop(db.Model):
+    """Shop table model."""
+
+    __tablename__ = "shop"
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False, unique=True)
+    url = db.Column(db.String(255), nullable=True, unique=True)
+    filename = db.Column(db.String(255), nullable=True, unique=True)
+    file_upload_datetime = db.Column(db.DateTime(), nullable=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    shop_manager = relationship("User")
+
+    def __repr__(self):
+        return self.title
 
 
-# class Shop(db.Model):
-#     __tablename__ = "shop"
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(255), nullable=False, unique=True)
-#     url = db.Column(db.String(255), nullable=True, unique=True)
-#     filename = db.Column(db.String(255), nullable=True, unique=True)
-#
-#
 # class Category(db.Model):
 #     __tablename__ = "category"
 #     id = db.Column(db.Integer, primary_key=True)

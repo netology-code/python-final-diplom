@@ -89,7 +89,7 @@ class TestEnterAdminUsers:
     #             client.post("/login", data=login_admin)
     #             data = dict(email="non_admin_buyer@test.mail", first_name="NonAdmin", last_name="Buyer",
     #                         password="test",
-    #                         user_type="buyer",
+    #                         user_type="customer",
     #                         is_active=True,
     #                         confirmed_at=datetime.now())
     #             client.post(URL + f"user/edit/?id={id}", data=data, follow_redirects=True)

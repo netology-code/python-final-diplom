@@ -40,7 +40,7 @@ login_manager.login_view = "login"
 # Init migrations
 directory = os.path.join(basedir, "database", "migrations")
 migrate = Migrate(app, db, directory=directory)
-from web_shop.database import models, UserAdmin
+from web_shop.database import models, UserAdmin, ShopAdmin
 
 # Init admin
 from web_shop.views import MyAdminIndexView
@@ -48,3 +48,4 @@ from web_shop.views import MyAdminIndexView
 
 admin = Admin(app, name="Admin", template_mode="bootstrap3", index_view=MyAdminIndexView())
 admin.add_view(UserAdmin(models.User, db.session))
+admin.add_view(ShopAdmin(models.Shop, db.session))

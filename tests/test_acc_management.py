@@ -180,5 +180,277 @@ class TestRetrieve:
             assert current_user.is_authenticated
 
 
+class TestGetPersonalAccount:
+    """Test GET personal account pages."""
+
+    def test_get_account_after_login(self, login_admin, client):
+        """Enter personal account in normal way."""
+        with client:
+            client.post("/login", data=login_admin, follow_redirects=True)
+            response: Response = client.get(url_for("account"))
+            message = f"Добрый день {current_user.first_name}! Добро пожаловать в личный кабинет!"
+            assert message in response.get_data(True)
+            assert request.path == url_for("account")
+
+    def test_get_account_without_login(self, login_admin, client):
+        """Enter personal account being not logged in."""
+        with client:
+            response: Response = client.get(url_for("account"), follow_redirects=True)
+            assert request.path != url_for("account")
+            assert request.path == url_for("login")
+            message = "Добро пожаловать в личный кабинет!"
+            assert message not in response.get_data(True)
+
+    def test_get_edit_account_after_login(self, login_admin, client):
+        """Enter personal account edit page with no args in query."""
+        with client:
+            client.post("/login", data=login_admin, follow_redirects=True)
+            response: Response = client.get("/account/edit", follow_redirects=True)
+            assert response.status_code == 404
+
+    def test_get_edit_name_account_after_login(self, login_admin, client):
+        """Enter edit name page."""
+        with client:
+            client.post("/login", data=login_admin, follow_redirects=True)
+            response: Response = client.get("/account/edit?name", follow_redirects=True)
+            assert response.status_code == 200
+            assert "Имя" in response.get_data(True)
+            assert "Фамилия" in response.get_data(True)
+
+    def test_get_edit_name_account_before_login(self, login_admin, client):
+        """Enter edit name page being not logged in."""
+        with client:
+            client.get("/account/edit?name", follow_redirects=True)
+            assert request.path == url_for("login")
+
+
+class TestPostPersonalAccountName:
+    """Test change personal account name data."""
+
+    def test_post_edit_name_account_after_login(self, login_non_admin, client):
+        """Post new full name data in edit name page."""
+        with client:
+            client.post("/login", data=login_non_admin, follow_redirects=True)
+            assert current_user.first_name != "Bill"
+            assert current_user.last_name != "Gates"
+            data = dict(first_name="Bill", last_name="Gates")
+            response: Response = client.post("/account/edit?name", data=data, follow_redirects=True)
+            assert request.path == url_for("account")
+            assert "Bill" in response.get_data(True)
+            assert "Gates" in response.get_data(True)
+            assert current_user.first_name == "Bill"
+            assert current_user.last_name == "Gates"
+
+    def test_post_edit_first_name_account_after_login(self, login_admin, client):
+        """Post new first name data in edit name page."""
+        with client:
+            client.post("/login", data=login_admin, follow_redirects=True)
+            assert current_user.first_name != "Bill"
+            data = dict(first_name="Bill")
+            response: Response = client.post("/account/edit?name", data=data, follow_redirects=True)
+            assert request.path == url_for("account")
+            assert "Bill" in response.get_data(True)
+            assert "Gates" not in response.get_data(True)
+            assert current_user.first_name == "Bill"
+
+    def test_post_edit_last_name_account_after_login(self, login_admin, client):
+        """Post new last name data in edit name page."""
+        with client:
+            client.post("/login", data=login_admin, follow_redirects=True)
+            assert current_user.last_name != "Gates"
+            data = dict(last_name="Gates")
+            response: Response = client.post("/account/edit?name", data=data, follow_redirects=True)
+            assert request.path == url_for("account")
+            assert "Gates" in response.get_data(True)
+            assert current_user.last_name == "Gates"
+
+
+class TestPostPersonalAccountEmail:
+    """Test change personal account email data."""
+
+    def test_post_edit_email_account_after_login(self, login_non_admin, client):
+        """Post new email data in edit email page."""
+        with client:
+            new_email = "no_email@email.ru"
+            client.post("/login", data=login_non_admin, follow_redirects=True)
+            assert current_user.email != new_email
+            data = dict(email=new_email)
+            response: Response = client.post("/account/edit?email", data=data, follow_redirects=True)
+            assert request.path == url_for("account")
+            assert new_email in response.get_data(True)
+            assert current_user.email == new_email
+
+            client.get(url_for("logout"))
+            login_non_admin["email"] = new_email
+            client.post("/login", data=login_non_admin, follow_redirects=True)
+            assert current_user.is_authenticated
+
+    @pytest.mark.parametrize(
+        ("string", "message"),
+        [
+            ("", "Адрес не указан"),
+            (" ", "Адрес не указан"),
+            ("  ", "Адрес не указан"),
+            ("              ", "Адрес не указан"),
+            ("a", "Длина имени адреса до символа"),
+            ("1", "Длина имени адреса до символа"),
+            ("@", "Длина имени адреса до символа"),
+            ("sud@a.com", "Длина имени адреса до символа"),
+            ("sud@ar.c", "Длина имени адреса до символа"),
+            ("mama", "В адресе почты должен быть один символ"),
+            ("12345", "В адресе почты должен быть один символ"),
+            ("mama@@", "В адресе почты может быть только один символ"),
+            ("super@mario@gmail.com", "В адресе почты может быть только один символ"),
+            ("mama@", "Длина доменного имени должна быть не менее 2 символов"),
+            ("sudo@a.com", "Длина доменного имени должна быть не менее 2 символов"),
+            ("sudo@ar.c", "Длина доменной зоны должна быть не менее 2 и не более 4 символов"),
+            ("sudo@ar.compa", "Длина доменной зоны должна быть не менее 2 и не более 4 символов"),
+            ("supеrmаriо@gmаil.com", "Буквы могут быть только латинскими"),  # russian vowels
+            ("папa@a.c", "Буквы могут быть только латинскими"),  # russian letters
+            ("supermario[2021]@gmail.com", "Недопустимые знаки препинания в адресе почты"),
+            (",", "Недопустимые знаки препинания в адресе почты"),
+            ("supermario@gmail,com", "Недопустимые знаки препинания в адресе почты"),
+            ("supermario+dendy@gmail.com", "Недопустимые знаки препинания в адресе почты"),
+            ("         @", "Недопустимые знаки препинания в адресе почты"),
+            ("         @          .    ", "Недопустимые знаки препинания в адресе почты"),
+        ],
+    )
+    def test_post_edit_invalid_email_account_after_login(self, client, login_admin, string, message):
+        """String passed to email field is not valid."""
+        with client:
+            client.post("/login", data=login_admin, follow_redirects=True)
+            response: Response = client.post("/account/edit?email", data={"email": f"{string}"}, follow_redirects=True)
+            assert message in response.get_data(as_text=True)
+
+
+class TestPostPersonalAccountPassword:
+    """Test change personal account  password data."""
+
+    def test_post_edit_password_account_after_login(self, login_admin, client):
+        """Post new password data in edit password page."""
+        with client:
+            new_password = "QwErTy0="
+            client.post("/login", data=login_admin, follow_redirects=True)
+            data = dict(password=new_password, password_confirm=new_password)
+
+            client.post("/account/edit?password", data=data, follow_redirects=True)
+            assert request.path == url_for("account")
+
+            client.get(url_for("logout"))
+
+            login_admin["password"] = new_password
+            client.post("/login", data=login_admin, follow_redirects=True)
+            assert current_user.is_authenticated
+
+    @pytest.mark.parametrize(
+        ("password", "password_confirm"),
+        [
+            ("testpass", ""),
+            ("testpass", " "),
+            ("testpass", "1"),
+            ("testpass", "12345678"),
+            ("testpass", "a"),
+            ("testpass", "Testpass"),
+            ("testpass", "TESTPASS"),
+            ("testpass", "TeStPaSs"),
+            ("Testpass", "TeStPaSs"),
+            ("TESTPASS", "testpass"),
+            ("testpass", "testpas"),
+            ("testpass", "_testpass"),
+            ("testpass", "estpass"),
+            ("", "testpass"),
+            (" ", "testpass"),
+            ("testpass", "tеstpаss"),  # russian vowels
+        ],
+    )
+    def test_post_edit_invalid_password_confirmation_account_after_login(
+        self, client, login_non_admin, password, password_confirm
+    ):
+        """String passed to password and password_confirm fields do not match each other."""
+        with client:
+            client.post("/login", data=login_non_admin, follow_redirects=True)
+            response: Response = client.post(
+                "/account/edit?password",
+                data={"password": f"{password}", "password_confirm": password_confirm},
+                follow_redirects=True,
+            )
+            assert "Пароли не совпадают" in response.get_data(as_text=True)
+
+    @pytest.mark.parametrize(
+        ("string", "message"),
+        [
+            ("", "Пароль не указан"),
+            (" ", "Пароль не указан"),
+            ("  ", "Пароль не указан"),
+            ("              ", "Пароль не указан"),
+            ("a", "Длина пароля должна быть не менее 8 и не более 14 символов"),
+            ("а", "Длина пароля должна быть не менее 8 и не более 14 символов"),  # russian vowels
+            ("q1!W2@e", "Длина пароля должна быть не менее 8 и не более 14 символов"),
+            ("q1!W2@e3#R4$t5%", "Длина пароля должна быть не менее 8 и не более 14 символов"),
+            ("1", "Пароль должен содержать хотя бы две буквы"),
+            ("1234567", "Пароль должен содержать хотя бы две буквы"),
+            ("12345678", "Пароль должен содержать хотя бы две буквы"),
+            ("1.3<5[6]7", "Пароль должен содержать хотя бы две буквы"),
+            (",./<>?';:", "Пароль должен содержать хотя бы две буквы"),
+            ("abcdefhg", "Пароль должен содержать хотя бы одну цифру"),
+            ("a.b!c@d#e%f&", "Пароль должен содержать хотя бы одну цифру"),
+            ("A.b!c@d#e%f&", "Пароль должен содержать хотя бы одну цифру"),
+            ("abcdefg1", "Пароль должен содержать хотя бы один знак препинания"),
+            ("Abcdefg1", "Пароль должен содержать хотя бы один знак препинания"),
+            ("1234567a", "Пароль должен содержать хотя бы один знак препинания"),
+            ("1234567a.", "Пароль должен содержать буквы в разных регистрах"),
+            ("1234567A.", "Пароль должен содержать буквы в разных регистрах"),
+            ("abcdef1.", "Пароль должен содержать буквы в разных регистрах"),
+            ("ABCDEF1.", "Пароль должен содержать буквы в разных регистрах"),
+            ("абвг@д.Е1", "Буквы могут быть только латинскими"),  # russian letters
+            ("абвг@д.Z1", "Буквы могут быть только латинскими"),  # russian letters
+            ("q1!W2@ê3#R", "Буквы могут быть только латинскими"),  # french ê
+        ],
+    )
+    def test_post_edit_invalid_password_account_after_login(self, client, login_non_admin, string, message):
+        """String passed to password is invalid password."""
+        with client:
+            client.post("/login", data=login_non_admin, follow_redirects=True)
+            response: Response = client.post(
+                "/account/edit?password", data={"password": string, "password_confirm": string}, follow_redirects=True
+            )
+            assert message in response.get_data(as_text=True)
+
+
+class TestGetPersonalAccountStatus:
+    """Test change personal account activity status data."""
+
+    def test_get_personal_account_status_change1(self, client, login_admin):
+        """Test inactive user becomes active."""
+        with client:
+            client.post("/login", data=login_admin, follow_redirects=True)
+            assert not current_user.is_active
+            client.get("/account/edit?status")
+            assert current_user.is_active
+
+    def test_get_personal_account_status_change2(self, client, login_non_admin):
+        """Test active user becomes inactive."""
+        with client:
+            client.post("/login", data=login_non_admin, follow_redirects=True)
+            assert current_user.is_active
+            client.get("/account/edit?status")
+            assert not current_user.is_active
+
+
+class TestCancelPersonalAccount:
+    """Test for cancel button in personal account pages."""
+
+    @pytest.mark.parametrize("url", ["/account/edit?name", "/account/edit?password", "/account/edit?email"])
+    def test_cancel_personal_account_name_change(self, client, login_admin, url):
+        """Test active user becomes inactive."""
+        with client:
+            client.post("/login", data=login_admin, follow_redirects=True)
+            response: Response = client.get(url)
+            assert "Тип пользователя:" not in response.get_data(True)
+            response_cancel: Response = client.post(url, data={"cancel": "cancel"}, follow_redirects=True)
+            assert response.get_data(True) != response_cancel.get_data(True)
+            assert "Тип пользователя:" in response_cancel.get_data(True)
+
+
 if __name__ == "__main__":
     pytest.main()
