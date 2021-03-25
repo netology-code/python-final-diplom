@@ -25,10 +25,7 @@ def upgrade():
         sa.Column("url", sa.String(length=255), nullable=True),
         sa.Column("filename", sa.String(length=255), nullable=True),
         sa.Column("user_id", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["user_id"],
-            ["user.id"],
-        ),
+        sa.ForeignKeyConstraint(["user_id"], ["user.id"],),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("filename"),
         sa.UniqueConstraint("name"),
