@@ -26,7 +26,9 @@ class TestEnterAdmin:
         """Enter admin panel by non_admin."""
         with client:
             client.post("/login", data=login_non_admin, follow_redirects=True)
-            response: Response = client.get(URL, content_type="html/text", follow_redirects=True)
+            response: Response = client.get(
+                URL, content_type="html/text", follow_redirects=True
+            )
             assert request.path == url_for("index")
             assert response.status_code == 200
             client.get("/logout")
@@ -45,8 +47,12 @@ class TestEnterAdmin:
     def test_login_admin_by_anonimous_admin(self, login_admin, client):
         """Enter admin panel by admin who was not logged in."""
         with client:
-            client.get(URL, content_type="html/text", follow_redirects=True)  # enter admin panel as anonymous
-            response: Response = client.post(request.url, data=login_admin, follow_redirects=True)  # login as admin
+            client.get(
+                URL, content_type="html/text", follow_redirects=True
+            )  # enter admin panel as anonymous
+            response: Response = client.post(
+                request.url, data=login_admin, follow_redirects=True
+            )  # login as admin
             assert request.path == URL  # return to admin panel as an authenticated admin
             assert response.status_code == 200
             client.get("/logout")
@@ -59,9 +65,14 @@ class TestEnterAdminUsers:
         """Enter users view at admin panel."""
         with client:
             client.post("/login", data=login_admin, follow_redirects=True)
-            response: Response = client.get(URL + "user/", content_type="html/text", follow_redirects=True)
+            response: Response = client.get(
+                URL + "user/", content_type="html/text", follow_redirects=True
+            )
             assert request.path == URL + "user/"
-            assert all(i in response.get_data(as_text=True) for i in ("List", "Create", "With selected"))
+            assert all(
+                i in response.get_data(as_text=True)
+                for i in ("List", "Create", "With selected")
+            )
 
     def test_get_admin_users_view_user(self, login_admin, client):
         """Enter a user entry at admin-users panel."""
@@ -71,7 +82,9 @@ class TestEnterAdminUsers:
             user = User.query.get(id)
             assert user.email == "non_admin_buyer@test.mail"
             response: Response = client.get(
-                URL + f"user/edit/?id={id}", content_type="html/text", follow_redirects=True
+                URL + f"user/edit/?id={id}",
+                content_type="html/text",
+                follow_redirects=True,
             )
             assert user.email in response.get_data(as_text=True)
             fields = list(user.__dict__.keys())

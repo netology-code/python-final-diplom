@@ -28,7 +28,11 @@ def upgrade():
         sa.Column("is_admin", sa.Boolean(), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=True),
         sa.Column("confirmed_at", sa.DateTime(), nullable=True),
-        sa.Column("user_type", sa.Enum("seller", "customer", name="usertypechoices"), nullable=False),
+        sa.Column(
+            "user_type",
+            sa.Enum("seller", "customer", name="usertypechoices"),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("email"),
     )

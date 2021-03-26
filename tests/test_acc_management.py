@@ -97,7 +97,10 @@ class TestRetrieve:
             ("token", "token"),
             ("token", "ImFkbWluX3Nob3BAdGVzdC5tYWlsIg"),
             ("token", "ImFkbWluX3Nob3BAdGVzdC5tYWlsIg.YECyMQ"),
-            ("token", "ImFkbWluX3Nob3BAdGVzdC5tYWlsIg.YECyMQ.Kpe_hZG7rbGeHB2S3rV6vVX8OgM"),
+            (
+                "token",
+                "ImFkbWluX3Nob3BAdGVzdC5tYWlsIg.YECyMQ.Kpe_hZG7rbGeHB2S3rV6vVX8OgM",
+            ),
             ("token", "YECyMQ.Kpe_hZG7rbGeHB2S3rV6vVX8OgM"),
             ("token", "Kpe_hZG7rbGeHB2S3rV6vVX8OgM"),
             ("token", "123.456.789"),
@@ -108,21 +111,32 @@ class TestRetrieve:
         with client:
             params = {arg_name: arg}
             response: Response = client.get(
-                url_for("retrieve", **params), content_type="html/text", follow_redirects=False
+                url_for("retrieve", **params),
+                content_type="html/text",
+                follow_redirects=False,
             )
             assert response.status_code == 404
 
     @pytest.mark.parametrize(
         "email",
-        ["admin_buyer@test.mail", "admin_shop@test.mail", "non_admin_buyer@test.mail", "non_admin_shop@test.mail"],
+        [
+            "admin_buyer@test.mail",
+            "admin_shop@test.mail",
+            "non_admin_buyer@test.mail",
+            "non_admin_shop@test.mail",
+        ],
     )
     def test_get_retrieve_with_expired_tokens(self, client, email):
         """Test get-retrieve with expired tokens."""
-        token = create_confirmation_token((email, "retrieve_password", datetime.utcnow().timestamp() - 301))
+        token = create_confirmation_token(
+            (email, "retrieve_password", datetime.utcnow().timestamp() - 301)
+        )
         with client:
             params = {"token": token}
             response: Response = client.get(
-                url_for("retrieve", **params), content_type="html/text", follow_redirects=True
+                url_for("retrieve", **params),
+                content_type="html/text",
+                follow_redirects=True,
             )
             assert "Ссылка недействительна" in response.get_data(True)
             assert request.path == url_for("retrieve")
@@ -142,36 +156,59 @@ class TestRetrieve:
         """Test post-retrieve with bad emails."""
         with client:
             data = dict(email=email)
-            response: Response = client.post(url_for("retrieve"), data=data, follow_redirects=True)
+            response: Response = client.post(
+                url_for("retrieve"), data=data, follow_redirects=True
+            )
             assert message in response.get_data(True)
             assert "Пароль" not in response.get_data(True)
             assert request.path == url_for("retrieve")
 
     @pytest.mark.parametrize(
         "email",
-        ["admin_buyer@test.mail", "admin_shop@test.mail", "non_admin_buyer@test.mail", "non_admin_shop@test.mail"],
+        [
+            "admin_buyer@test.mail",
+            "admin_shop@test.mail",
+            "non_admin_buyer@test.mail",
+            "non_admin_shop@test.mail",
+        ],
     )
     def test_post_retrieve_with_args(self, client, email):
         """Test post-retrieve with good emails."""
         with client:
             with patch("web_shop.views.acc_management_view.send_message"):
                 data = dict(email=email)
-                response: Response = client.post(url_for("retrieve"), data=data, follow_redirects=True)
-                assert "Ваш предыдущий пароль был сброшен. Проверьте свою почту." in response.get_data(True)
+                response: Response = client.post(
+                    url_for("retrieve"), data=data, follow_redirects=True
+                )
+                assert (
+                    "Ваш предыдущий пароль был сброшен. Проверьте свою почту."
+                    in response.get_data(True)
+                )
                 assert "Пароль" not in response.get_data(True)
                 assert request.path == url_for("index")
 
     @pytest.mark.parametrize(
         "email",
-        ["admin_buyer@test.mail", "admin_shop@test.mail", "non_admin_buyer@test.mail", "non_admin_shop@test.mail"],
+        [
+            "admin_buyer@test.mail",
+            "admin_shop@test.mail",
+            "non_admin_buyer@test.mail",
+            "non_admin_shop@test.mail",
+        ],
     )
     def test_post_retrieve_with_password(self, client, email):
         """Test post-retrieve with good tokens."""
-        token = create_confirmation_token((email, "retrieve_password", datetime.utcnow().timestamp()))
+        token = create_confirmation_token(
+            (email, "retrieve_password", datetime.utcnow().timestamp())
+        )
         new_password = create_random_password()
         with client:
             data = dict(password=new_password, password_confirm=new_password)
-            response: Response = client.post(url_for("retrieve", token=token), data=data, follow_redirects=True)
+            response: Response = client.post(
+                url_for("retrieve", token=token),
+                data=data,
+                follow_redirects=True,
+            )
             assert "Пароль был успешно изменен." in response.get_data(True)
             assert request.path == url_for("login")
 
@@ -234,7 +271,9 @@ class TestPostPersonalAccountName:
             assert current_user.first_name != "Bill"
             assert current_user.last_name != "Gates"
             data = dict(first_name="Bill", last_name="Gates")
-            response: Response = client.post("/account/edit?name", data=data, follow_redirects=True)
+            response: Response = client.post(
+                "/account/edit?name", data=data, follow_redirects=True
+            )
             assert request.path == url_for("account")
             assert "Bill" in response.get_data(True)
             assert "Gates" in response.get_data(True)
@@ -247,7 +286,9 @@ class TestPostPersonalAccountName:
             client.post("/login", data=login_admin, follow_redirects=True)
             assert current_user.first_name != "Bill"
             data = dict(first_name="Bill")
-            response: Response = client.post("/account/edit?name", data=data, follow_redirects=True)
+            response: Response = client.post(
+                "/account/edit?name", data=data, follow_redirects=True
+            )
             assert request.path == url_for("account")
             assert "Bill" in response.get_data(True)
             assert "Gates" not in response.get_data(True)
@@ -259,7 +300,9 @@ class TestPostPersonalAccountName:
             client.post("/login", data=login_admin, follow_redirects=True)
             assert current_user.last_name != "Gates"
             data = dict(last_name="Gates")
-            response: Response = client.post("/account/edit?name", data=data, follow_redirects=True)
+            response: Response = client.post(
+                "/account/edit?name", data=data, follow_redirects=True
+            )
             assert request.path == url_for("account")
             assert "Gates" in response.get_data(True)
             assert current_user.last_name == "Gates"
@@ -275,7 +318,9 @@ class TestPostPersonalAccountEmail:
             client.post("/login", data=login_non_admin, follow_redirects=True)
             assert current_user.email != new_email
             data = dict(email=new_email)
-            response: Response = client.post("/account/edit?email", data=data, follow_redirects=True)
+            response: Response = client.post(
+                "/account/edit?email", data=data, follow_redirects=True
+            )
             assert request.path == url_for("account")
             assert new_email in response.get_data(True)
             assert current_user.email == new_email
@@ -300,26 +345,62 @@ class TestPostPersonalAccountEmail:
             ("mama", "В адресе почты должен быть один символ"),
             ("12345", "В адресе почты должен быть один символ"),
             ("mama@@", "В адресе почты может быть только один символ"),
-            ("super@mario@gmail.com", "В адресе почты может быть только один символ"),
+            (
+                "super@mario@gmail.com",
+                "В адресе почты может быть только один символ",
+            ),
             ("mama@", "Длина доменного имени должна быть не менее 2 символов"),
-            ("sudo@a.com", "Длина доменного имени должна быть не менее 2 символов"),
-            ("sudo@ar.c", "Длина доменной зоны должна быть не менее 2 и не более 4 символов"),
-            ("sudo@ar.compa", "Длина доменной зоны должна быть не менее 2 и не более 4 символов"),
-            ("supеrmаriо@gmаil.com", "Буквы могут быть только латинскими"),  # russian vowels
-            ("папa@a.c", "Буквы могут быть только латинскими"),  # russian letters
-            ("supermario[2021]@gmail.com", "Недопустимые знаки препинания в адресе почты"),
+            (
+                "sudo@a.com",
+                "Длина доменного имени должна быть не менее 2 символов",
+            ),
+            (
+                "sudo@ar.c",
+                "Длина доменной зоны должна быть не менее 2 и не более 4 символов",
+            ),
+            (
+                "sudo@ar.compa",
+                "Длина доменной зоны должна быть не менее 2 и не более 4 символов",
+            ),
+            (
+                "supеrmаriо@gmаil.com",
+                "Буквы могут быть только латинскими",
+            ),  # russian vowels
+            (
+                "папa@a.c",
+                "Буквы могут быть только латинскими",
+            ),  # russian letters
+            (
+                "supermario[2021]@gmail.com",
+                "Недопустимые знаки препинания в адресе почты",
+            ),
             (",", "Недопустимые знаки препинания в адресе почты"),
-            ("supermario@gmail,com", "Недопустимые знаки препинания в адресе почты"),
-            ("supermario+dendy@gmail.com", "Недопустимые знаки препинания в адресе почты"),
+            (
+                "supermario@gmail,com",
+                "Недопустимые знаки препинания в адресе почты",
+            ),
+            (
+                "supermario+dendy@gmail.com",
+                "Недопустимые знаки препинания в адресе почты",
+            ),
             ("         @", "Недопустимые знаки препинания в адресе почты"),
-            ("         @          .    ", "Недопустимые знаки препинания в адресе почты"),
+            (
+                "         @          .    ",
+                "Недопустимые знаки препинания в адресе почты",
+            ),
         ],
     )
-    def test_post_edit_invalid_email_account_after_login(self, client, login_admin, string, message):
+    def test_post_edit_invalid_email_account_after_login(
+        self, client, login_admin, string, message
+    ):
         """String passed to email field is not valid."""
         with client:
             client.post("/login", data=login_admin, follow_redirects=True)
-            response: Response = client.post("/account/edit?email", data={"email": f"{string}"}, follow_redirects=True)
+            response: Response = client.post(
+                "/account/edit?email",
+                data={"email": f"{string}"},
+                follow_redirects=True,
+            )
             assert message in response.get_data(as_text=True)
 
 
@@ -371,7 +452,10 @@ class TestPostPersonalAccountPassword:
             client.post("/login", data=login_non_admin, follow_redirects=True)
             response: Response = client.post(
                 "/account/edit?password",
-                data={"password": f"{password}", "password_confirm": password_confirm},
+                data={
+                    "password": f"{password}",
+                    "password_confirm": password_confirm,
+                },
                 follow_redirects=True,
             )
             assert "Пароли не совпадают" in response.get_data(as_text=True)
@@ -384,9 +468,18 @@ class TestPostPersonalAccountPassword:
             ("  ", "Пароль не указан"),
             ("              ", "Пароль не указан"),
             ("a", "Длина пароля должна быть не менее 8 и не более 14 символов"),
-            ("а", "Длина пароля должна быть не менее 8 и не более 14 символов"),  # russian vowels
-            ("q1!W2@e", "Длина пароля должна быть не менее 8 и не более 14 символов"),
-            ("q1!W2@e3#R4$t5%", "Длина пароля должна быть не менее 8 и не более 14 символов"),
+            (
+                "а",
+                "Длина пароля должна быть не менее 8 и не более 14 символов",
+            ),  # russian vowels
+            (
+                "q1!W2@e",
+                "Длина пароля должна быть не менее 8 и не более 14 символов",
+            ),
+            (
+                "q1!W2@e3#R4$t5%",
+                "Длина пароля должна быть не менее 8 и не более 14 символов",
+            ),
             ("1", "Пароль должен содержать хотя бы две буквы"),
             ("1234567", "Пароль должен содержать хотя бы две буквы"),
             ("12345678", "Пароль должен содержать хотя бы две буквы"),
@@ -395,24 +488,43 @@ class TestPostPersonalAccountPassword:
             ("abcdefhg", "Пароль должен содержать хотя бы одну цифру"),
             ("a.b!c@d#e%f&", "Пароль должен содержать хотя бы одну цифру"),
             ("A.b!c@d#e%f&", "Пароль должен содержать хотя бы одну цифру"),
-            ("abcdefg1", "Пароль должен содержать хотя бы один знак препинания"),
-            ("Abcdefg1", "Пароль должен содержать хотя бы один знак препинания"),
-            ("1234567a", "Пароль должен содержать хотя бы один знак препинания"),
+            (
+                "abcdefg1",
+                "Пароль должен содержать хотя бы один знак препинания",
+            ),
+            (
+                "Abcdefg1",
+                "Пароль должен содержать хотя бы один знак препинания",
+            ),
+            (
+                "1234567a",
+                "Пароль должен содержать хотя бы один знак препинания",
+            ),
             ("1234567a.", "Пароль должен содержать буквы в разных регистрах"),
             ("1234567A.", "Пароль должен содержать буквы в разных регистрах"),
             ("abcdef1.", "Пароль должен содержать буквы в разных регистрах"),
             ("ABCDEF1.", "Пароль должен содержать буквы в разных регистрах"),
-            ("абвг@д.Е1", "Буквы могут быть только латинскими"),  # russian letters
-            ("абвг@д.Z1", "Буквы могут быть только латинскими"),  # russian letters
+            (
+                "абвг@д.Е1",
+                "Буквы могут быть только латинскими",
+            ),  # russian letters
+            (
+                "абвг@д.Z1",
+                "Буквы могут быть только латинскими",
+            ),  # russian letters
             ("q1!W2@ê3#R", "Буквы могут быть только латинскими"),  # french ê
         ],
     )
-    def test_post_edit_invalid_password_account_after_login(self, client, login_non_admin, string, message):
+    def test_post_edit_invalid_password_account_after_login(
+        self, client, login_non_admin, string, message
+    ):
         """String passed to password is invalid password."""
         with client:
             client.post("/login", data=login_non_admin, follow_redirects=True)
             response: Response = client.post(
-                "/account/edit?password", data={"password": string, "password_confirm": string}, follow_redirects=True
+                "/account/edit?password",
+                data={"password": string, "password_confirm": string},
+                follow_redirects=True,
             )
             assert message in response.get_data(as_text=True)
 
@@ -440,14 +552,19 @@ class TestGetPersonalAccountStatus:
 class TestCancelPersonalAccount:
     """Test for cancel button in personal account pages."""
 
-    @pytest.mark.parametrize("url", ["/account/edit?name", "/account/edit?password", "/account/edit?email"])
+    @pytest.mark.parametrize(
+        "url",
+        ["/account/edit?name", "/account/edit?password", "/account/edit?email"],
+    )
     def test_cancel_personal_account_name_change(self, client, login_admin, url):
         """Test active user becomes inactive."""
         with client:
             client.post("/login", data=login_admin, follow_redirects=True)
             response: Response = client.get(url)
             assert "Тип пользователя:" not in response.get_data(True)
-            response_cancel: Response = client.post(url, data={"cancel": "cancel"}, follow_redirects=True)
+            response_cancel: Response = client.post(
+                url, data={"cancel": "cancel"}, follow_redirects=True
+            )
             assert response.get_data(True) != response_cancel.get_data(True)
             assert "Тип пользователя:" in response_cancel.get_data(True)
 

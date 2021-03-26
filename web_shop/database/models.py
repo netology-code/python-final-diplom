@@ -43,7 +43,11 @@ class User(UserMixin, db.Model):
     is_admin = db.Column(db.Boolean(), default=False)
     is_active = db.Column(db.Boolean(), default=False)
     confirmed_at = db.Column(db.DateTime())
-    user_type = db.Column(db.Enum(UserTypeChoices), default=UserTypeChoices.customer, nullable=False)
+    user_type = db.Column(
+        db.Enum(UserTypeChoices),
+        default=UserTypeChoices.customer,
+        nullable=False,
+    )
 
     def __str__(self):
         return self.email

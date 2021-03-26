@@ -40,7 +40,9 @@ class MyValidator(object):
             """Name length must be 4 or greater."""
             if len(string.split("@")[0]) >= 4:
                 return True
-            raise ValueError('Длина имени адреса до символа "@" не может быть меньше 4 символов')
+            raise ValueError(
+                'Длина имени адреса до символа "@" не может быть меньше 4 символов'
+            )
         if key == "pass":
             """Password length must be 4 or greater."""
             if 8 <= len(string) <= 14:
@@ -77,7 +79,9 @@ class MyEmailValidator(MyValidator):
         """Domain zone length must be in range(2,4) inclusive."""
         if 2 <= len(email.rsplit(".", 1)[-1]) <= 4:
             return True
-        raise ValueError("Длина доменной зоны должна быть не менее 2 и не более 4 символов")
+        raise ValueError(
+            "Длина доменной зоны должна быть не менее 2 и не более 4 символов"
+        )
 
     @staticmethod
     def check_domain_len(email: str) -> bool:

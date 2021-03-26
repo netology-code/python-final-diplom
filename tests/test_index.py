@@ -28,7 +28,9 @@ def test_logout(client, username, password):
     with client:
         data = dict(email=username, password=password, remember_me=False)
 
-        response: Response = client.post(url_for("login"), data=data, follow_redirects=True)
+        response: Response = client.post(
+            url_for("login"), data=data, follow_redirects=True
+        )
         assert request.path == url_for("index")
         assert "Выйти" in response.get_data(as_text=True)
 

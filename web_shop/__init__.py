@@ -46,6 +46,8 @@ from web_shop.database import models, UserAdmin, ShopAdmin
 from web_shop.views import MyAdminIndexView
 
 
-admin = Admin(app, name="Admin", template_mode="bootstrap3", index_view=MyAdminIndexView())
+admin = Admin(
+    app, name="Admin", template_mode="bootstrap3", index_view=MyAdminIndexView()
+)
 admin.add_view(UserAdmin(models.User, db.session))
 admin.add_view(ShopAdmin(models.Shop, db.session))

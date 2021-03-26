@@ -1,7 +1,13 @@
 """Forms for rendering html templates."""
 
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, PasswordField, SelectField, StringField, SubmitField
+from wtforms import (
+    BooleanField,
+    PasswordField,
+    SelectField,
+    StringField,
+    SubmitField,
+)
 from wtforms.validators import DataRequired, EqualTo
 
 from web_shop.database import UserTypeChoices
@@ -11,8 +17,14 @@ from web_shop.validators.validators import MyEmailValidator, MyPasswordValidator
 class MyLoginForm(FlaskForm):
     """Web form for login template."""
 
-    email = StringField("Адрес электронной почты", validators=[DataRequired(message="Адрес не указан")])
-    password = PasswordField("Пароль учётной записи", validators=[DataRequired(message="Пароль не указан")])
+    email = StringField(
+        "Адрес электронной почты",
+        validators=[DataRequired(message="Адрес не указан")],
+    )
+    password = PasswordField(
+        "Пароль учётной записи",
+        validators=[DataRequired(message="Пароль не указан")],
+    )
     remember_me = BooleanField("Запомнить меня")
     submit = SubmitField("Войти")
 
@@ -21,9 +33,15 @@ class MyRegisterForm(FlaskForm):
     """Form for registration template."""
 
     first_name = StringField("Имя", validators=[DataRequired(message="Имя не указано")])
-    last_name = StringField("Фамилия", validators=[DataRequired(message="Фамилия не указана")])
+    last_name = StringField(
+        "Фамилия", validators=[DataRequired(message="Фамилия не указана")]
+    )
     email = StringField(
-        "Адрес электронной почты", validators=[DataRequired(message="Адрес не указан"), MyEmailValidator()]
+        "Адрес электронной почты",
+        validators=[
+            DataRequired(message="Адрес не указан"),
+            MyEmailValidator(),
+        ],
     )
     password = PasswordField(
         "Пароль учётной записи",
@@ -56,7 +74,10 @@ class MyRegisterForm(FlaskForm):
 class MyResetPasswordForm(FlaskForm):
     """Form for password reset template."""
 
-    email = StringField("Адрес электронной почты", validators=[DataRequired(message="Адрес не указан")])
+    email = StringField(
+        "Адрес электронной почты",
+        validators=[DataRequired(message="Адрес не указан")],
+    )
     submit = SubmitField("Отправить")
 
 
@@ -84,7 +105,11 @@ class MyEmailChangeForm(MyForm):
     """Email change form."""
 
     email = StringField(
-        "Адрес электронной почты", validators=[DataRequired(message="Адрес не указан"), MyEmailValidator()]
+        "Адрес электронной почты",
+        validators=[
+            DataRequired(message="Адрес не указан"),
+            MyEmailValidator(),
+        ],
     )
 
 

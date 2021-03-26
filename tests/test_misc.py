@@ -17,25 +17,38 @@ from web_shop.views import confirm_email
 class TestEmailSender:
     """Test emails module."""
 
-    @pytest.mark.parametrize(("email", "expiry_time"), [("non_admin_buyer@test.mail", 1), ("admin_shop@test.mail", 2)])
+    @pytest.mark.parametrize(
+        ("email", "expiry_time"),
+        [("non_admin_buyer@test.mail", 1), ("admin_shop@test.mail", 2)],
+    )
     def test_create_confirmation_token(self, test_app, email, expiry_time):
         token = create_confirmation_token(email)
         if expiry_time > 1:
-            stored_email = token_serializer.loads(token, salt=test_app.config["SECRET_KEY"])
+            stored_email = token_serializer.loads(
+                token, salt=test_app.config["SECRET_KEY"]
+            )
             assert stored_email == email
         else:
             time.sleep(2)
             with pytest.raises(SignatureExpired):
-                token_serializer.loads(token, salt=test_app.config["SECRET_KEY"], max_age=expiry_time)
+                token_serializer.loads(
+                    token,
+                    salt=test_app.config["SECRET_KEY"],
+                    max_age=expiry_time,
+                )
 
-    @pytest.mark.parametrize("email", ["non_admin_buyer@test.mail", "admin_shop@test.mail"])
+    @pytest.mark.parametrize(
+        "email", ["non_admin_buyer@test.mail", "admin_shop@test.mail"]
+    )
     def test_create_message(self, email):
         message = create_message(f"Test_email_{email}", email)
         assert isinstance(message, Message)
         assert email in message.subject
         assert message.recipients == [email]
 
-    @pytest.mark.parametrize("email", ["non_admin_buyer@test.mail", "admin_shop@test.mail"])
+    @pytest.mark.parametrize(
+        "email", ["non_admin_buyer@test.mail", "admin_shop@test.mail"]
+    )
     def test_body_message(self, email):
         message = create_message("", email)
         token = create_confirmation_token(email)
@@ -49,22 +62,37 @@ class TestEmailSender:
         token = create_confirmation_token(email)
         link = url_for("confirm_email", token=token, _external=True)
         with client:
-            response: Response = client.get(link, content_type="html/text", follow_redirects=True)
+            response: Response = client.get(
+                link, content_type="html/text", follow_redirects=True
+            )
             assert request.path == url_for("register")
-            assert "Ссылка недействительна. Пройдите регистрацию." in response.get_data(True)
+            assert "Ссылка недействительна. Пройдите регистрацию." in response.get_data(
+                True
+            )
 
-    @pytest.mark.parametrize("email", ["admin_shop@test.mail", "non_admin_buyer@test.mail"])
+    @pytest.mark.parametrize(
+        "email", ["admin_shop@test.mail", "non_admin_buyer@test.mail"]
+    )
     def test_confirm_email_confirmed_users(self, email, client):
         """Confirmation url got by an unregistered user."""
         token = create_confirmation_token(email)
         link = url_for("confirm_email", token=token, _external=True)
         with client:
-            response: Response = client.get(link, content_type="html/text", follow_redirects=True)
+            response: Response = client.get(
+                link, content_type="html/text", follow_redirects=True
+            )
             assert request.path == url_for("login")
-            assert "Ссылка недействительна. Пройдите регистрацию." not in response.get_data(True)
+            assert (
+                "Ссылка недействительна. Пройдите регистрацию."
+                not in response.get_data(True)
+            )
 
-    @pytest.mark.parametrize("email", ["admin_shop@test.mail", "non_admin_buyer@test.mail"])
-    def test_confirm_email_expired_confirmation_old_users(self, email, register_data, client):
+    @pytest.mark.parametrize(
+        "email", ["admin_shop@test.mail", "non_admin_buyer@test.mail"]
+    )
+    def test_confirm_email_expired_confirmation_old_users(
+        self, email, register_data, client
+    ):
         """Confirmation url got by an old confirmed user."""
         register_data["email"] = email
         token = create_confirmation_token(email)
@@ -80,8 +108,14 @@ class TestEmailSender:
         link = url_for("confirm_email", token=token, _external=True)
         with client:
             with patch("web_shop.views.register_view.send_message"):
-                client.post(url_for("register"), data=register_data, follow_redirects=True)
-                response: Response = client.get(link, content_type="html/text", follow_redirects=True)
+                client.post(
+                    url_for("register"),
+                    data=register_data,
+                    follow_redirects=True,
+                )
+                response: Response = client.get(
+                    link, content_type="html/text", follow_redirects=True
+                )
                 assert request.path == url_for("login")
                 assert "Учётная запись подтверждена" in response.get_data(True)
                 user = User.query.filter_by(email=email).first()
@@ -94,7 +128,11 @@ class TestEmailSender:
         token = create_confirmation_token(email)
         with client:
             with patch("web_shop.views.register_view.send_message"):
-                client.post(url_for("register"), data=register_data, follow_redirects=True)
+                client.post(
+                    url_for("register"),
+                    data=register_data,
+                    follow_redirects=True,
+                )
                 assert User.query.filter_by(email=email).first()
                 time.sleep(2)
                 confirm_email(token, 1)

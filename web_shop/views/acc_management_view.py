@@ -3,14 +3,26 @@ import random
 from datetime import datetime
 from string import ascii_lowercase, ascii_uppercase, digits, punctuation
 
-from flask import abort, flash, make_response, redirect, render_template, request, url_for
+from flask import (
+    abort,
+    flash,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask_login import current_user, login_required
 from itsdangerous import BadPayload, BadSignature, SignatureExpired
 from werkzeug.security import generate_password_hash
 
 from web_shop import app, db, token_serializer
 from web_shop.database import User
-from web_shop.emails import create_confirmation_token, create_message, send_message
+from web_shop.emails import (
+    create_confirmation_token,
+    create_message,
+    send_message,
+)
 from web_shop.forms import (
     MyEmailChangeForm,
     MyNameChangeForm,
@@ -77,7 +89,11 @@ def confirm_email(token, token_age=None):
     user = User.query.filter_by(email=email).first()
     if user:
         try:
-            token_serializer.loads(token, salt=app.config["SECRET_KEY"], max_age=token_age if token_age else 60)
+            token_serializer.loads(
+                token,
+                salt=app.config["SECRET_KEY"],
+                max_age=token_age if token_age else 60,
+            )
             user.confirmed_at = datetime.now()
             user.is_active = True
             db.session.commit()
@@ -116,7 +132,9 @@ def retrieve():
             return make_response(abort(404))
 
         try:
-            email, code, date = token_serializer.loads(request.args["token"], salt=app.config["SECRET_KEY"])
+            email, code, date = token_serializer.loads(
+                request.args["token"], salt=app.config["SECRET_KEY"]
+            )
         except (BadSignature, ValueError):
             return make_response(abort(404))
 
@@ -132,7 +150,11 @@ def retrieve():
             flash("Пароль был успешно изменен.")
             return make_response(redirect(url_for("login")))
 
-    return make_response(render_template("retrieve_password.html", title="Восстановление доступа", form=form))
+    return make_response(
+        render_template(
+            "retrieve_password.html", title="Восстановление доступа", form=form
+        )
+    )
 
 
 def create_random_password() -> str:
@@ -156,7 +178,9 @@ def retrieve_password(user) -> None:
     """Change stored password by a random one and send a letter with a link for retrieve."""
     user.password = get_random_password_hash()
     db.session.commit()
-    token = create_confirmation_token((user.email, "retrieve_password", datetime.utcnow().timestamp()))
+    token = create_confirmation_token(
+        (user.email, "retrieve_password", datetime.utcnow().timestamp())
+    )
     link = url_for("retrieve", token=token, _external=True)
     message = create_message("Восстановление доступа на сайт WebShop", user.email)
     message.html = (

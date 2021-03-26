@@ -31,11 +31,15 @@ class TestNormalLogin:
             ("non_admin_shop@test.mail", "testpass4", False, "seller"),
         ],
     )
-    def test_login_post_form_existing_users_no_redirection(self, username, pwd, is_admin, user_type, client):
+    def test_login_post_form_existing_users_no_redirection(
+        self, username, pwd, is_admin, user_type, client
+    ):
         """Test logging in for existing users with confirmed emails. Catch redirect code with no redirection."""
         with client:
             response: Response = client.post(
-                "/login", data=dict(email=username, password=pwd, remember_me=False), follow_redirects=False
+                "/login",
+                data=dict(email=username, password=pwd, remember_me=False),
+                follow_redirects=False,
             )
             assert response.status_code == 302
             assert current_user.is_admin == is_admin
@@ -52,16 +56,23 @@ class TestNormalLogin:
             ("non_admin_shop@test.mail", "testpass4", False, "seller"),
         ],
     )
-    def test_login_post_form_existing_users_redirection(self, username, pwd, is_admin, user_type, client):
+    def test_login_post_form_existing_users_redirection(
+        self, username, pwd, is_admin, user_type, client
+    ):
         """Test logging in for existing active users with confirmed emails. Follow redirection."""
         with client:
             response: Response = client.post(
-                "/login", data=dict(email=username, password=pwd, remember_me=False), follow_redirects=True
+                "/login",
+                data=dict(email=username, password=pwd, remember_me=False),
+                follow_redirects=True,
             )
             assert response.status_code == 200
             assert current_user.user_type.name == user_type
             assert ("Админка" in response.get_data(as_text=True)) == is_admin
-            assert "Проверьте почту и активируйте учётную запись" not in response.get_data(as_text=True)
+            assert (
+                "Проверьте почту и активируйте учётную запись"
+                not in response.get_data(as_text=True)
+            )
             assert request.path == url_for("index")
             client.get("/logout")
 
@@ -74,15 +85,21 @@ class TestNormalLogin:
             ("non_admin_shop_unc@test.mail", "testpass4"),
         ],
     )
-    def test_login_post_form_existing_unconfirmed_users_redirection(self, username, pwd, client):
+    def test_login_post_form_existing_unconfirmed_users_redirection(
+        self, username, pwd, client
+    ):
         """Test logging in for existing not active users. Follow redirection."""
         with client:
             response: Response = client.post(
-                "/login", data=dict(email=username, password=pwd, remember_me=False), follow_redirects=True
+                "/login",
+                data=dict(email=username, password=pwd, remember_me=False),
+                follow_redirects=True,
             )
             assert request.path == url_for("index")
             assert current_user.is_active is False
-            assert "Проверьте почту и активируйте учётную запись" in response.get_data(as_text=True)
+            assert "Проверьте почту и активируйте учётную запись" in response.get_data(
+                as_text=True
+            )
             client.get("/logout")
 
 
@@ -93,7 +110,9 @@ class TestFailedLogin:
         """Test empty form is submitted."""
         with client:
             response: Response = client.post(
-                "/login", data=dict(email="", password="", remember_me=False), follow_redirects=True
+                "/login",
+                data=dict(email="", password="", remember_me=False),
+                follow_redirects=True,
             )
             assert "Адрес и пароль не указаны" in response.get_data(as_text=True)
             assert request.path == url_for("login")
@@ -103,7 +122,9 @@ class TestFailedLogin:
         """Test form with no email is submitted."""
         with client:
             response: Response = client.post(
-                "/login", data=dict(email="", password="testpass1", remember_me=False), follow_redirects=True
+                "/login",
+                data=dict(email="", password="testpass1", remember_me=False),
+                follow_redirects=True,
             )
             assert "Адрес не указан" in response.get_data(as_text=True)
             assert request.path == url_for("login")
@@ -114,7 +135,11 @@ class TestFailedLogin:
         with client:
             response: Response = client.post(
                 "/login",
-                data=dict(email="admin_buyer@test.mail", password="", remember_me=False),
+                data=dict(
+                    email="admin_buyer@test.mail",
+                    password="",
+                    remember_me=False,
+                ),
                 follow_redirects=True,
             )
             assert "Пароль не указан" in response.get_data(as_text=True)
@@ -126,7 +151,11 @@ class TestFailedLogin:
         with client:
             response: Response = client.post(
                 "/login",
-                data=dict(email="admin_buyer@test.mai_", password="testpass1", remember_me=False),
+                data=dict(
+                    email="admin_buyer@test.mai_",
+                    password="testpass1",
+                    remember_me=False,
+                ),
                 follow_redirects=True,
             )
             assert "Пользователь не зарегистрирован" in response.get_data(as_text=True)
@@ -138,7 +167,11 @@ class TestFailedLogin:
         with client:
             response: Response = client.post(
                 "/login",
-                data=dict(email="admin_buyer@test.mail", password="testpass1_", remember_me=False),
+                data=dict(
+                    email="admin_buyer@test.mail",
+                    password="testpass1_",
+                    remember_me=False,
+                ),
                 follow_redirects=True,
             )
             assert "Ошибка при вводе пароля" in response.get_data(as_text=True)
@@ -150,7 +183,11 @@ class TestFailedLogin:
         with client:
             response: Response = client.post(
                 "/login",
-                data=dict(email="admin_buyer@test.mai_", password="testpass1_", remember_me=False),
+                data=dict(
+                    email="admin_buyer@test.mai_",
+                    password="testpass1_",
+                    remember_me=False,
+                ),
                 follow_redirects=True,
             )
             assert "Пользователь не зарегистрирован" in response.get_data(as_text=True)

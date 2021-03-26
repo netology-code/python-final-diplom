@@ -16,7 +16,9 @@ def create_message(subject: str, addresses: str or list or tuple):
     elif isinstance(addresses, str):
         recipients = [addresses]
     else:
-        raise ValueError("Recipients' addresses must be tuple or list of strings (if many) or str (if one)")
+        raise ValueError(
+            "Recipients' addresses must be tuple or list of strings (if many) or str (if one)"
+        )
 
     return Message(subject, recipients=recipients, sender=app.config["MAIL_USERNAME"])
 

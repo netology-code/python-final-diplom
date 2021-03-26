@@ -40,7 +40,9 @@ def database(test_app):
 @pytest.fixture(scope="session")
 def test_app():
     """Application modifications for tests."""
-    TEST_DB_URI = f"sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'test.db')}"
+    TEST_DB_URI = (
+        f"sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'test.db')}"
+    )
     app.config["TESTING"] = True
     app.config["WTF_CSRF_ENABLED"] = False
     app.config["SQLALCHEMY_DATABASE_URI"] = TEST_DB_URI
@@ -53,7 +55,14 @@ def test_app():
 @pytest.fixture()
 def empty_register_data():
     """Empty data for register view."""
-    return dict(email="", first_name="", last_name="", password="", password_confirm="", user_type="")
+    return dict(
+        email="",
+        first_name="",
+        last_name="",
+        password="",
+        password_confirm="",
+        user_type="",
+    )
 
 
 @pytest.fixture()
@@ -90,7 +99,9 @@ def register_data():
 
 def create_db_confirmed_users():
     """Users with confirmed email."""
-    admin_buyer = User(email="admin_buyer@test.mail", first_name="Admin", last_name="Buyer")
+    admin_buyer = User(
+        email="admin_buyer@test.mail", first_name="Admin", last_name="Buyer"
+    )
     admin_buyer.set_password("testpass1")
     admin_buyer.user_type = "customer"
     admin_buyer.is_admin = True
@@ -104,13 +115,21 @@ def create_db_confirmed_users():
     admin_shop.is_active = True
     admin_shop.confirmed_at = datetime.now()
 
-    non_admin_buyer = User(email="non_admin_buyer@test.mail", first_name="NonAdmin", last_name="Buyer")
+    non_admin_buyer = User(
+        email="non_admin_buyer@test.mail",
+        first_name="NonAdmin",
+        last_name="Buyer",
+    )
     non_admin_buyer.set_password("testpass3")
     non_admin_buyer.user_type = "customer"
     non_admin_buyer.is_active = True
     non_admin_buyer.confirmed_at = datetime.now()
 
-    non_admin_shop = User(email="non_admin_shop@test.mail", first_name="NonAdmin", last_name="Shop")
+    non_admin_shop = User(
+        email="non_admin_shop@test.mail",
+        first_name="NonAdmin",
+        last_name="Shop",
+    )
     non_admin_shop.set_password("testpass4")
     non_admin_shop.user_type = "seller"
     non_admin_shop.is_active = True
@@ -121,22 +140,43 @@ def create_db_confirmed_users():
 
 def create_db_unconfirmed_users():
     """Users with unconfirmed email."""
-    admin_buyer_unc = User(email="admin_buyer_unc@test.mail", first_name="Admin_unc", last_name="Buyer_unc")
+    admin_buyer_unc = User(
+        email="admin_buyer_unc@test.mail",
+        first_name="Admin_unc",
+        last_name="Buyer_unc",
+    )
     admin_buyer_unc.set_password("testpass1")
     admin_buyer_unc.user_type = "customer"
     admin_buyer_unc.is_admin = True
 
-    admin_shop_unc = User(email="admin_shop_unc@test.mail", first_name="Admin_unc", last_name="Shop_unc")
+    admin_shop_unc = User(
+        email="admin_shop_unc@test.mail",
+        first_name="Admin_unc",
+        last_name="Shop_unc",
+    )
     admin_shop_unc.set_password("testpass2")
     admin_shop_unc.user_type = "seller"
     admin_shop_unc.is_admin = True
 
-    non_admin_buyer_unc = User(email="non_admin_buyer_unc@test.mail", first_name="NonAdmin_unc", last_name="Buyer_unc")
+    non_admin_buyer_unc = User(
+        email="non_admin_buyer_unc@test.mail",
+        first_name="NonAdmin_unc",
+        last_name="Buyer_unc",
+    )
     non_admin_buyer_unc.set_password("testpass3")
     non_admin_buyer_unc.user_type = "customer"
 
-    non_admin_shop_unc = User(email="non_admin_shop_unc@test.mail", first_name="NonAdmin_unc", last_name="Shop_unc")
+    non_admin_shop_unc = User(
+        email="non_admin_shop_unc@test.mail",
+        first_name="NonAdmin_unc",
+        last_name="Shop_unc",
+    )
     non_admin_shop_unc.set_password("testpass4")
     non_admin_shop_unc.user_type = "seller"
 
-    return admin_buyer_unc, admin_shop_unc, non_admin_shop_unc, non_admin_buyer_unc
+    return (
+        admin_buyer_unc,
+        admin_shop_unc,
+        non_admin_shop_unc,
+        non_admin_buyer_unc,
+    )

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h3>Загрузите новый файл с данными</h3>
+    <form method=post enctype=multipart/form-data>
+        <input type=file name=file> <br>
+        <input type=submit value=Загрузить>
+    </form>
+
+    <br>
+    <a href={{ url_for("my_shops")}}>Назад</a>
+
+{% endblock %}

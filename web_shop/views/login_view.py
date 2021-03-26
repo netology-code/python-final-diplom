@@ -1,7 +1,15 @@
 """Login views."""
 from datetime import timedelta
 
-from flask import Response, flash, make_response, redirect, render_template, request, url_for
+from flask import (
+    Response,
+    flash,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask_jwt_extended import create_access_token
 from flask_login import current_user, login_user
 
@@ -40,11 +48,11 @@ def login():
             flash("Ошибка при вводе пароля")
             return make_response(redirect(url_for("login")))
 
-        login_user(user, remember=form.remember_me.data, force=True)
-
         if not user.confirmed_at:
             flash("Проверьте почту и активируйте учётную запись")
             return make_response(redirect(url_for("index")))
+
+        login_user(user, remember=form.remember_me.data, force=True)
 
         if request.args.get("next"):
             resp: Response = make_response(redirect(url_for(request.args.get("next"))))
@@ -53,4 +61,6 @@ def login():
 
         return resp
 
-    return make_response(render_template("login.html", title="Вход в учётную запись", form=form))
+    return make_response(
+        render_template("login.html", title="Вход в учётную запись", form=form)
+    )

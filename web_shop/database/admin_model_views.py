@@ -35,10 +35,21 @@ class UserAdmin(ModelView):
 class ShopAdmin(ModelView):
     """Shop model view in admin panel."""
 
-    column_list = ("id", "title", "url", "filename", "file_upload_datetime", "user_id")
-
-    form_args = {"shop_manager": {"query_factory": lambda: User.query.filter_by(user_type="seller").order_by("email")}}
-
+    column_list = (
+        "id",
+        "title",
+        "url",
+        "filename",
+        "file_upload_datetime",
+        "user_id",
+    )
+    form_args = {
+        "shop_manager": {
+            "query_factory": lambda: User.query.filter_by(user_type="seller").order_by(
+                "email"
+            )
+        }
+    }
     can_edit = True
     can_create = True
     can_delete = True

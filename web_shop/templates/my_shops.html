@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if current_user.is_authenticated %}
+        <h3>Список моих магазинов <a style="float: right;" href="/account/my_shops/new">Подключить новый магазин</a>
+        </h3>
+
+        <table border="1" cellpadding="10" bgcolor="#d0d0d0">
+            <tr>
+                <th>Название магазина</th>
+                <th>Ссылка</th>
+                <th>Последняя загрузка файла</th>
+                <th>Имя последнего файла</th>
+            </tr>
+            {% for shop in shops %}
+                <tr align="left">
+                    <td>{{ shop.title }}</td>
+                    {% if shop.url %}
+                        <td>{{ shop.url }}</td>
+                    {% else %}
+                        <td>---</td>
+                    {% endif %}
+
+                    {% if shop.file_upload_datetime %}
+                        <td>{{ shop.file_upload_datetime }}</td>
+                    {% else %}
+                        <td>---</td>
+                    {% endif %}
+
+                    {% if shop.filename %}
+                        <td>{{ shop.filename }}</td>
+                    {% else %}
+                        <td>---</td>
+                    {% endif %}
+                    <td><a href="/account/my_shops/upload_file?shop={{ shop.title }}">Загрузить новый файл</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+    <br>
+    <a href={{ url_for("account")}}>Назад</a>
+{% endblock %}
