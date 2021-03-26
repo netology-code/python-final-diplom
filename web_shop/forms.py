@@ -18,10 +18,12 @@ class MyLoginForm(FlaskForm):
     """Web form for login template."""
 
     email = StringField(
-        "Адрес электронной почты", validators=[DataRequired(message="Адрес не указан")],
+        "Адрес электронной почты",
+        validators=[DataRequired(message="Адрес не указан")],
     )
     password = PasswordField(
-        "Пароль учётной записи", validators=[DataRequired(message="Пароль не указан")],
+        "Пароль учётной записи",
+        validators=[DataRequired(message="Пароль не указан")],
     )
     remember_me = BooleanField("Запомнить меня")
     submit = SubmitField("Войти")
@@ -36,7 +38,7 @@ class MyRegisterForm(FlaskForm):
     )
     email = StringField(
         "Адрес электронной почты",
-        validators=[DataRequired(message="Адрес не указан"), MyEmailValidator(),],
+        validators=[DataRequired(message="Адрес не указан"), MyEmailValidator()],
     )
     password = PasswordField(
         "Пароль учётной записи",
@@ -70,7 +72,8 @@ class MyResetPasswordForm(FlaskForm):
     """Form for password reset template."""
 
     email = StringField(
-        "Адрес электронной почты", validators=[DataRequired(message="Адрес не указан")],
+        "Адрес электронной почты",
+        validators=[DataRequired(message="Адрес не указан")],
     )
     submit = SubmitField("Отправить")
 
@@ -100,7 +103,7 @@ class MyEmailChangeForm(MyForm):
 
     email = StringField(
         "Адрес электронной почты",
-        validators=[DataRequired(message="Адрес не указан"), MyEmailValidator(),],
+        validators=[DataRequired(message="Адрес не указан"), MyEmailValidator()],
     )
 
 
