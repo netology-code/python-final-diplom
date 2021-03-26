@@ -116,9 +116,7 @@ def create_db_confirmed_users():
     admin_shop.confirmed_at = datetime.now()
 
     non_admin_buyer = User(
-        email="non_admin_buyer@test.mail",
-        first_name="NonAdmin",
-        last_name="Buyer",
+        email="non_admin_buyer@test.mail", first_name="NonAdmin", last_name="Buyer",
     )
     non_admin_buyer.set_password("testpass3")
     non_admin_buyer.user_type = "customer"
@@ -126,9 +124,7 @@ def create_db_confirmed_users():
     non_admin_buyer.confirmed_at = datetime.now()
 
     non_admin_shop = User(
-        email="non_admin_shop@test.mail",
-        first_name="NonAdmin",
-        last_name="Shop",
+        email="non_admin_shop@test.mail", first_name="NonAdmin", last_name="Shop",
     )
     non_admin_shop.set_password("testpass4")
     non_admin_shop.user_type = "seller"
@@ -141,18 +137,14 @@ def create_db_confirmed_users():
 def create_db_unconfirmed_users():
     """Users with unconfirmed email."""
     admin_buyer_unc = User(
-        email="admin_buyer_unc@test.mail",
-        first_name="Admin_unc",
-        last_name="Buyer_unc",
+        email="admin_buyer_unc@test.mail", first_name="Admin_unc", last_name="Buyer_unc",
     )
     admin_buyer_unc.set_password("testpass1")
     admin_buyer_unc.user_type = "customer"
     admin_buyer_unc.is_admin = True
 
     admin_shop_unc = User(
-        email="admin_shop_unc@test.mail",
-        first_name="Admin_unc",
-        last_name="Shop_unc",
+        email="admin_shop_unc@test.mail", first_name="Admin_unc", last_name="Shop_unc",
     )
     admin_shop_unc.set_password("testpass2")
     admin_shop_unc.user_type = "seller"

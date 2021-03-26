@@ -32,9 +32,7 @@ class TestEmailSender:
             time.sleep(2)
             with pytest.raises(SignatureExpired):
                 token_serializer.loads(
-                    token,
-                    salt=test_app.config["SECRET_KEY"],
-                    max_age=expiry_time,
+                    token, salt=test_app.config["SECRET_KEY"], max_age=expiry_time,
                 )
 
     @pytest.mark.parametrize(
@@ -109,9 +107,7 @@ class TestEmailSender:
         with client:
             with patch("web_shop.views.register_view.send_message"):
                 client.post(
-                    url_for("register"),
-                    data=register_data,
-                    follow_redirects=True,
+                    url_for("register"), data=register_data, follow_redirects=True,
                 )
                 response: Response = client.get(
                     link, content_type="html/text", follow_redirects=True
@@ -129,9 +125,7 @@ class TestEmailSender:
         with client:
             with patch("web_shop.views.register_view.send_message"):
                 client.post(
-                    url_for("register"),
-                    data=register_data,
-                    follow_redirects=True,
+                    url_for("register"), data=register_data, follow_redirects=True,
                 )
                 assert User.query.filter_by(email=email).first()
                 time.sleep(2)

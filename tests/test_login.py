@@ -135,11 +135,7 @@ class TestFailedLogin:
         with client:
             response: Response = client.post(
                 "/login",
-                data=dict(
-                    email="admin_buyer@test.mail",
-                    password="",
-                    remember_me=False,
-                ),
+                data=dict(email="admin_buyer@test.mail", password="", remember_me=False,),
                 follow_redirects=True,
             )
             assert "Пароль не указан" in response.get_data(as_text=True)
