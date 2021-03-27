@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% if current_user.is_authenticated %}
+    {% if current_user.is_authenticated and current_user.user_type.name == "seller" %}
         <h3>Список моих магазинов <a style="float: right;" href="/account/my_shops/new">Подключить новый магазин</a>
         </h3>
 
@@ -38,5 +38,5 @@
         </table>
     {% endif %}
     <br>
-    <a href={{ url_for("account")}}>Назад</a>
+    <a href={{ url_for("account") }}>Назад</a>
 {% endblock %}

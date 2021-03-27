@@ -26,9 +26,11 @@ from web_shop import app, db
 BASE_URL = "/account/my_shops"
 
 
-@app.route(BASE_URL, methods=["GET", "POST"])
+@app.route(BASE_URL, methods=["GET"])
 def my_shops():
     """View for seller's shops management."""
+    if not current_user.is_authenticated or current_user.user_type.name != "seller":
+        return make_response(redirect(url_for("index")))
     shops = Shop.query.filter_by(user_id=current_user.id).order_by(Shop.title).all()
     return make_response(render_template("my_shops.html", shops=shops))
 
@@ -36,6 +38,8 @@ def my_shops():
 @app.route(BASE_URL + "/upload_file", methods=["GET", "POST"])
 def upload_file():
     """Actions on file upload."""
+    if not current_user.is_authenticated or current_user.user_type.name != "seller":
+        return make_response(redirect(url_for("index")))
     if request.args.get("shop"):
         shop = Shop.query.filter_by(title=request.args["shop"]).first()
         if (

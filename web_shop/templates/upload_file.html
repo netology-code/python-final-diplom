@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h3>Загрузите новый файл с данными</h3>
-    <form method=post enctype=multipart/form-data>
-        <input type=file name=file> <br>
-        <input type=submit value=Загрузить>
-    </form>
+    {% if current_user.is_authenticated and current_user.user_type.name == "seller" %}
+        <h3>Загрузите новый файл с данными</h3>
+        <form method=post enctype=multipart/form-data>
+            <input type=file name=file> <br>
+            <input type=submit value=Загрузить>
+        </form>
 
-    <br>
-    <a href={{ url_for("my_shops")}}>Назад</a>
-
+        <br>
+        <a href={{ url_for("my_shops") }}>Назад</a>
+    {% endif %}
 {% endblock %}

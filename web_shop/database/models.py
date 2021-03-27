@@ -44,7 +44,9 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean(), default=False)
     confirmed_at = db.Column(db.DateTime())
     user_type = db.Column(
-        db.Enum(UserTypeChoices), default=UserTypeChoices.customer, nullable=False,
+        db.Enum(UserTypeChoices),
+        default=UserTypeChoices.customer,
+        nullable=False,
     )
 
     def __str__(self):
@@ -71,6 +73,7 @@ class Shop(db.Model):
     """Shop table model."""
 
     __tablename__ = "shop"
+    # __table_args__ = {"extend_existing": True}
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False, unique=True)
     url = db.Column(db.String(255), nullable=True, unique=True)

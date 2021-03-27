@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 
 from web_shop import app, db
-from web_shop.database import User
+from web_shop.database import User, Shop
 
 
 @pytest.fixture()
@@ -25,12 +25,16 @@ def database(test_app):
         db.create_all()
         users = create_db_confirmed_users() + create_db_unconfirmed_users()
         db.session.bulk_save_objects(users)
+        shops = create_shops()
+        db.session.bulk_save_objects(shops)
         db.session.commit()
         yield db
     except IntegrityError:
         db.drop_all()
         users = create_db_confirmed_users() + create_db_unconfirmed_users()
         db.session.bulk_save_objects(users)
+        shops = create_shops()
+        db.session.bulk_save_objects(shops)
         db.session.commit()
         yield db
     finally:
@@ -77,11 +81,30 @@ def login_non_admin():
     return dict(email="non_admin_buyer@test.mail", password="testpass3")
 
 
-# @pytest.fixture()
-# def logged_in_admin(login_admin, client):
-#     with client:
-#
-#         yield client
+@pytest.fixture()
+def logged_in_admin(login_admin, client):
+    """Log in admin."""
+    with client:
+        client.post("/login", data=login_admin, follow_redirects=True)
+        return client
+
+
+@pytest.fixture()
+def logged_in_seller(client):
+    """Log in seller."""
+    with client:
+        data = dict(email="non_admin_shop@test.mail", password="testpass4")
+        client.post("/login", data=data, follow_redirects=True)
+        return client
+
+
+@pytest.fixture()
+def logged_in_customer(client):
+    """Log in customer."""
+    with client:
+        data = dict(email="non_admin_buyer@test.mail", password="testpass3")
+        client.post("/login", data=data, follow_redirects=True)
+        return client
 
 
 @pytest.fixture()
@@ -116,7 +139,9 @@ def create_db_confirmed_users():
     admin_shop.confirmed_at = datetime.now()
 
     non_admin_buyer = User(
-        email="non_admin_buyer@test.mail", first_name="NonAdmin", last_name="Buyer",
+        email="non_admin_buyer@test.mail",
+        first_name="NonAdmin",
+        last_name="Buyer",
     )
     non_admin_buyer.set_password("testpass3")
     non_admin_buyer.user_type = "customer"
@@ -124,7 +149,9 @@ def create_db_confirmed_users():
     non_admin_buyer.confirmed_at = datetime.now()
 
     non_admin_shop = User(
-        email="non_admin_shop@test.mail", first_name="NonAdmin", last_name="Shop",
+        email="non_admin_shop@test.mail",
+        first_name="NonAdmin",
+        last_name="Shop",
     )
     non_admin_shop.set_password("testpass4")
     non_admin_shop.user_type = "seller"
@@ -137,14 +164,18 @@ def create_db_confirmed_users():
 def create_db_unconfirmed_users():
     """Users with unconfirmed email."""
     admin_buyer_unc = User(
-        email="admin_buyer_unc@test.mail", first_name="Admin_unc", last_name="Buyer_unc",
+        email="admin_buyer_unc@test.mail",
+        first_name="Admin_unc",
+        last_name="Buyer_unc",
     )
     admin_buyer_unc.set_password("testpass1")
     admin_buyer_unc.user_type = "customer"
     admin_buyer_unc.is_admin = True
 
     admin_shop_unc = User(
-        email="admin_shop_unc@test.mail", first_name="Admin_unc", last_name="Shop_unc",
+        email="admin_shop_unc@test.mail",
+        first_name="Admin_unc",
+        last_name="Shop_unc",
     )
     admin_shop_unc.set_password("testpass2")
     admin_shop_unc.user_type = "seller"
@@ -172,3 +203,11 @@ def create_db_unconfirmed_users():
         non_admin_shop_unc,
         non_admin_buyer_unc,
     )
+
+
+def create_shops():
+    """Create shops for database."""
+    shop1 = Shop(title="Shop1", user_id=2)
+    shop2 = Shop(title="Shop2", user_id=3)
+    shop3 = Shop(title="Shop3", user_id=3)
+    return shop1, shop2, shop3
