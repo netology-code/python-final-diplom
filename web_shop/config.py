@@ -23,7 +23,7 @@ class Config:
     # Files
     ALLOWED_EXTENSIONS = {"yaml"}
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 megabytes - is a maximum file-size
-    UPLOAD_FOLDER = "uploads"
+    UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), "uploads")
 
     # JSON
     JSON_AS_ASCII = False

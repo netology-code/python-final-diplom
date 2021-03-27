@@ -206,7 +206,9 @@ class TestRetrieve:
         with client:
             data = dict(password=new_password, password_confirm=new_password)
             response: Response = client.post(
-                url_for("retrieve", token=token), data=data, follow_redirects=True,
+                url_for("retrieve", token=token),
+                data=data,
+                follow_redirects=True,
             )
             assert "Пароль был успешно изменен." in response.get_data(True)
             assert request.path == url_for("login")
@@ -344,9 +346,15 @@ class TestPostPersonalAccountEmail:
             ("mama", "В адресе почты должен быть один символ"),
             ("12345", "В адресе почты должен быть один символ"),
             ("mama@@", "В адресе почты может быть только один символ"),
-            ("super@mario@gmail.com", "В адресе почты может быть только один символ",),
+            (
+                "super@mario@gmail.com",
+                "В адресе почты может быть только один символ",
+            ),
             ("mama@", "Длина доменного имени должна быть не менее 2 символов"),
-            ("sudo@a.com", "Длина доменного имени должна быть не менее 2 символов",),
+            (
+                "sudo@a.com",
+                "Длина доменного имени должна быть не менее 2 символов",
+            ),
             (
                 "sudo@ar.c",
                 "Длина доменной зоны должна быть не менее 2 и не более 4 символов",
@@ -359,13 +367,19 @@ class TestPostPersonalAccountEmail:
                 "supеrmаriо@gmаil.com",
                 "Буквы могут быть только латинскими",
             ),  # russian vowels
-            ("папa@a.c", "Буквы могут быть только латинскими",),  # russian letters
+            (
+                "папa@a.c",
+                "Буквы могут быть только латинскими",
+            ),  # russian letters
             (
                 "supermario[2021]@gmail.com",
                 "Недопустимые знаки препинания в адресе почты",
             ),
             (",", "Недопустимые знаки препинания в адресе почты"),
-            ("supermario@gmail,com", "Недопустимые знаки препинания в адресе почты",),
+            (
+                "supermario@gmail,com",
+                "Недопустимые знаки препинания в адресе почты",
+            ),
             (
                 "supermario+dendy@gmail.com",
                 "Недопустимые знаки препинания в адресе почты",
@@ -384,7 +398,9 @@ class TestPostPersonalAccountEmail:
         with client:
             client.post("/login", data=login_admin, follow_redirects=True)
             response: Response = client.post(
-                "/account/edit?email", data={"email": f"{string}"}, follow_redirects=True,
+                "/account/edit?email",
+                data={"email": f"{string}"},
+                follow_redirects=True,
             )
             assert message in response.get_data(as_text=True)
 
@@ -437,7 +453,7 @@ class TestPostPersonalAccountPassword:
             client.post("/login", data=login_non_admin, follow_redirects=True)
             response: Response = client.post(
                 "/account/edit?password",
-                data={"password": f"{password}", "password_confirm": password_confirm,},
+                data={"password": f"{password}", "password_confirm": password_confirm},
                 follow_redirects=True,
             )
             assert "Пароли не совпадают" in response.get_data(as_text=True)
@@ -454,7 +470,10 @@ class TestPostPersonalAccountPassword:
                 "а",
                 "Длина пароля должна быть не менее 8 и не более 14 символов",
             ),  # russian vowels
-            ("q1!W2@e", "Длина пароля должна быть не менее 8 и не более 14 символов",),
+            (
+                "q1!W2@e",
+                "Длина пароля должна быть не менее 8 и не более 14 символов",
+            ),
             (
                 "q1!W2@e3#R4$t5%",
                 "Длина пароля должна быть не менее 8 и не более 14 символов",
@@ -467,15 +486,30 @@ class TestPostPersonalAccountPassword:
             ("abcdefhg", "Пароль должен содержать хотя бы одну цифру"),
             ("a.b!c@d#e%f&", "Пароль должен содержать хотя бы одну цифру"),
             ("A.b!c@d#e%f&", "Пароль должен содержать хотя бы одну цифру"),
-            ("abcdefg1", "Пароль должен содержать хотя бы один знак препинания",),
-            ("Abcdefg1", "Пароль должен содержать хотя бы один знак препинания",),
-            ("1234567a", "Пароль должен содержать хотя бы один знак препинания",),
+            (
+                "abcdefg1",
+                "Пароль должен содержать хотя бы один знак препинания",
+            ),
+            (
+                "Abcdefg1",
+                "Пароль должен содержать хотя бы один знак препинания",
+            ),
+            (
+                "1234567a",
+                "Пароль должен содержать хотя бы один знак препинания",
+            ),
             ("1234567a.", "Пароль должен содержать буквы в разных регистрах"),
             ("1234567A.", "Пароль должен содержать буквы в разных регистрах"),
             ("abcdef1.", "Пароль должен содержать буквы в разных регистрах"),
             ("ABCDEF1.", "Пароль должен содержать буквы в разных регистрах"),
-            ("абвг@д.Е1", "Буквы могут быть только латинскими",),  # russian letters
-            ("абвг@д.Z1", "Буквы могут быть только латинскими",),  # russian letters
+            (
+                "абвг@д.Е1",
+                "Буквы могут быть только латинскими",
+            ),  # russian letters
+            (
+                "абвг@д.Z1",
+                "Буквы могут быть только латинскими",
+            ),  # russian letters
             ("q1!W2@ê3#R", "Буквы могут быть только латинскими"),  # french ê
         ],
     )
@@ -517,7 +551,8 @@ class TestCancelPersonalAccount:
     """Test for cancel button in personal account pages."""
 
     @pytest.mark.parametrize(
-        "url", ["/account/edit?name", "/account/edit?password", "/account/edit?email"],
+        "url",
+        ["/account/edit?name", "/account/edit?password", "/account/edit?email"],
     )
     def test_cancel_personal_account_name_change(self, client, login_admin, url):
         """Test active user becomes inactive."""

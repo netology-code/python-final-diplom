@@ -155,12 +155,14 @@ class TestPostUploadNewFile:
             (None, "Файл не прикреплён"),
         ],
     )
-    def test_post_a_file(logged_in_seller, filename, message):
+    def test_post_a_file(logged_in_seller, filename, message, test_app):
         """Test different posts for file upload."""
         params = {"shop": "Shop2"}
         try:
             if filename:
-                path = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+                path = os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
+                print()
+                print(111, path)
                 file = FileStorage(
                     stream=open(path, "rb"),
                     filename=filename,
@@ -192,18 +194,18 @@ class TestPostUploadNewFile:
                 )
             print(response.get_data(True))
             assert message in response.get_data(True)
+
         finally:
-            uploads_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), "uploads"
-            )
-            if os.path.exists(uploads_path):
+            if os.path.exists(test_app.config["UPLOAD_FOLDER"]):
                 the_only_file_name = [
-                    file for _, _, file in os.walk(uploads_path) if file
+                    file
+                    for _, _, file in os.walk(test_app.config["UPLOAD_FOLDER"])
+                    if file
                 ][0][0]
                 assert filename in the_only_file_name
                 from shutil import rmtree
 
-                rmtree(uploads_path)
+                rmtree(test_app.config["UPLOAD_FOLDER"])
 
 
 if __name__ == "__main__":

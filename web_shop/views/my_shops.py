@@ -1,7 +1,9 @@
 """Seller's shops view."""
 import os
 from datetime import datetime
+from pprint import pprint
 
+import yaml
 from flask import (
     flash,
     make_response,
@@ -62,27 +64,10 @@ def upload_file():
                     flash("Допускаются только файлы формата yaml")
                     return make_response(redirect(request.url))
 
-                folder = os.path.join(app.config["UPLOAD_FOLDER"], request.args["shop"])
-                os.makedirs(folder, exist_ok=True)
                 secured_filename = secure_filename(file.filename)
-                filename, extension = secured_filename.rsplit(".", 1)
-                upload_time = datetime.utcnow()
-                filename = ".".join(
-                    (
-                        "_".join(
-                            (
-                                datetime.strftime(upload_time, "%Y_%m_%d__%H_%M_%S"),
-                                current_user.email.lower(),
-                                filename,
-                            )
-                        ),
-                        extension,
-                    )
-                )
-                file.save(os.path.join(folder, filename))
-                shop.filename = filename
-                shop.file_upload_datetime = upload_time
-                db.session.commit()
+                new_filename = save_file(file, current_user, shop, secured_filename)
+                import_data(new_filename)
+
                 return make_response(redirect(url_for("my_shops")))
             return make_response(render_template("upload_file.html"))
     return make_response(redirect(url_for("my_shops")))
@@ -96,3 +81,46 @@ def allowed_file(filename):
             and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
         )
     return False
+
+
+def import_data(filename) -> None:
+    """Parse uploaded file and insert data into database."""
+    with open(filename, "r", encoding="utf-8") as f:
+        file = yaml.safe_load(f)
+    pprint(file)
+    # categories = [Category(**category) for category in file["categories"]]
+    #
+    # print(categories)
+
+
+def save_file(file, user, shop, filename) -> str:
+    """Save uploaded file.
+
+    :param file: file-object from request
+    :param user: current_user object
+    :param shop: database shop object
+    :param filename: secured filename
+
+    :return str: a new filename, including upload datetime, shop manager's email and basic filename
+    """
+    folder = os.path.join(app.config["UPLOAD_FOLDER"], request.args["shop"])
+    os.makedirs(folder, exist_ok=True)
+    filename, extension = filename.rsplit(".", 1)
+    upload_time = datetime.utcnow()
+    filename = ".".join(
+        (
+            "-".join(
+                (
+                    datetime.strftime(upload_time, "%Y_%m_%d__%H_%M_%S_UTC"),
+                    user.email.lower(),
+                    filename,
+                )
+            ),
+            extension,
+        )
+    )
+    file.save(os.path.join(folder, filename))
+    shop.filename = filename
+    shop.file_upload_datetime = upload_time
+    db.session.commit()
+    return os.path.abspath(os.path.join(folder, filename))
