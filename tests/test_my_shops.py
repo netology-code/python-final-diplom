@@ -1,7 +1,11 @@
 """Tests for my_shops.py views."""
+import io
+import os
+
 
 import pytest
 from flask import Response, request, url_for
+from werkzeug.datastructures import FileStorage
 
 
 class TestGetMyShops:
@@ -35,7 +39,7 @@ class TestGetMyShops:
         assert request.path == url_for("index")
 
 
-class TestUploadNewFile:
+class TestGetUploadNewFile:
     """Tests for upload_file view."""
 
     @staticmethod
@@ -49,13 +53,15 @@ class TestUploadNewFile:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "shop_title", ["Shop", "Shop1", "", " ", "_", 1, 0, -1, None, True, False],
+        "shop_title",
+        ["Shop", "Shop1", "", " ", "_", 1, 0, -1, None, True, False],
     )
     def test_get_upload_new_file_wrong_params(logged_in_seller, shop_title):
         """Test get upload_file view by logged in seller with wrong params in query_string value."""
-        params = {"shop": {shop_title}}
+        params = {"shop": shop_title}
         response: Response = logged_in_seller.get(
-            url_for("upload_file", **params), follow_redirects=True,
+            url_for("upload_file", **params),
+            follow_redirects=True,
         )
         assert "Загрузите новый файл с данными" not in response.get_data(True)
         assert "Список моих магазинов" in response.get_data(True)
@@ -79,6 +85,9 @@ class TestUploadNewFile:
             ("sHOP", "Shop2"),
             ("ShOP", "Shop2"),
             ("SHoP", "Shop2"),
+            ("sho", "Shop2"),
+            ("hop", "Shop2"),
+            ("shp", "Shop2"),
             ("", ""),
             ("", " "),
             (" ", " "),
@@ -103,11 +112,13 @@ class TestUploadNewFile:
         params = {query_key: query_val} if query_key and query_val else None
         if params:
             response: Response = logged_in_seller.get(
-                url_for("upload_file", **params), follow_redirects=True,
+                url_for("upload_file", **params),
+                follow_redirects=True,
             )
         else:
             response: Response = logged_in_seller.get(
-                url_for("upload_file"), follow_redirects=True,
+                url_for("upload_file"),
+                follow_redirects=True,
             )
         assert "Загрузите новый файл с данными" not in response.get_data(True)
         assert "Список моих магазинов" in response.get_data(True)
@@ -129,6 +140,70 @@ class TestUploadNewFile:
         response: Response = client.get(url_for("upload_file"), follow_redirects=True)
         assert "Загрузите новый файл с данными" not in response.get_data(True)
         assert request.path == url_for("index")
+
+
+class TestPostUploadNewFile:
+    """Test uploading files."""
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        ("filename", "message"),
+        [
+            ("shop1.yaml", "shop1.yaml"),
+            ("shop1.yam", "Допускаются только файлы формата yaml"),
+            ("", "Выберите файл"),
+            (None, "Файл не прикреплён"),
+        ],
+    )
+    def test_post_a_file(logged_in_seller, filename, message):
+        """Test different posts for file upload."""
+        params = {"shop": "Shop2"}
+        try:
+            if filename:
+                path = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+                file = FileStorage(
+                    stream=open(path, "rb"),
+                    filename=filename,
+                )
+                response: Response = logged_in_seller.post(
+                    url_for("upload_file", **params),
+                    data={"file": file},
+                    content_type="multipart/form-data",
+                    follow_redirects=True,
+                )
+
+            elif filename == "":
+                file = FileStorage(
+                    stream=io.BytesIO(b""),
+                    filename=filename,
+                )
+                response: Response = logged_in_seller.post(
+                    url_for("upload_file", **params),
+                    data={"file": file},
+                    content_type="multipart/form-data",
+                    follow_redirects=True,
+                )
+
+            else:
+                response: Response = logged_in_seller.post(
+                    url_for("upload_file", **params),
+                    content_type="multipart/form-data",
+                    follow_redirects=True,
+                )
+            print(response.get_data(True))
+            assert message in response.get_data(True)
+        finally:
+            uploads_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "uploads"
+            )
+            if os.path.exists(uploads_path):
+                the_only_file_name = [
+                    file for _, _, file in os.walk(uploads_path) if file
+                ][0][0]
+                assert filename in the_only_file_name
+                from shutil import rmtree
+
+                rmtree(uploads_path)
 
 
 if __name__ == "__main__":

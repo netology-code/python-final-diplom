@@ -12,6 +12,7 @@ from web_shop.database import User
 from web_shop import token_serializer
 from web_shop.emails import create_confirmation_token, create_message
 from web_shop.views import confirm_email
+from web_shop.views.my_shops import allowed_file
 
 
 class TestEmailSender:
@@ -32,7 +33,9 @@ class TestEmailSender:
             time.sleep(2)
             with pytest.raises(SignatureExpired):
                 token_serializer.loads(
-                    token, salt=test_app.config["SECRET_KEY"], max_age=expiry_time,
+                    token,
+                    salt=test_app.config["SECRET_KEY"],
+                    max_age=expiry_time,
                 )
 
     @pytest.mark.parametrize(
@@ -107,7 +110,9 @@ class TestEmailSender:
         with client:
             with patch("web_shop.views.register_view.send_message"):
                 client.post(
-                    url_for("register"), data=register_data, follow_redirects=True,
+                    url_for("register"),
+                    data=register_data,
+                    follow_redirects=True,
                 )
                 response: Response = client.get(
                     link, content_type="html/text", follow_redirects=True
@@ -125,12 +130,57 @@ class TestEmailSender:
         with client:
             with patch("web_shop.views.register_view.send_message"):
                 client.post(
-                    url_for("register"), data=register_data, follow_redirects=True,
+                    url_for("register"),
+                    data=register_data,
+                    follow_redirects=True,
                 )
                 assert User.query.filter_by(email=email).first()
                 time.sleep(2)
                 confirm_email(token, 1)
                 assert not User.query.filter_by(email=email).first()
+
+
+class TestAllowedFileExtension:
+    """Test allowed_file function."""
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        ("filename", "result"),
+        [
+            (".yaml", True),
+            ("1.yaml", True),
+            ("a.yaml", True),
+            ("filename.yaml", True),
+            ("filename.Yaml", True),
+            ("filename.YAml", True),
+            ("filename.YAMl", True),
+            ("filename.YAML", True),
+            ("filename.yAML", True),
+            ("filename.yaML", True),
+            ("filename.yamL", True),
+            ("filename.YaMl", True),
+            ("filename.yAmL", True),
+            ("filename.YamL", True),
+            ("filename.yAMl", True),
+            ("", False),
+            (" ", False),
+            ("filename.yml", False),
+            ("filename.yal", False),
+            ("filename.yl", False),
+            ("filename.doc", False),
+            ("filename.exe", False),
+            (None, False),
+            (True, False),
+            (False, False),
+            (["filename.yaml"], False),
+            ([], False),
+            (("filename.yaml",), False),
+            (tuple(), False),
+        ],
+    )
+    def test_allowed_file(filename, result):
+        """Test only 'yaml' extension is allowed (case-independently)."""
+        assert result == allowed_file(filename)
 
 
 if __name__ == "__main__":

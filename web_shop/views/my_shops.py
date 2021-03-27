@@ -90,7 +90,9 @@ def upload_file():
 
 def allowed_file(filename):
     """Check filename is correct and has valid format."""
-    return (
-        "." in filename
-        and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
-    )
+    if isinstance(filename, str):
+        return (
+            "." in filename
+            and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
+        )
+    return False
