@@ -54,9 +54,7 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean(), default=False)
     confirmed_at = db.Column(db.DateTime())
     user_type = db.Column(
-        db.Enum(UserTypeChoices),
-        default=UserTypeChoices.customer,
-        nullable=False,
+        db.Enum(UserTypeChoices), default=UserTypeChoices.customer, nullable=False,
     )
 
     def __init__(
