@@ -5,7 +5,7 @@
 1) Install requirements: `pip install -r requirements.txt`
 2) Initiate pre-commit: `pre-commit install`
    If necessary modify pre-commit roots in `.git/hooks/pre-commit`  
-3) Set flask running file: `set FLASK_APP=web_shop\app.py` (for Linux: `export FLASK_APP=web_shop\app.py`)
+3) Set flask running file: `set FLASK_APP=web_shop/app.py` (for Linux: `export FLASK_APP=web_shop/app.py`)
    3.1) If necessary set flask debugging mode:
       - `set FLASK_DEBUG=1` - to turn debug mode on (for Linux: `export FLASK_DEBUG=1`) 
       - `set FLASK_DEBUG=0` - to turn debug mode off (for Linux: `export FLASK_DEBUG=0`)   
@@ -19,11 +19,14 @@
    - SMTP_PASSWORD
    providing that "SMTP" keys shall represent an acting email-service smtp-configuration.
 6) Create tables from migrations: `flask db upgrade`
-7) Start app: `flask run`
-7) Register first user at `/register`
-8) Set first user "is_admin" field to true in database manually.
+7) Run `web_shop/database/load_db_inits.py`
+8) Start app: `flask run`  
 
-Admin panel is reachable at /admin (`is_admin=true` required).
+Optional steps:  
+9) Register your first user at `/register`
+10) If you need an admin - set your user "is_admin" field to true in database manually.  
+
+Admin panel is reachable at `/admin` (`is_admin=true` required).
 Admin panel link is available from project /index view for administrators.
 
 ## Описание
