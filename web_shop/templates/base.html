@@ -22,12 +22,22 @@
             <a href="{{ url_for('login') }}">Войти</a>
 
         {% else %}
-            <text style="float: left;"> Добрый день {{ current_user.first_name }}! Добро пожаловать в личный кабинет!
-            </text>
+            {% if request.path != url_for('account') %}
+                <text style="float: left;">Добрый день {{ current_user.first_name }}! Добро пожаловать в магазин WebShop!</text>
+            {% else %}
+                <text style="float: left;">Добрый день {{ current_user.first_name }}! Добро пожаловать в личный кабинет!</text>
+            {% endif %}
+
+
+
             {% if current_user.is_admin %}
                 <a href="{{ url_for('admin.index') }}">Админка</a>
             {% endif %}
-            <a href="{{ url_for('account') }}">Личный кабинет</a>
+            {% if request.path != url_for('account') %}
+                <a href="{{ url_for('account') }}">Личный кабинет</a>
+            {% else %}
+                <a href="{{ url_for('index') }}">На главную</a>
+            {% endif %}
             <a href="{{ url_for('logout') }}">Выйти из системы</a>
         {% endif %}
     {% endif %}
@@ -44,6 +54,39 @@
         </p>
     {% endif %}
 {% endwith %}
-{% block content %}{% endblock %}
+{% block content %}
+    {% if header %}
+            <h3>{{ header }}</h3>
+    {% endif %}
+    <div style="float: left">
+        {% if cats %}
+            {% for cat in cats %}
+                <p><a href={{ url_for('index') }}?cat={{ cat.name }} >{{ cat.name }}</a></p>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div>
+        {% if items %}
+            <table style="float: right" border="1" cellpadding="10">
+                <tr>
+                    <th>Наименование</th>
+                    <th>Магазин</th>
+                    <th>Цена (руб.)</th>
+                    <th>Количество (шт.)</th>
+
+                </tr>
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.shop }}</td>
+                        <td>{{ item.price }}</td>
+                        <td>{{ item.quantity }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    </div>
+
+{% endblock %}
 </body>
 </html>

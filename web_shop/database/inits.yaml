@@ -1,0 +1,335 @@
+users:
+  - id: 1
+    email: admin@email.ru
+    password: Qwerty123_
+    first_name: Admin
+    last_name: Admin
+    is_admin: True
+    is_active: True
+    user_type: customer
+    confirmed_at: 2021-03-28 13:51:36.168325
+  - id: 2
+    email: seller1@email.ru
+    password: Qwerty123_
+    first_name: First_Seller
+    last_name: Seller
+    is_admin: False
+    is_active: True
+    user_type: seller
+    confirmed_at: 2021-03-28 13:51:36.168325
+  - id: 3
+    email: customer1@email.ru
+    password: Qwerty123_
+    first_name: First_Customer
+    last_name: Customer
+    is_admin: False
+    is_active: True
+    user_type: customer
+    confirmed_at: 2021-03-28 13:51:36.168325
+  - id: 4
+    email: seller2@email.ru
+    password: Qwerty123_
+    first_name: Second_Seller
+    last_name: Seller
+    is_admin: False
+    is_active: True
+    user_type: seller
+    confirmed_at: 2021-03-28 13:51:36.168325
+
+shops:
+  - id: 1
+    title: Связной
+    user_id: 2
+  - id: 2
+    title: М-Видео
+    user_id: 2
+  - id: 3
+    title: Эльдорадо
+    user_id: 4
+
+categories:
+  - name: Flash-накопители
+  - name: Смартфоны
+  - name: Аксессуары
+  - name: Компьютеры
+  - name: Телевизоры
+
+goods:
+  - category: Смартфоны
+    model: apple/iphone/xs-max
+    name: Смартфон Apple iPhone XS Max 512GB (золотистый)
+    price: 110000
+    price_rrc: 116990
+    quantity: 14
+    shop: 1
+    parameters:
+      "Диагональ (дюйм)": 6.5
+      "Разрешение (пикс)": 2688x1242
+      "Встроенная память (Гб)": 512
+      "Цвет": золотистый
+  - category: Смартфоны
+    model: apple/iphone/xr
+    name: Смартфон Apple iPhone XR 256GB (красный)
+    price: 65000
+    price_rrc: 69990
+    quantity: 9
+    shop: 1
+    parameters:
+      "Диагональ (дюйм)": 6.1
+      "Разрешение (пикс)": 1792x828
+      "Встроенная память (Гб)": 256
+      "Цвет": красный
+  - category: Смартфоны
+    model: apple/iphone/xr
+    name: Смартфон Apple iPhone XR 256GB (черный)
+    price: 65000
+    price_rrc: 69990
+    quantity: 5
+    shop: 1
+    parameters:
+      "Диагональ (дюйм)": 6.1
+      "Разрешение (пикс)": 1792x828
+      "Встроенная память (Гб)": 256
+      "Цвет": черный
+  - category: Смартфоны
+    model: apple/iphone/xr
+    name: Смартфон Apple iPhone XR 128GB (синий)
+    price: 60000
+    price_rrc: 64990
+    quantity: 7
+    shop: 1
+    parameters:
+      "Диагональ (дюйм)": 6.1
+      "Разрешение (пикс)": 1792x828
+      "Встроенная память (Гб)": 256
+      "Цвет": синий
+  - category: Телевизоры
+    model: philips/4k(UHD)
+    name: Телевизор Philips 50PUS8505B
+    price: 37000
+    price_rrc: 42990
+    quantity: 3
+    shop: 1
+    parameters:
+      "Диагональ (дюйм)": 58
+      "Формат экрана": 16:9
+      "Разрешение (пикс)": 3840x2160
+      "Операционная система": Android 9
+      "Цвет": чёрный
+      "Smart TV": да
+  - category: Смартфоны
+    model: apple/iphone/xs-max
+    name: Смартфон Apple iPhone XS Max 512GB (золотистый)
+    price: 111000
+    price_rrc: 117990
+    quantity: 14
+    shop: 2
+    parameters:
+      "Диагональ (дюйм)": 6.5
+      "Разрешение (пикс)": 2688x1242
+      "Встроенная память (Гб)": 512
+      "Цвет": золотистый
+  - category: Смартфоны
+    model: apple/iphone/xr
+    name: Смартфон Apple iPhone XR 256GB (красный)
+    price: 66000
+    price_rrc: 70990
+    quantity: 9
+    shop: 2
+    parameters:
+      "Диагональ (дюйм)": 6.1
+      "Разрешение (пикс)": 1792x828
+      "Встроенная память (Гб)": 256
+      "Цвет": красный
+  - category: Смартфоны
+    model: apple/iphone/xr
+    name: Смартфон Apple iPhone XR 256GB (черный)
+    price: 66000
+    price_rrc: 70990
+    quantity: 5
+    shop: 2
+    parameters:
+      "Диагональ (дюйм)": 6.1
+      "Разрешение (пикс)": 1792x828
+      "Встроенная память (Гб)": 256
+      "Цвет": черный
+  - category: Смартфоны
+    model: apple/iphone/xr
+    name: Смартфон Apple iPhone XR 128GB (синий)
+    price: 61000
+    price_rrc: 65990
+    quantity: 7
+    shop: 2
+    parameters:
+      "Диагональ (дюйм)": 6.1
+      "Разрешение (пикс)": 1792x828
+      "Встроенная память (Гб)": 256
+      "Цвет": синий
+  - category: Смартфоны
+    model: apple/iphone/xs-max
+    name: Смартфон Apple iPhone XS Max 512GB (золотистый)
+    price: 109000
+    price_rrc: 115990
+    quantity: 14
+    shop: 3
+    parameters:
+      "Диагональ (дюйм)": 6.5
+      "Разрешение (пикс)": 2688x1242
+      "Встроенная память (Гб)": 512
+      "Цвет": золотистый
+  - category: Смартфоны
+    model: apple/iphone/xr
+    name: Смартфон Apple iPhone XR 256GB (красный)
+    price: 64000
+    price_rrc: 68990
+    quantity: 9
+    shop: 3
+    parameters:
+      "Диагональ (дюйм)": 6.1
+      "Разрешение (пикс)": 1792x828
+      "Встроенная память (Гб)": 256
+      "Цвет": красный
+  - category: Смартфоны
+    model: apple/iphone/xr
+    name: Смартфон Apple iPhone XR 256GB (черный)
+    price: 64000
+    price_rrc: 68990
+    quantity: 5
+    shop: 3
+    parameters:
+      "Диагональ (дюйм)": 6.1
+      "Разрешение (пикс)": 1792x828
+      "Встроенная память (Гб)": 256
+      "Цвет": черный
+  - category: Смартфоны
+    model: apple/iphone/xr
+    name: Смартфон Apple iPhone XR 128GB (синий)
+    price: 59000
+    price_rrc: 63990
+    quantity: 7
+    shop: 3
+    parameters:
+      "Диагональ (дюйм)": 6.1
+      "Разрешение (пикс)": 1792x828
+      "Встроенная память (Гб)": 256
+      "Цвет": синий
+  - category: Телевизоры
+    model: philips/4k(UHD)
+    name: Телевизор Philips 50PUS8505G
+    price: 47000
+    price_rrc: 52990
+    quantity: 5
+    shop: 1
+    parameters:
+      "Диагональ (дюйм)": 58
+      "Формат экрана": 16:9
+      "Разрешение (пикс)": 3840x2160
+      "Операционная система": Android 9
+      "Цвет": серый
+      "Smart TV": да
+  - category: Телевизоры
+    model: lg/4k(UHD)
+    name: Телевизор LG 49UK6200PLA
+    price: 26000
+    price_rrc: 31990
+    quantity: 4
+    shop: 1
+    parameters:
+      "Диагональ (дюйм)": 49
+      "Формат экрана": 16:9
+      "Разрешение (пикс)": 3840x2160
+      "Цвет": чёрный
+      "Smart TV": да
+  - category: Телевизоры
+    model: lg/4k(UHD)
+    name: Телевизор LG 43UK6200PLA
+    price: 20000
+    price_rrc: 25990
+    quantity: 7
+    shop: 1
+    parameters:
+      "Диагональ (дюйм)": 43
+      "Формат экрана": 16:9
+      "Разрешение (пикс)": 3840x2160
+      "Цвет": серый
+      "Smart TV": да
+  - category: Телевизоры
+    model: philips/4k(UHD)
+    name: Телевизор Philips 65PUS8505W
+    price: 75000
+    price_rrc: 79990
+    quantity: 1
+    shop: 2
+    parameters:
+      "Диагональ (дюйм)": 65
+      "Формат экрана": 16:9
+      "Разрешение (пикс)": 3840x2160
+      "Операционная система": Android 9
+      "Цвет": белый
+      "Smart TV": да
+  - category: Телевизоры
+    model: sumsung/4k(UHD)
+    name: Телевизор Samsung UE50TU8570U
+    price: 39000
+    price_rrc: 44990
+    quantity: 6
+    shop: 2
+    parameters:
+      "Диагональ (дюйм)": 50
+      "Формат экрана": 16:9
+      "Разрешение (пикс)": 3840x2160
+      "Цвет": чёрный
+      "Smart TV": да
+  - category: Телевизоры
+    model: lg/4k(UHD)
+    name: Телевизор LG 49UK6200PLA
+    price: 24000
+    price_rrc: 28990
+    quantity: 4
+    shop: 2
+    parameters:
+      "Диагональ (дюйм)": 49
+      "Формат экрана": 16:9
+      "Разрешение (пикс)": 3840x2160
+      "Цвет": чёрный
+      "Smart TV": да
+  - category: Телевизоры
+    model: philips/4k(UHD)
+    name: Телевизор Philips 50PUS8505G
+    price: 45000
+    price_rrc: 50990
+    quantity: 5
+    shop: 3
+    parameters:
+      "Диагональ (дюйм)": 58
+      "Формат экрана": 16:9
+      "Разрешение (пикс)": 3840x2160
+      "Операционная система": Android 9
+      "Цвет": серый
+      "Smart TV": да
+  - category: Телевизоры
+    model: lg/4k(UHD)
+    name: Телевизор LG 49UK6200PLA
+    price: 22000
+    price_rrc: 27990
+    quantity: 4
+    shop: 3
+    parameters:
+      "Диагональ (дюйм)": 49
+      "Формат экрана": 16:9
+      "Разрешение (пикс)": 3840x2160
+      "Цвет": чёрный
+      "Smart TV": да
+  - category: Телевизоры
+    model: lg/4k(UHD)
+    name: Телевизор LG 43UK6200PLA
+    price: 18000
+    price_rrc: 23990
+    quantity: 7
+    shop: 3
+    parameters:
+      "Диагональ (дюйм)": 43
+      "Формат экрана": 16:9
+      "Разрешение (пикс)": 3840x2160
+      "Цвет": серый
+      "Smart TV": да

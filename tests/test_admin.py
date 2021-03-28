@@ -44,7 +44,7 @@ class TestEnterAdmin:
             assert request.path == url_for("login")
             assert request.args.get("next") == "admin.index"
 
-    def test_login_admin_by_anonimous_admin(self, login_admin, client):
+    def test_login_admin_by_anonymous_admin(self, login_admin, client):
         """Enter admin panel by admin who was not logged in."""
         with client:
             client.get(
@@ -53,7 +53,9 @@ class TestEnterAdmin:
             response: Response = client.post(
                 request.url, data=login_admin, follow_redirects=True
             )  # login as admin
-            assert request.path == URL  # return to admin panel as an authenticated admin
+            assert request.path == url_for(
+                "admin.index"
+            )  # return to admin panel as an authenticated admin
             assert response.status_code == 200
             client.get("/logout")
 

@@ -108,7 +108,7 @@ class TestGetUploadNewFile:
     def test_get_upload_new_file_wrong_query_string(
         logged_in_seller, query_key, query_val
     ):
-        """Test get upload_file view by logged in seller with wrong params in query_string."""
+        """Test get upload_file view by logged-in seller with wrong params in query_string."""
         params = {query_key: query_val} if query_key and query_val else None
         if params:
             response: Response = logged_in_seller.get(

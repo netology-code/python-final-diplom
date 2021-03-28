@@ -28,16 +28,16 @@ def register():
             email=form.email.data.lower(),
             first_name=form.first_name.data,
             last_name=form.last_name.data,
+            password=form.password.data,
+            user_type=getattr(UserTypeChoices, form.user_type.data).name,
         )
-        user.set_password(form.password.data)
-        user.user_type = getattr(UserTypeChoices, form.user_type.data).name
         db.session.add(user)
         db.session.commit()
 
         token = create_confirmation_token(user.email)
         message = create_message("Подтверждение регистрации", user.email)
         link = url_for("confirm_email", token=token, _external=True)
-        message.body = (
+        message.html = (
             f"Для подтверждения учётной записи на WebShop перейдите по ссылке: {link}"
         )
         send_message(message)
