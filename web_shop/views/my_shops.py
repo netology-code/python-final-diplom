@@ -11,19 +11,12 @@ from flask import (
     render_template,
     request,
     url_for,
-    send_from_directory,
 )
 from flask_login import current_user
 from werkzeug.utils import secure_filename
 
-from web_shop.database import User, UserTypeChoices, Shop
-from web_shop.emails import (
-    create_confirmation_token,
-    create_message,
-    send_message,
-)
-from web_shop.forms import MyRegisterForm
-from web_shop import app, db
+from web_shop import app, celery, db
+from web_shop.database import Shop
 
 BASE_URL = "/account/my_shops"
 
@@ -83,6 +76,7 @@ def allowed_file(filename):
     return False
 
 
+@celery.task()
 def import_data(filename) -> None:
     """Parse uploaded file and insert data into database."""
     with open(filename, "r", encoding="utf-8") as f:
@@ -93,6 +87,7 @@ def import_data(filename) -> None:
     # print(categories)
 
 
+@celery.task()
 def save_file(file, user, shop, filename) -> str:
     """Save uploaded file.
 

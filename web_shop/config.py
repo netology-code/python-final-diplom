@@ -4,7 +4,6 @@ import os
 
 from dotenv import load_dotenv
 
-ROOT_URL = "/api/v1/"
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 load_dotenv()

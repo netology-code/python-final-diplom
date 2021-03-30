@@ -10,16 +10,16 @@ if __name__ == "__main__":
     with open("inits.yaml", "r", encoding="utf-8") as f:
         inits = yaml.safe_load(f)
 
+    # insert users, shops, categories
     users = [User(**user) for user in inits["users"]]
     shops = [Shop(**shop) for shop in inits["shops"]]
     categories = [Category(**category) for category in inits["categories"]]
-
     models = (users, shops, categories)
-
     for model in models:
         db.session.bulk_save_objects(model)
     db.session.commit()
 
+    # insert products
     products = [
         Product(*item)
         for item in {
@@ -29,6 +29,7 @@ if __name__ == "__main__":
     db.session.bulk_save_objects(products)
     db.session.commit()
 
+    # insert product_info
     product_infos = [
         ProductInfo(*item)
         for item in {
@@ -46,23 +47,7 @@ if __name__ == "__main__":
     db.session.bulk_save_objects(product_infos)
     db.session.commit()
 
-    product_infos = [
-        ProductInfo(*item)
-        for item in {
-            (
-                product["name"],
-                product["model"],
-                product["shop"],
-                product["price"],
-                product["price_rrc"],
-                product["quantity"],
-            )
-            for product in inits["goods"]
-        }
-    ]
-    db.session.bulk_save_objects(product_infos)
-    db.session.commit()
-
+    # insert parameters
     params = []
     for item in inits["goods"]:
         item_params = item["parameters"]
@@ -72,16 +57,21 @@ if __name__ == "__main__":
     db.session.bulk_save_objects(parameters)
     db.session.commit()
 
-    p_params = set()
+    # insert x_product_parameters
+    product_params = set()
     for item in inits["goods"]:
-        shop = item["shop"]
-        product = item["name"]
+        product = item["model"]
         params = item["parameters"]
         for param in params:
-            p_params.add((product, param, params[param]))
+            product_params.add(ProductParameter(product, param, params[param]))
 
-    product_params = [ProductParameter(*item) for item in p_params]
     db.session.bulk_save_objects(product_params)
     db.session.commit()
+
+    # fixup: reset all sequences to their max value
+    for i in ("user", "shop", "category", "product", "product_info", "parameter"):
+        db.engine.execute(
+            f"SELECT setval('{i}_id_seq', (SELECT max(id) FROM public.{i}));"
+        )
 
     print("Initial inserts done.")

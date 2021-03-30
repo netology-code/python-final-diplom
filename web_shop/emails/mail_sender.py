@@ -23,7 +23,7 @@ def create_message(subject: str, addresses: str or list or tuple):
     return Message(subject, recipients=recipients, sender=app.config["MAIL_USERNAME"])
 
 
-@celery.task
+@celery.task()
 def send_message(message: Message):
     """Send message via email as a celery-task."""
     with app.app_context():

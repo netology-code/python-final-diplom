@@ -2,6 +2,7 @@
 import enum
 
 from flask_login import UserMixin
+from slugify import slugify
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -54,7 +55,9 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean(), default=False)
     confirmed_at = db.Column(db.DateTime())
     user_type = db.Column(
-        db.Enum(UserTypeChoices), default=UserTypeChoices.customer, nullable=False,
+        db.Enum(UserTypeChoices),
+        default=UserTypeChoices.customer,
+        nullable=False,
     )
 
     def __init__(
@@ -150,10 +153,10 @@ class Product(db.Model):
     def __init__(self, name, category, id=None):
         self.id = id
         self.name = name
-        self.category = self.set_category(category)
+        self.category = self.__set_category(category)
 
     @staticmethod
-    def set_category(name: str) -> int:
+    def __set_category(name: str) -> int:
         """Auto set category id for product."""
         category = Category.query.filter_by(name=name).first()
         if category:
@@ -172,18 +175,34 @@ class ProductInfo(db.Model):
     price = db.Column(db.Integer(), nullable=False)
     price_rrc = db.Column(db.Integer(), nullable=False)
     quantity = db.Column(db.Integer(), nullable=False)
+    slug = db.Column(db.String(255), nullable=False)
 
     def __init__(self, name, product, shop, price, price_rrc, quantity, id=None):
         self.id = id
         self.name = name
-        self.product = self.set_product(product)
-        self.shop = self.set_shop(shop)
-        self.price = price
-        self.price_rrc = price_rrc
+        self.product = self.__set_product(product)
+        self.shop = self.__set_shop(shop)
+        self.price = price * 100
+        self.price_rrc = price_rrc * 100
         self.quantity = quantity
+        self.slug = slugify(name + " " + str(self.shop))
+
+    def __repr__(self):
+        return (
+            f"{__class__.__name__}("
+            f"{self.id!r}, "
+            f"{self.name!r}, "
+            f"{self.product!r}, "
+            f"{self.shop!r}, "
+            f"{self.price!r}, "
+            f"{self.price_rrc!r}, "
+            f"{self.quantity!r}, "
+            f"{self.slug!r}"
+            f")"
+        )
 
     @staticmethod
-    def set_product(name: str) -> int:
+    def __set_product(name: str) -> int:
         """Auto set product id for product."""
         product = Product.query.filter_by(name=name).first()
         if isinstance(name, int):
@@ -193,7 +212,7 @@ class ProductInfo(db.Model):
         raise ValueError("No such product")
 
     @staticmethod
-    def set_shop(name) -> int:
+    def __set_shop(name) -> int:
         """Auto set shop id for product."""
         if isinstance(name, int):
             return name
@@ -228,23 +247,50 @@ class ProductParameter(db.Model):
     )
     value = db.Column(db.String(255), nullable=False)
 
-    def __init__(self, product_info, parameter, value):
-        self.product_info = self.set_product_info(product_info)
-        self.parameter = self.set_parameter(parameter)
+    def __init__(self, product, parameter, value):
+        self.product_info = self.__set_product(product)
+        self.parameter = self.__set_parameter(parameter)
         self.value = value
 
+    # def __str__(self):
+    #     return f'{self.product_info}, {self.parameter}, {self.value}'
+
+    def __repr__(self):
+        return (
+            f"{__class__.__name__}("
+            f"product={self.product_info!r}, "
+            f"parameter={self.parameter!r}, "
+            f"value={self.value!r}"
+            f")"
+        )
+
+    def __hash__(self):
+        return hash((self.product_info, self.parameter, self.value))
+
+    def __eq__(self, other):
+        return self.__hash__() == other.__hash__()
+
+    def __lt__(self, other):
+        return self.product_info < other.product_info
+
     @staticmethod
-    def set_product_info(name) -> int:
+    def __set_product(name) -> int:
         """Auto set product_info id for product."""
         if isinstance(name, int):
             return name
-        pr_info = ProductInfo.query.filter_by(name=name).first()
+        if not name:
+            print("No name")
+            input()
+        pr_info = Product.query.filter_by(name=name).first()
+        if not pr_info:
+            print("No product")
+            input()
         if pr_info:
             return pr_info.id
         raise ValueError("No such product info")
 
     @staticmethod
-    def set_parameter(name: str) -> int:
+    def __set_parameter(name: str) -> int:
         """Auto set parameter id for product."""
         if isinstance(name, int):
             return name

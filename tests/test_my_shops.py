@@ -53,17 +53,19 @@ class TestGetUploadNewFile:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "shop_title", ["Shop", "Shop1", "", " ", "_", 1, 0, -1, None, True, False],
+        "shop_title",
+        ["Shop", "Shop1", "", " ", "_", 1, 0, -1, None, True, False],
     )
     def test_get_upload_new_file_wrong_params(logged_in_seller, shop_title):
         """Test get upload_file view by logged in seller with wrong params in query_string value."""
         params = {"shop": shop_title}
         response: Response = logged_in_seller.get(
-            url_for("upload_file", **params), follow_redirects=True,
+            url_for("upload_file", **params),
+            follow_redirects=True,
         )
         assert "Загрузите новый файл с данными" not in response.get_data(True)
         assert "Список моих магазинов" in response.get_data(True)
-        # assert request.path == url_for('my_shops')
+        # assert request.path == url_for('my_shops')  #  !!! Объект request работает неправильно !!!
         # print(request.__dict__)
 
     @staticmethod
@@ -110,15 +112,17 @@ class TestGetUploadNewFile:
         params = {query_key: query_val} if query_key and query_val else None
         if params:
             response: Response = logged_in_seller.get(
-                url_for("upload_file", **params), follow_redirects=True,
+                url_for("upload_file", **params),
+                follow_redirects=True,
             )
         else:
             response: Response = logged_in_seller.get(
-                url_for("upload_file"), follow_redirects=True,
+                url_for("upload_file"),
+                follow_redirects=True,
             )
         assert "Загрузите новый файл с данными" not in response.get_data(True)
         assert "Список моих магазинов" in response.get_data(True)
-        # assert request.path == url_for('my_shops')
+        # assert request.path == url_for('my_shops')  #  !!! Объект request работает неправильно !!!
         # print(request.__dict__)
 
     @staticmethod
@@ -159,7 +163,10 @@ class TestPostUploadNewFile:
                 path = os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
                 print()
                 print(111, path)
-                file = FileStorage(stream=open(path, "rb"), filename=filename,)
+                file = FileStorage(
+                    stream=open(path, "rb"),
+                    filename=filename,
+                )
                 response: Response = logged_in_seller.post(
                     url_for("upload_file", **params),
                     data={"file": file},
@@ -168,7 +175,10 @@ class TestPostUploadNewFile:
                 )
 
             elif filename == "":
-                file = FileStorage(stream=io.BytesIO(b""), filename=filename,)
+                file = FileStorage(
+                    stream=io.BytesIO(b""),
+                    filename=filename,
+                )
                 response: Response = logged_in_seller.post(
                     url_for("upload_file", **params),
                     data={"file": file},

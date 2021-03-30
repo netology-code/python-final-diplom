@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+    <div style="float: left; padding-right:20px;">
+        {% if cats %}
+            <table cellpadding="5">
+            <tr>
+                <th><h3>Категории</h3></th>
+            </tr>
+            {% for cat in cats %}
+                <tr>
+                    <td><a href={{ url_for('index') }}?cat={{ cat.name }} >{{ cat.name }}</a></td>
+                </tr>
+            {% endfor %}
+            <td></td>
+        {% endif %}
+        </table>
+
+    </div>
+
+    <div style="float: left">
+        {% if items or parameters %}
+            <table border="1" cellpadding="5">
+                {% if header %}
+                    <tr>
+                        <th colspan="6"><h3>{{ header }}</h3></th>
+                    </tr>
+                {% endif %}
+                {% if items %}
+                    <tr>
+                        <th>Наименование</th>
+                        <th>Магазин</th>
+                        <th>Цена (руб.)</th>
+                        <th>Кол-во (шт.)</th>
+                    </tr>
+                    {% for item in items %}
+                        <tr>
+                            <td>
+                                <a href={{ request.full_path }}&item={{ item.slug }}>{{ item.name }}</a>
+                            </td>
+                            <td>{{ item.shop }}</td>
+                            <td>{{ item.price }}</td>
+                            <td>{{ item.quantity }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                {% if parameters %}
+                    <tr>
+                        <th>Параметр</th>
+                        <th>Значение</th>
+                    </tr>
+                    {% for parameter in parameters %}
+                        <tr>
+                            <td>{{ parameter.name }}</td>
+                            <td>{{ parameter.value }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </table>
+            {% if parameters %}
+                <div>
+                    <br><a href={{ request.full_path.split('&',1)[0] }}>Назад</a>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}

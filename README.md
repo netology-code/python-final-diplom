@@ -20,7 +20,7 @@
    providing that "SMTP" keys shall represent an acting email-service smtp-configuration.
 6) Create tables from migrations: `flask db upgrade`
 7) Run `web_shop/database/load_db_inits.py`
-8) Start app: `flask run`  
+8) Start app: `flask run` and open `http://127.0.0.1:5000/` in your browser. 
 
 Optional steps:  
 9) Register your first user at `/register`
