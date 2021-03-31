@@ -2,13 +2,14 @@
 from collections import namedtuple
 
 from flask import make_response, redirect, render_template, request, url_for
+from flask_login import current_user
 from sqlalchemy.sql.elements import and_
 
-from web_shop import app
+from web_shop import app, db
 from web_shop.database.models import *
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
     """Index view."""
     categories = Category.query.all()
@@ -33,6 +34,28 @@ def index():
             category = Category.query.filter_by(name=request.args.get("cat")).first()
             if category:
                 items = show_goods_by_category(category)
+
+                if request.method == "POST":
+                    for item in items:
+                        if request.form.get(f"{item.slug}_cart_qty"):
+                            print(
+                                request.form[f"{item.slug}_cart_qty"],
+                                type(request.form[f"{item.slug}_cart_qty"]),
+                            )
+
+                    chosen_goods = [
+                        (item, int(request.form[f"{item.slug}_cart_qty"]))
+                        for item in items
+                        if (
+                            request.form.get(f"{item.slug}_cart_qty")
+                            and request.form[f"{item.slug}_cart_qty"] != "0"
+                        )
+                    ]
+
+                    chosen_goods.append(current_user.id)
+                    add_items_to_cart(chosen_goods)
+                    return make_response(redirect(request.full_path))
+
                 return make_response(
                     render_template(
                         "showcase.html",
@@ -48,6 +71,24 @@ def index():
     return make_response(render_template("base.html"))
 
 
+def add_items_to_cart(items):
+    """Add items chosen by user to his cart."""
+    user = items.pop()
+    order = Order.query.filter_by(user=user, status=OrderStateChoices.cart.name).first()
+    if not order:
+        order = Order(user)
+        db.session.add(order)
+        db.session.flush()  # reset session
+        db.session.refresh(order)  # get order id after insert
+
+    order_items = []
+    for item, quantity in items:
+        item = ProductInfo.query.filter_by(slug=item.slug).first()
+        order_items.append(OrderItem(order.id, item.product, item.shop, quantity))
+    db.session.bulk_save_objects(order_items)
+    db.session.commit()
+
+
 def show_goods_by_category(cat, sort_by=None, reverse=False):
     """Show goods by selected category on request."""
     products = Product.query.filter_by(category=cat.id).all()
@@ -56,7 +97,11 @@ def show_goods_by_category(cat, sort_by=None, reverse=False):
         items = set()
         for product in products:
             infos = ProductInfo.query.filter(
-                and_(ProductInfo.product == product.id, ProductInfo.shop.in_(o_shops))
+                and_(
+                    ProductInfo.product == product.id,
+                    ProductInfo.shop.in_(o_shops),
+                    ProductInfo.quantity > 0,
+                )
             ).all()
             if infos:
 
@@ -73,7 +118,13 @@ def show_goods_by_category(cat, sort_by=None, reverse=False):
                         price_rem = str(price_rem)
                     price = ".".join((price_int, price_rem))
                     items.add(
-                        item(info.name, shop.title, price, info.quantity, info.slug,)
+                        item(
+                            info.name,
+                            shop.title,
+                            price,
+                            info.quantity,
+                            info.slug,
+                        )
                     )
         if not sort_by:
             items = sorted(list(items), key=lambda x: x.name)

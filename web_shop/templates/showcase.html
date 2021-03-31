@@ -26,23 +26,37 @@
                     </tr>
                 {% endif %}
                 {% if items %}
-                    <tr>
-                        <th>Наименование</th>
-                        <th>Магазин</th>
-                        <th>Цена (руб.)</th>
-                        <th>Кол-во (шт.)</th>
-                    </tr>
-                    {% for item in items %}
+                    <form action="" method="post" novalidate>
                         <tr>
+                            <th>Наименование</th>
+                            <th>Магазин</th>
+                            <th>Цена (руб.)</th>
+                            <th>Кол-во (шт.)</th>
+                            <th>В корзину (шт.)</th>
+                        </tr>
+
+                        {% for item in items %}
                             <td>
                                 <a href={{ request.full_path }}&item={{ item.slug }}>{{ item.name }}</a>
                             </td>
                             <td>{{ item.shop }}</td>
                             <td>{{ item.price }}</td>
                             <td>{{ item.quantity }}</td>
-                        </tr>
-                    {% endfor %}
+                            <label for={{ item.slug }}></label>
+
+                            <div class="form-group">
+                                <label hidden="True">{{ item.slug }}_cart_qty</label>
+                                <td><input name={{ item.slug }}_cart_qty id={{ item.slug }}_cart_qty type="number"
+                                           min="0"
+                                           max={{ item.quantity }} step="1"/></td>
+                            </div>
+                            </tr>
+                        {% endfor %}
+
+                        <p><input type="submit" value=" Добавить в корзину "></p>
+                    </form>
                 {% endif %}
+
                 {% if parameters %}
                     <tr>
                         <th>Параметр</th>

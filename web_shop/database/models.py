@@ -1,5 +1,6 @@
 """Database table models."""
 import enum
+from datetime import datetime
 
 from flask_login import UserMixin
 from slugify import slugify
@@ -10,6 +11,9 @@ from web_shop import db, login_manager
 
 __all__ = [
     "Category",
+    "Contact",
+    "Order",
+    "OrderItem",
     "OrderStateChoices",
     "Shop",
     "Product",
@@ -25,7 +29,7 @@ __all__ = [
 class OrderStateChoices(enum.Enum):
     """Order state choices."""
 
-    basket = "Статус корзины"
+    cart = "Статус корзины"
     new = "Новый"
     confirmed = "Подтвержден"
     assembled = "Собран"
@@ -53,9 +57,11 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean(), default=False)
     is_active = db.Column(db.Boolean(), default=False)
-    confirmed_at = db.Column(db.DateTime())
+    confirmed_at = db.Column(db.DateTime(), nullable=True)
     user_type = db.Column(
-        db.Enum(UserTypeChoices), default=UserTypeChoices.customer, nullable=False,
+        db.Enum(UserTypeChoices),
+        default=UserTypeChoices.customer,
+        nullable=False,
     )
 
     def __init__(
@@ -104,13 +110,11 @@ class Shop(db.Model):
     """Shop table model."""
 
     __tablename__ = "shop"
-    # __table_args__ = {"extend_existing": True}
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False, unique=True)
     url = db.Column(db.String(255), nullable=True, unique=True)
     filename = db.Column(db.String(255), nullable=True, unique=True)
     file_upload_datetime = db.Column(db.DateTime(), nullable=True)
-
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     shop_manager = relationship("User")
 
@@ -121,7 +125,9 @@ class Shop(db.Model):
         self.title = title
         self.url = url
         self.filename = filename
-        self.file_upload_datetime = file_upload_datetime
+        self.file_upload_datetime = (
+            file_upload_datetime if file_upload_datetime else datetime.utcnow()
+        )
         self.user_id = user_id
 
     def __repr__(self):
@@ -238,10 +244,16 @@ class ProductParameter(db.Model):
 
     __tablename__ = "x_product_parameter"
     product_info = db.Column(
-        db.Integer(), db.ForeignKey("product_info.id"), primary_key=True, nullable=False
+        db.Integer(),
+        db.ForeignKey("product_info.id"),
+        primary_key=True,
+        nullable=False,
     )
     parameter = db.Column(
-        db.Integer(), db.ForeignKey("parameter.id"), primary_key=True, nullable=False
+        db.Integer(),
+        db.ForeignKey("parameter.id"),
+        primary_key=True,
+        nullable=False,
     )
     value = db.Column(db.String(255), nullable=False)
 
@@ -299,25 +311,95 @@ class ProductParameter(db.Model):
         raise ValueError("No such parameter")
 
 
-# class Order(db.Model):
-#     user = db.Column(db.Integer(), db.ForeignKey("user.id"), nullable=False)
-#
-#
-# # - dt
-# # - status
-#
-# # 8.
-# # OrderItem
-# # - order
-# # - product
-# # - shop
-# # - quantity
-#
-# # 9.
-# # Contact
-# # - type
-# # - user
-# - value
+class Order(db.Model):
+    """Order model."""
+
+    __tablename__ = "order"
+    id = db.Column(db.Integer(), primary_key=True)
+    user = db.Column(db.Integer(), db.ForeignKey("user.id"), nullable=False)
+    datetime = db.Column(db.DateTime(), nullable=False)
+    status = db.Column(
+        db.Enum(OrderStateChoices), default=OrderStateChoices.cart, nullable=False
+    )
+    contact = db.Column(db.Integer(), db.ForeignKey("contact.id"), nullable=True)
+
+    def __init__(self, user, status=None, dt=None, contact=None, id=None):
+        self.id = id
+        self.user = user
+        self.datetime = dt if dt else datetime.utcnow()
+        self.status = status
+        self.contact = contact
+
+
+class OrderItem(db.Model):
+    """Model for goods in order."""
+
+    __tablename__ = "x_order_item"
+    order = db.Column(
+        db.Integer(),
+        db.ForeignKey("order.id"),
+        primary_key=True,
+        nullable=False,
+    )
+    product = db.Column(
+        db.Integer(),
+        db.ForeignKey("product.id"),
+        primary_key=True,
+        nullable=False,
+    )
+    shop = db.Column(
+        db.Integer(),
+        db.ForeignKey("shop.id"),
+        primary_key=True,
+        nullable=False,
+    )
+    quantity = db.Column(db.Integer(), nullable=False)
+
+    def __init__(self, order, product, shop, quantity):
+        self.order = order
+        self.product = product
+        self.shop = shop
+        self.quantity = quantity
+
+
+class Contact(db.Model):
+    """User shipping address model."""
+
+    __tablename__ = "contact"
+    id = db.Column(db.Integer(), primary_key=True)
+    user = db.Column(db.ForeignKey("user.id"))
+    zip_code = db.Column(db.String(6))
+    city = db.Column(db.String(50))
+    street = db.Column(db.String(100))
+    house = db.Column(db.String(15), nullable=True)
+    structure = db.Column(db.String(15), nullable=True)
+    building = db.Column(db.String(15), nullable=True)
+    apartment = db.Column(db.String(15), nullable=True)
+    phone = db.Column(db.String(20))
+
+    def __init__(
+        self,
+        user,
+        phone,
+        zip_code,
+        city,
+        street,
+        house=None,
+        structure=None,
+        building=None,
+        apartment=None,
+        id=None,
+    ):
+        self.id = id
+        self.user = user
+        self.phone = phone
+        self.zip_code = zip_code
+        self.city = city
+        self.street = street
+        self.house = house
+        self.structure = structure
+        self.building = building
+        self.apartment = apartment
 
 
 @login_manager.user_loader
