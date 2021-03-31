@@ -30,10 +30,7 @@ def upgrade():
         sa.Column("building", sa.String(length=15), nullable=True),
         sa.Column("apartment", sa.String(length=15), nullable=True),
         sa.Column("phone", sa.String(length=20), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["user"],
-            ["user.id"],
-        ),
+        sa.ForeignKeyConstraint(["user"], ["user.id"],),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -56,14 +53,8 @@ def upgrade():
             nullable=False,
         ),
         sa.Column("contact", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["contact"],
-            ["contact.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["user"],
-            ["user.id"],
-        ),
+        sa.ForeignKeyConstraint(["contact"], ["contact.id"],),
+        sa.ForeignKeyConstraint(["user"], ["user.id"],),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -72,18 +63,9 @@ def upgrade():
         sa.Column("product", sa.Integer(), nullable=False),
         sa.Column("shop", sa.Integer(), nullable=False),
         sa.Column("quantity", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["order"],
-            ["order.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["product"],
-            ["product.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["shop"],
-            ["shop.id"],
-        ),
+        sa.ForeignKeyConstraint(["order"], ["order.id"],),
+        sa.ForeignKeyConstraint(["product"], ["product.id"],),
+        sa.ForeignKeyConstraint(["shop"], ["shop.id"],),
         sa.PrimaryKeyConstraint("order", "product", "shop"),
     )
     # ### end Alembic commands ###

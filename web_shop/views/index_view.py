@@ -118,13 +118,7 @@ def show_goods_by_category(cat, sort_by=None, reverse=False):
                         price_rem = str(price_rem)
                     price = ".".join((price_int, price_rem))
                     items.add(
-                        item(
-                            info.name,
-                            shop.title,
-                            price,
-                            info.quantity,
-                            info.slug,
-                        )
+                        item(info.name, shop.title, price, info.quantity, info.slug,)
                     )
         if not sort_by:
             items = sorted(list(items), key=lambda x: x.name)
