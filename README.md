@@ -1,16 +1,14 @@
 # Дипломная работа к профессии Python-разработчик «API Сервис заказа товаров для розничных сетей».
 
-## Get started
+## Getting started
 
 1) Install requirements: `pip install -r requirements.txt`
-2) Initiate pre-commit: `pre-commit install`
-   If necessary modify pre-commit roots in `.git/hooks/pre-commit`  
-3) Set flask running file: `set FLASK_APP=web_shop/app.py` (for Linux: `export FLASK_APP=web_shop/app.py`)
-   3.1) If necessary set flask debugging mode:
+2) Set flask running file: `set FLASK_APP=web_shop/app.py` (for Linux: `export FLASK_APP=web_shop/app.py`)
+   2.1) If necessary set flask debugging mode:
       - `set FLASK_DEBUG=1` - to turn debug mode on (for Linux: `export FLASK_DEBUG=1`) 
       - `set FLASK_DEBUG=0` - to turn debug mode off (for Linux: `export FLASK_DEBUG=0`)   
-4) Create a new clean database 
-5) In project root create ".env" with following keys: 
+3) Create a new clean database in PostgreSQL 
+4) In project root create ".env" with following keys: 
    - DATABASE_URI 
    - SECRET_KEY,
    - SMTP_SERVER,
@@ -18,16 +16,29 @@
    - SMTP_USERNAME,
    - SMTP_PASSWORD
    providing that "SMTP" keys shall represent an acting email-service smtp-configuration.
-6) Create tables from migrations: `flask db upgrade`
-7) Run `web_shop/database/load_db_inits.py`
-8) Start app: `flask run` and open `http://127.0.0.1:5000/` in your browser. 
+5) Create tables from migrations: `flask db upgrade`
+6) Run `web_shop/database/load_db_inits.py`
+7) Run `sudo service redis-server`   
+8) Run `celery -A web_shop.celery worker`
+9) Start app: `flask run` and open `http://127.0.0.1:5000/` in your browser. 
 
 Optional steps:  
-9) Register your first user at `/register`
-10) If you need an admin - set your user "is_admin" field to true in database manually.  
+10) Register your first user at `/register`
+11) If you need an admin - set your user "is_admin" field to true in database manually.  
+
+## Notes
 
 Admin panel is reachable at `/admin` (`is_admin=true` required).
-Admin panel link is available from project /index view for administrators.
+Admin panel link is available from project `/index` view for administrators.
+
+Initial database commits include admin, two sellers, three shops, one customer and a pack of goods.
+Seller1 is a manager of Svayznoy and M-Video. Seller2 is a manager of Eldorado. 
+You may change their properties in `database/inits.yaml` if you wish, but you shall keep the file schema.
+
+Once the project is running you may use `eldorado.yaml` and/or `svyaznoy.yaml` (from the `web_shop` root) for adding some goods from the personal account of a correspondent seller.
+Also, you may create your own YAML with a schema similar to any of the above mentioned two provided files.
+
+It's highly recommended signing in a new customer with an acting email for making orders. 
 
 ## Описание
 
@@ -53,144 +64,13 @@ Admin panel link is available from project /index view for administrators.
 Необходимо разработать backend-часть (Django) сервиса заказа товаров для розничных сетей.
 
 **Базовая часть:**
-* Разработка сервиса под готовую спецификацию (API);
-* Возможность добавления настраиваемых полей (характеристик) товаров;
-* Импорт товаров;
-* Отправка накладной на email администратора (для исполнения заказа);
-* Отправка заказа на email клиента (подтверждение приема заказа).
+[x] Разработка сервиса под готовую спецификацию (API);
+[x] Возможность добавления настраиваемых полей (характеристик) товаров;
+[x] Импорт товаров;
+[x] Отправка накладной на email администратора (для исполнения заказа);
+[x] Отправка заказа на email клиента (подтверждение приема заказа).
 
 **Продвинутая часть:**
 * Экспорт товаров;
-* Админка заказов (проставление статуса заказа и уведомление клиента);
-* Выделение медленных методов в отдельные процессы (email, импорт, экспорт).
-
-### Исходные данные
- 
-1. Общее описание сервиса
-1. [Спецификация (API) - 1 шт.](old_project/reference/screens.md)
-1. [Файлы yaml для импорта товаров - 1 шт.](old_project/data/shop1.yaml)
-1. [Пример API Сервиса для магазина](old_project/reference/netology_pd_diplom/readme.md) 
-
-## Этапы разработки
-
-Разработку Backend рекомендуется разделить на следующие этапы:
-
-Базовая часть:
-1. [Создание и настройка проекта](old_project/reference/step-1.md)
-2. [Проработка моделей данных](old_project/reference/step-2.md)
-3. [Реализация импорта товаров](old_project/reference/step-3.md)
-4. [Реализация API views](old_project/reference/step-4.md)
-5. [Полностью готовый backend](old_project/reference/step-5.md)
-
-Продвинутая часть (по желанию, если базовая часть полностью готова):
-
-6. [Реализация forms и views админки склада](old_project/reference/step-6-adv.md)
-7. [Вынос медленных методов в задачи Celery](old_project/reference/step-7-adv.md)
-
-
-Настоятельно рекомендуется вести разработку с использованием git (github/gitlab/bitbucket) с регулярными коммитами в репозиторий, доступный вашему дипломному руководителю. Старайтесь делать коммиты как можно чаще для того, чтобы иметь возможность оперативно получать обратную связь от руководителя проекта и избежать лишнего переписывания кода, если что-то потребует корректировки.
-
-Разберём подробно каждый этап.
-
-### Этап 1. Создание и настройка проекта
-
-Критерии достижения:
-
-1. Вы имеете актуальный код данного репозитория на рабочем компьютере;
-2. У вас создан django-проект и он запускается без ошибок.
-
-Для получения подробностей по данному этапу
-[перейдите по ссылке](old_project/reference/step-1.md).
-
-### Этап 2. Проработка моделей данных
-
-Критерии достижения:
-
-1. Созданы модели и их дополнительные методы.
-
-Для получения подробностей по данному этапу
-[перейдите по ссылке](old_project/reference/step-2.md).
-
-### Этап 3. Реализация импорта товаров
-
-Критерии достижения:
-
-1. Созданы функции загрузки товаров из приложенных файлов в модели Django.
-2. Загружены товары из всех файлов для импорта.
-
-Для получения подробностей по данному этапу
-[перейдите по ссылке](old_project/reference/step-3.md).
-
-### Этап 4. Реализация forms и views
-
-Критерии достижения:
-
-1. Реализованы API Views для основных [страниц](old_project/reference/screens.md) сервиса (без админки):
-   - Вход
-   - Регистрация
-   - Список товаров
-   - Карточка товара
-   - Корзина
-   - Подтверждение заказа
-   - Спасибо за заказ
-   - Заказы
-   - Заказ
-
-Для получения подробностей по данному этапу
-[перейдите по ссылке](old_project/reference/step-4.md).
-
-### Этап 5. Полностью готовый backend
-
-Критерии достижения:
-
-1. Полностью работающие API Endpoint
-2. Корректно отрабатывает следующий сценарий:
-   - пользователь может авторизироваться;
-   - есть возможность отправки данных для регистрации и получения email с подтверждением регистрации;
-   - пользователь может добавлять в корзину товары от разных магазинов;
-   - пользователь может подтверждать заказ с вводом адреса доставки;
-   - пользователь получает email с подтверждением после ввода адреса доставки;
-   - Пользователь может переходить на страницу "Заказы" и открывать созданный заказ.
-
-Для получения подробностей по данному этапу
-[перейдите по ссылке](old_project/reference/step-5.md).
-
-## Полезные материалы
-
-1. [Информация о сервисе](old_project/reference/service.md)
-2. [Спецификация API](old_project/reference/api.md)
-3. [Описание страниц сервиса](old_project/reference/screens.md)
-
-
----
-
-## Продвинутая часть (по желанию)
-
-Обязательное условие: Базовая часть полностью готова.
-
-### Этап 6. Реализация API views админки склада
-
-Критерии достижения:
-
-1. Реализованы API views для [страниц админки](old_project/reference/screens.md) сервиса.
-
-
-Для получения подробностей по данному этапу
-[перейдите по ссылке](old_project/reference/step-6-adv.md).
-
-### Этап 7. Вынос медленных методов в задачи Celery
-
-Критерии достижения:
-
-1. Создано Celery-приложение c методами:
-   - send_email
-   - do_import
-2. Создан view для запуска Celery-задачи do_import из админки.
-
-Для получения подробностей по данному этапу
-[перейдите по ссылке](old_project/reference/step-7-adv.md).  
-
-
-### Этап 8. Создать docker-файл для приложения
-1. Создание docker-файла для сборки приложения.
-2. Предоставить инструкцию для сборки docker-образа.
+[x] Админка заказов (проставление статуса заказа и уведомление клиента);
+[x] Выделение медленных методов в отдельные процессы (email, импорт, экспорт).
