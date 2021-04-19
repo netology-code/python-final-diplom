@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% if current_user.is_authenticated %}
+        <h3>Корзина</h3>
+        {% if items %}
+            <form action="" method="post">
+                <div style="font-size: 14px; float: right; padding-right: 20px">
+                    <table border="1" cellpadding="5">
+                        <tr>
+                            <th><input type="checkbox" name=select_all><br>все позиции</th>
+                            {% if request.args.get('sort_by') and not request.args.get('reverse') %}
+                                <th><a href="
+                                        {{ request.full_path.split('?',1)[0] }}?sort_by=name&reverse=True">Наименование
+                                    товара</a></th>
+                                <th><a href="
+                                        {{ request.full_path.split('?',1)[0] }}?sort_by=shop&reverse=True">Магазин</a>
+                                </th>
+                                <th><a href="
+                                        {{ request.full_path.split('?',1)[0] }}?sort_by=price&reverse=True">Цена<br>(руб/шт)</a>
+                                </th>
+                                <th><a href="
+                                        {{ request.full_path.split('?',1)[0] }}?sort_by=discount_price&reverse=True">Цена<br>со
+                                    скидкой<br>(руб)</a></th>
+                                <th><a href="
+                                        {{ request.full_path.split('?',1)[0] }}?sort_by=stock_qty&reverse=True">На
+                                    складе<br>(шт)</a></th>
+                                <th><a href="
+                                        {{ request.full_path.split('?',1)[0] }}?sort_by=quantity&reverse=True">В
+                                    заказ<br>(шт)</a></th>
+                                <th><a href="
+
+
+                                        {{ request.full_path.split('?',1)[0] }}?sort_by=discount&reverse=True">Скидка</a>
+                                </th>
+                                <th><a href="
+                                        {{ request.full_path.split('?',1)[0] }}?sort_by=agg_price&reverse=True">Стоимость<br>(руб)</a>
+                                </th>
+                            {% else %}
+                                <th><a href="{{ request.full_path.split('?',1)[0] }}?sort_by=name">Наименование
+                                    товара</a></th>
+                                <th><a href="
+                                        {{ request.full_path.split('?',1)[0] }}?sort_by=shop">Магазин</a>
+                                </th>
+                                <th><a href="{{ request.full_path.split('?',1)[0] }}?sort_by=price">Цена<br>(руб/шт)</a>
+                                </th>
+                                <th><a href="
+                                        {{ request.full_path.split('?',1)[0] }}?sort_by=discount_price">Цена<br>со
+                                    скидкой<br>(руб)</a></th>
+                                <th><a href="{{ request.full_path.split('?',1)[0] }}?sort_by=stock_qty">На
+                                    складе<br>(шт)</a></th>
+                                <th><a href="{{ request.full_path.split('?',1)[0] }}?sort_by=quantity">В
+                                    заказ<br>(шт)</a></th>
+                                <th><a href="{{ request.full_path.split('?',1)[0] }}?sort_by=discount">Скидка</a>
+                                </th>
+                                <th><a href="{{ request.full_path.split('?',1)[0] }}?sort_by=agg_price">Стоимость<br>(руб)</a>
+                                </th>
+                            {% endif %}
+                        </tr>
+
+                        {% for item in items %}
+                            {% if not item.available or item.stock_qty == 0 %}
+                                <tr style="color: red">
+                                    {% elif item.quantity == 0 %}
+                                <tr style="color: grey">
+                                    {% else %}
+                                <tr>
+                            {% endif %}
+
+                            <td align="center"><input type="checkbox" name={{ item.slug }}_check></td>
+                            <td><a href={{ request.full_path }}&item={{ item.slug }}>{{ item.name }}</a></td>
+                            <td>{{ item.shop_name }}</td>
+                            {% if not item.available %}
+                                <td colspan="6" align="center">Заказы из данного магазина временно недоступны</td>
+                            {% elif item.stock_qty == 0 %}
+                                <td colspan="6" align="center">Данный товар недоступен</td>
+                            {% else %}
+                                <td>{{ item.price }}</td>
+                                <td>{{ item.discount_price }}</td>
+                                <td align="center">{{ item.stock_qty }}</td>
+                                <label hidden="True">{{ item.slug }}_cart_qty</label>
+                                <div class="form-group" align="center">
+                                    <td>
+                                        <input name={{ item.slug }}_cart_qty id={{ item.slug }}_cart_qty
+                                               value={{ item.quantity }} type="number" min="0"
+                                               max={{ item.stock_qty }} step="1"/>
+                                    </td>
+                                </div>
+                                <td align="center">{{ item.discount }}</td>
+                                <td>{{ item.agg_price }}</td>
+                            {% endif %}
+
+                        {% endfor %}
+                        </tr>
+                        <tr>
+                            <th colspan="8" align="right">Предварительная стоимость заказа (руб):</th>
+                            <th colspan="1" align="center">{{ total_sum }}</th>
+                        </tr>
+
+                    </table>
+                    <div style="font-size: 14px; float: right; padding-right: 0px">
+                        <table>
+                            <tr>
+                                <td>
+                                    <input type="submit" name="delete"
+                                           style="background-color: red; color: white;"
+                                           value=" Удалить отмеченные товары ">
+                                </td>
+                                <td><input type="submit" name="update" value=" Обновить стоимость "></td>
+                                <td><input type="submit" name="submit"
+                                           style="background-color: #00dd50;color: black "
+                                           value=" Добавить отмеченные товары в заказ  ">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+            </form>
+        {% else %}
+            <p>Ваша корзина пуста</p>
+        {% endif %}
+
+    {% endif %}
+{% endblock %}

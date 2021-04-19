@@ -1,0 +1,159 @@
+{% extends 'new_order.html' %}
+
+{% block content %}
+    {% if current_user.is_authenticated %}
+        {% if items %}
+            <form action="" method="post">
+                <div style="font-size: 14px; float: right; padding-right: 20px;">
+                    <table border="1" cellpadding="5">
+                        <thead>
+                        <tr>
+                            <th colspan="9">
+                                <h3>ЗАКАЗ №{{ items[0].order }}</h3>
+                            </th>
+                        </tr>
+                        </thead>
+
+                        <tr>
+                            <th>№ п/п</th>
+                            {% if request.args.get('sort_by') and not request.args.get('reverse') %}
+                                <th>
+                                    <a href="
+
+
+                                            {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=name&reverse=True">Наименование
+                                        товара</a>
+                                </th>
+                                <th>
+                                    <a href="
+
+
+                                        {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=shop&reverse=True">Магазин</a>
+                                </th>
+                                <th>
+                                    <a href="
+                                {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=price&reverse=True">Цена<br>(руб/шт)</a>
+                                </th>
+                                <th>
+                                    <a href="
+
+                            {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=discount_price&reverse=True">Цена<br>со
+                                        скидкой<br>(руб)</a>
+                                </th>
+                                <th>
+                                    <a href="
+
+                                {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=quantity&reverse=True">В
+                                        заказ<br>(шт)</a>
+                                </th>
+                                <th>
+                                    <a href="
+
+                                {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=discount&reverse=True">Скидка</a>
+                                </th>
+                                <th>
+                                    <a href="
+
+                                {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=agg_price&reverse=True">Стоимость<br>(руб)</a>
+                                </th>
+                                <th>Статус<br>позиции</th>
+                            {% else %}
+                                <th>
+                                    <a href="{{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=name">Наименование
+                                        товара</a>
+                                </th>
+                                <th>
+                                    <a href="
+
+
+                                            {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=shop">Магазин</a>
+                                </th>
+                                <th>
+                                    <a href="{{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=price">Цена<br>(руб/шт)</a>
+                                </th>
+                                <th>
+                                    <a href="
+                                            {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=discount_price">Цена<br>со
+                                        скидкой<br>(руб)</a>
+                                </th>
+                                <th>
+                                    <a href="{{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=quantity">В
+                                        заказ<br>(шт)</a>
+                                </th>
+                                <th>
+                                    <a href="
+                                        {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=discount">Скидка</a>
+                                </th>
+                                <th>
+                                    <a href="
+
+
+                                {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=agg_price">Стоимость<br>(руб)</a>
+                                </th>
+                                <th>Статус<br>позиции</th>
+                            {% endif %}
+                        </tr>
+
+                        {% for item in items %}
+                            {% if item.status.name == 'canceled' %}
+                            <tr style="color: darkred; font-style: italic">
+
+                                <td align="center">{{ items.index(item)+1}}.</td>
+                                <td><a href={{ request.full_path }}&item={{ item.slug }}>{{ item.name }}</a></td>
+                                <td>{{ item.shop_name }}</td>
+                                <td align="center">{{ item.price }}</td>
+                                <td align="center">{{ item.discount_price }}</td>
+                                <td align="center">{{ item.quantity }}</td>
+                                <td align="center">{{ item.discount }}</td>
+                                <td align="center">{{ 0 }}</td>
+
+                                <td align="center">{{ item.status.value }}</td>
+                            </tr>
+                            {% else %}
+                                <tr>
+                                <td align="center">{{ items.index(item)+1}}.</td>
+                                <td><a href={{ request.full_path }}&item={{ item.slug }}>{{ item.name }}</a></td>
+                                <td>{{ item.shop_name }}</td>
+                                <td align="center">{{ item.price }}</td>
+                                <td align="center">{{ item.discount_price }}</td>
+                                <td align="center">{{ item.quantity }}</td>
+                                <td align="center">{{ item.discount }}</td>
+                                <td align="center">{{ item.agg_price }}</td>
+                                <td align="center">{{ item.status.value }}</td>
+                            </tr>
+
+
+                            {% endif %}
+                        {% endfor %}
+                        <tr>
+                            <th colspan="7" align="right">Доставка: {{ delivery_name }}</th>
+                            <th align="center">{{ delivery_sum }}</th>
+                        </tr>
+                        <tr>
+                            <th colspan="7" align="right">ИТОГО (руб):</th>
+                            <th align="center">{{ total_sum }}</th>
+                        </tr>
+
+                    </table>
+                </div>
+
+                {% if request.args['type']=='awaiting' and items %}
+                    <div style="font-size: 14px; float: right; padding-right: 20px">
+                        <table>
+                            <tr>
+                                <td>
+                                    <input type="submit" name="cancel"
+                                           style="background-color: red; color: white"
+                                           value=" Отменить заказ ">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                {% endif %}
+            </form>
+
+        {% else %}
+            <p>В данной категории пока ничего нет. Закажите что-нибудь. :-)</p>
+        {% endif %}
+    {% endif %}
+{% endblock %}

@@ -1,4 +1,4 @@
-"""Tests for my_shops.py views."""
+"""Tests for my_shops_view.py views."""
 import io
 import os
 
@@ -53,13 +53,15 @@ class TestGetUploadNewFile:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "shop_title", ["Shop", "Shop1", "", " ", "_", 1, 0, -1, None, True, False],
+        "shop_title",
+        ["Shop", "Shop1", "", " ", "_", 1, 0, -1, None, True, False],
     )
     def test_get_upload_new_file_wrong_params(logged_in_seller, shop_title):
         """Test get upload_file view by logged in seller with wrong params in query_string value."""
         params = {"shop": shop_title}
         response: Response = logged_in_seller.get(
-            url_for("upload_file", **params), follow_redirects=True,
+            url_for("upload_file", **params),
+            follow_redirects=True,
         )
         assert "Загрузите новый файл с данными" not in response.get_data(True)
         assert "Список моих магазинов" in response.get_data(True)
@@ -110,11 +112,13 @@ class TestGetUploadNewFile:
         params = {query_key: query_val} if query_key and query_val else None
         if params:
             response: Response = logged_in_seller.get(
-                url_for("upload_file", **params), follow_redirects=True,
+                url_for("upload_file", **params),
+                follow_redirects=True,
             )
         else:
             response: Response = logged_in_seller.get(
-                url_for("upload_file"), follow_redirects=True,
+                url_for("upload_file"),
+                follow_redirects=True,
             )
         assert "Загрузите новый файл с данными" not in response.get_data(True)
         assert "Список моих магазинов" in response.get_data(True)
@@ -145,7 +149,6 @@ class TestPostUploadNewFile:
     @pytest.mark.parametrize(
         ("filename", "message"),
         [
-            ("shop1.yaml", "shop1.yaml"),
             ("shop1.yam", "Допускаются только файлы формата yaml"),
             ("", "Выберите файл"),
             (None, "Файл не прикреплён"),
@@ -159,7 +162,10 @@ class TestPostUploadNewFile:
                 path = os.path.join(os.path.abspath(os.path.dirname(__file__)), filename)
                 print()
                 print(111, path)
-                file = FileStorage(stream=open(path, "rb"), filename=filename,)
+                file = FileStorage(
+                    stream=open(path, "rb"),
+                    filename=filename,
+                )
                 response: Response = logged_in_seller.post(
                     url_for("upload_file", **params),
                     data={"file": file},
@@ -168,7 +174,10 @@ class TestPostUploadNewFile:
                 )
 
             elif filename == "":
-                file = FileStorage(stream=io.BytesIO(b""), filename=filename,)
+                file = FileStorage(
+                    stream=io.BytesIO(b""),
+                    filename=filename,
+                )
                 response: Response = logged_in_seller.post(
                     url_for("upload_file", **params),
                     data={"file": file},
@@ -182,7 +191,7 @@ class TestPostUploadNewFile:
                     content_type="multipart/form-data",
                     follow_redirects=True,
                 )
-            print(response.get_data(True))
+            # print(response.get_data(True))
             assert message in response.get_data(True)
 
         finally:
@@ -191,8 +200,11 @@ class TestPostUploadNewFile:
                     file
                     for _, _, file in os.walk(test_app.config["UPLOAD_FOLDER"])
                     if file
-                ][0][0]
-                assert filename in the_only_file_name
+                ]
+                if the_only_file_name:
+                    the_only_file_name = the_only_file_name[0][0]
+                    assert filename in the_only_file_name
+
                 from shutil import rmtree
 
                 rmtree(test_app.config["UPLOAD_FOLDER"])

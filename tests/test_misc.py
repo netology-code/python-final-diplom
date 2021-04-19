@@ -11,8 +11,8 @@ from itsdangerous import SignatureExpired
 from web_shop.database import User
 from web_shop import token_serializer
 from web_shop.emails import create_confirmation_token, create_message
-from web_shop.views import confirm_email
-from web_shop.views.my_shops import allowed_file
+from web_shop.views import confirm
+from web_shop.views.my_shops_view import allowed_file
 
 
 class TestEmailSender:
@@ -33,7 +33,9 @@ class TestEmailSender:
             time.sleep(2)
             with pytest.raises(SignatureExpired):
                 token_serializer.loads(
-                    token, salt=test_app.config["SECRET_KEY"], max_age=expiry_time,
+                    token,
+                    salt=test_app.config["SECRET_KEY"],
+                    max_age=expiry_time,
                 )
 
     @pytest.mark.parametrize(
@@ -51,7 +53,7 @@ class TestEmailSender:
     def test_body_message(self, email):
         message = create_message("", email)
         token = create_confirmation_token(email)
-        link = url_for("confirm_email", token=token, _external=True)
+        link = url_for("confirm", token=token, _external=True)
         message.body = f"Link in body {link}"
         assert link in message.body
 
@@ -59,7 +61,7 @@ class TestEmailSender:
     def test_confirm_email_non_users(self, email, client):
         """Confirmation url got by an unregistered user."""
         token = create_confirmation_token(email)
-        link = url_for("confirm_email", token=token, _external=True)
+        link = url_for("confirm", token=token, _external=True)
         with client:
             response: Response = client.get(
                 link, content_type="html/text", follow_redirects=True
@@ -75,7 +77,7 @@ class TestEmailSender:
     def test_confirm_email_confirmed_users(self, email, client):
         """Confirmation url got by an unregistered user."""
         token = create_confirmation_token(email)
-        link = url_for("confirm_email", token=token, _external=True)
+        link = url_for("confirm", token=token, _external=True)
         with client:
             response: Response = client.get(
                 link, content_type="html/text", follow_redirects=True
@@ -96,7 +98,7 @@ class TestEmailSender:
         register_data["email"] = email
         token = create_confirmation_token(email)
         time.sleep(2)
-        confirm_email(token, 1)
+        confirm(token, 1)
         assert User.query.filter_by(email=email).first()
 
     @pytest.mark.parametrize("email", ["new_user1@test.mail", "new_user2@test.mail"])
@@ -104,11 +106,13 @@ class TestEmailSender:
         """Confirmation url got by a new user."""
         register_data["email"] = email
         token = create_confirmation_token(email)
-        link = url_for("confirm_email", token=token, _external=True)
+        link = url_for("confirm", token=token, _external=True)
         with client:
             with patch("web_shop.views.register_view.send_message"):
                 client.post(
-                    url_for("register"), data=register_data, follow_redirects=True,
+                    url_for("register"),
+                    data=register_data,
+                    follow_redirects=True,
                 )
                 response: Response = client.get(
                     link, content_type="html/text", follow_redirects=True
@@ -126,11 +130,13 @@ class TestEmailSender:
         with client:
             with patch("web_shop.views.register_view.send_message"):
                 client.post(
-                    url_for("register"), data=register_data, follow_redirects=True,
+                    url_for("register"),
+                    data=register_data,
+                    follow_redirects=True,
                 )
                 assert User.query.filter_by(email=email).first()
                 time.sleep(2)
-                confirm_email(token, 1)
+                confirm(token, 1)
                 assert not User.query.filter_by(email=email).first()
 
 

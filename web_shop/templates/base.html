@@ -22,20 +22,20 @@
             <a href="{{ url_for('login') }}">Войти</a>
         {% else %}
             {% if request.path != url_for('account') %}
-                <text style="float: left;">Добрый день {{ current_user.first_name }}! Добро пожаловать в магазин WebShop!</text>
+                <text style="float: left;">Добрый день {{ current_user.first_name }}! Добро пожаловать в магазин WebShop!
+                </text>
             {% else %}
-                <text style="float: left;">Добрый день {{ current_user.first_name }}! Добро пожаловать в личный кабинет!</text>
+                <text style="float: left;">Добрый день {{ current_user.first_name }}! Добро пожаловать в личный кабинет!
+                </text>
             {% endif %}
 
             {% if current_user.is_admin %}
                 <a href="{{ url_for('admin.index') }}">Админка</a>
             {% endif %}
-
-            {% if request.path != url_for('account') %}
-                <a href="{{ url_for('account') }}">Личный кабинет</a>
-            {% else %}
-                <a href="{{ url_for('index') }}">На главную</a>
-            {% endif %}
+            <a href="{{ url_for('index') }}">На главную</a>
+            <a href="{{ url_for('show_cart') }}">Корзина</a>
+            <a href="{{ url_for('list_orders') }}">Заказы</a>
+            <a href="{{ url_for('account') }}">Личный кабинет</a>
             <a href="{{ url_for('logout') }}">Выйти из системы</a>
         {% endif %}
     {% endif %}
@@ -48,10 +48,14 @@
         <p class=flashes>
             {% for message in messages %}
                 <text style="color:RED">{{ message }}</text>
+                <br>
             {% endfor %}
         </p>
     {% endif %}
 {% endwith %}
+    {% if not current_user.is_anonymous and current_user.user_type.name == 'seller' %}
+        <a href={{ url_for('sellers_orders') }} style="float: right; color: sienna">Заказы на исполнение</a>
+    {% endif %}
 {% block content %}
 
 

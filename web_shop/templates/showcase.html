@@ -25,35 +25,76 @@
                         <th colspan="6"><h3>{{ header }}</h3></th>
                     </tr>
                 {% endif %}
+
                 {% if items %}
                     <form action="" method="post" novalidate>
                         <tr>
-                            <th>Наименование</th>
-                            <th>Магазин</th>
-                            <th>Цена (руб.)</th>
-                            <th>Кол-во (шт.)</th>
-                            <th>В корзину (шт.)</th>
+                            {% if request.args.get('sort_by') and not request.args.get('reverse') %}
+                                <th><a href="
+
+
+                                        {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=name&reverse=True">Наименование</a>
+                                </th>
+                                <th><a href="
+
+
+                                        {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=shop&reverse=True">Магазин</a>
+                                </th>
+
+                                <th><a href="
+
+
+                                        {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=price&reverse=True">Цена<br>(руб)</a>
+                                </th>
+
+                                <th><a href="
+
+
+
+                                        {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=stock_qty&reverse=True">На
+                                    складе<br>(шт)</a></th>
+                            {% else %}
+                                <th><a href="{{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=name">Наименование</a>
+                                </th>
+                                <th><a href="
+                                        {{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=shop">Магазин</a>
+                                </th>
+                                <th><a href="{{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=price">Цена<br>(руб)</a>
+                                </th>
+                                <th><a href="{{ request.full_path.split('&',1)[0].rstrip('?') }}&sort_by=stock_qty">На
+                                    складе<br>(шт)</a></th>
+
+                            {% endif %}
+                            <th>В корзину<br>(шт)</th>
                         </tr>
 
                         {% for item in items %}
                             <td>
                                 <a href={{ request.full_path }}&item={{ item.slug }}>{{ item.name }}</a>
                             </td>
-                            <td>{{ item.shop }}</td>
-                            <td>{{ item.price }}</td>
-                            <td>{{ item.quantity }}</td>
-                            <label for={{ item.slug }}></label>
+                            <td>{{ item.shop_name }}</td>
+                            {% if current_user.is_authenticated %}
+                                <td>{{ item.price }}</td>
+                                <td align="center">{{ item.stock_qty }}</td>
+                                <label for={{ item.slug }}></label>
+                                <div class="form-group" align="center">
+                                    <label hidden="True">{{ item.slug }}_cart_qty</label>
+                                    <td><input name={{ item.slug }}_cart_qty id={{ item.slug }}_cart_qty type="number"
+                                               min="0" max={{ item.stock_qty }} step="1"/></td>
+                                </div>
+                            {% else %}
+                                <td style="color: red"><strong>Скрыто</strong></td>
+                                <td style="color: red"><strong>Скрыто</strong></td>
+                                <td><input type="number" min="0" max=100000 step="1"/></td>
+                            {% endif %}
 
-                            <div class="form-group">
-                                <label hidden="True">{{ item.slug }}_cart_qty</label>
-                                <td><input name={{ item.slug }}_cart_qty id={{ item.slug }}_cart_qty type="number"
-                                           min="0"
-                                           max={{ item.quantity }} step="1"/></td>
-                            </div>
                             </tr>
                         {% endfor %}
-
-                        <p><input type="submit" value=" Добавить в корзину "></p>
+                        {% if current_user.is_authenticated %}
+                            <p><input style="background-color: #9CDCFE" type="submit" value=" Добавить в корзину "></p>
+                        {% else %}
+                            <p style="color: red"><strong>Для оформления покупок авторизуйтесь в системе</strong></p>
+                        {% endif %}
                     </form>
                 {% endif %}
 
@@ -68,13 +109,14 @@
                             <td>{{ parameter.value }}</td>
                         </tr>
                     {% endfor %}
+
+                    </table>
+
+                    <div>
+                        <br><a href={{ request.full_path.split('&',1)[0].rstrip('?')}}>Назад</a>
+                    </div>
                 {% endif %}
-            </table>
-            {% if parameters %}
-                <div>
-                    <br><a href={{ request.full_path.split('&',1)[0] }}>Назад</a>
-                </div>
-            {% endif %}
+
         {% endif %}
     </div>
 {% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if header %}
+        <h3>Мои {{ header }} заказы</h3>
+    {% else %}
+        <h3>Мои заказы</h3>
+    {% endif %}
+    <div style="float: left">
+        <table>
+            <tr>
+                <td>
+                    <a href={{ url_for('list_orders') }}?type=new> Проект заказа</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href={{ url_for('list_orders') }}?type=awaiting> Неподтвержденные</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href={{ url_for('list_orders') }}?type=confirmed> Подтвержденные</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href={{ url_for('list_orders') }}?type=assembled> Собранные</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href={{ url_for('list_orders') }}?type=sent> Отправленные</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href={{ url_for('list_orders') }}?type=delivered> Доставленные</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href={{ url_for('list_orders') }}?type=ready> Готовые к выдаче</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href={{ url_for('list_orders') }}?type=canceled> Отмененные</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+    {% if orders_list %}
+        <div style="font-size: 14px; align-self: center; padding-left: 300px;">
+            <table border="1" cellpadding="5">
+                <tr>
+                    <th>№ п/п</th>
+                    <th>Номер заказа</th>
+                    <th>Создан</th>
+                    <th>Статус</th>
+                    <th>Последние изменения</th>
+                </tr>
+                {% for order in orders_list %}
+                    <tr>
+                    <td>{{ orders_list.index(order)+1 }}.</td>
+                    <td><a href={{ request.full_path.split("&order",1)[0]}}&order={{ order.id }}>Заказ №{{ order.id }}</a></td>
+                    <td>{{ order.created }}</td>
+                    <td>{{ order.status.value }}</td>
+                    <td>{{ order.last_change }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <br><br>
+    {% endif %}
+
+
+
+{% endblock %}

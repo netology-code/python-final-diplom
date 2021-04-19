@@ -5,7 +5,6 @@ import os
 from celery import Celery
 from flask import Flask
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
 from flask_jwt_extended import JWTManager
 from flask_login import LoginManager
 from flask_mail import Mail
@@ -30,8 +29,14 @@ mail = Mail(app)
 token_serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
 # Initialize Celery
-celery = Celery(app.name, broker=app.config["CELERY_BROKER_URL"])
+celery = Celery(
+    app.name,
+    broker=app.config["CELERY_BROKER_URL"],
+    backend=app.config["CELERY_RESULT_BACKEND"],
+    include=app.config["CELERY_INCLUDE"],
+)
 celery.conf.update(app.config)
+
 
 # Init login
 login_manager = LoginManager(app)

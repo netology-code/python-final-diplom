@@ -2,14 +2,14 @@
 from flask import flash, make_response, redirect, render_template, url_for
 from flask_login import current_user
 
+from web_shop.utils.utils import create_link
+from web_shop import app, db
 from web_shop.database import User, UserTypeChoices
 from web_shop.emails import (
-    create_confirmation_token,
     create_message,
     send_message,
 )
 from web_shop.forms import MyRegisterForm
-from web_shop import app, db
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -34,9 +34,8 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        token = create_confirmation_token(user.email)
+        link = create_link(user.email)
         message = create_message("Подтверждение регистрации", user.email)
-        link = url_for("confirm_email", token=token, _external=True)
         message.html = (
             f"Для подтверждения учётной записи на WebShop перейдите по ссылке: {link}"
         )

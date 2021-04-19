@@ -1,56 +1,56 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% if current_user.is_authenticated %}
-            <table border="1" cellpadding="10" bgcolor="#d0d0d0">
-                <tr>
-                    <th align="left">Тип пользователя:</th>
-                    <td colspan="2" align="center">{{ current_user.user_type.value }}</td>
-                    <td rowspan="6"><a href="account/edit?password">Изменить пароль</a></td>
-                </tr>
-                <tr>
-                    <th align="left">Дата регистрации:</th>
-                    <td colspan="2" align="center">{{ current_user.confirmed_at }}</td>
-                </tr>
-                <tr>
-                    <th align="left">Имя:</th>
-                    <td>{{ current_user.first_name }}</td>
-                    <td rowspan="2"><a href="account/edit?name">Изменить</a></td>
-                </tr>
-                <tr>
-                    <th align="left">Фамилия:</th>
-                    <td>{{ current_user.last_name }}</td>
-                </tr>
-                <tr>
-                    <th align="left">Aдрес электронной почты:</th>
-                    <td>{{ current_user.email }}</td>
-                    <td><a href="account/edit?email">Изменить</a></td>
-                </tr>
+{% if current_user.is_authenticated %}
+    <table border="1" cellpadding="10" bgcolor="#d0d0d0">
+        <tr>
+            <th align="left">Тип пользователя:</th>
+            <td colspan="2" align="center">{{ current_user.user_type.value }}</td>
+            <td rowspan="6"><a href="account/edit?password">Изменить пароль</a></td>
+        </tr>
+        <tr>
+            <th align="left">Дата регистрации:</th>
+            <td colspan="2" align="center">{{ current_user.confirmed_at }}</td>
+        </tr>
+        <tr>
+            <th align="left">Имя:</th>
+            <td>{{ current_user.first_name }}</td>
+            <td rowspan="2"><a href="account/edit?name">Изменить</a></td>
+        </tr>
+        <tr>
+            <th align="left">Фамилия:</th>
+            <td>{{ current_user.last_name }}</td>
+        </tr>
+        <tr>
+            <th align="left">Aдрес электронной почты:</th>
+            <td>{{ current_user.email }}</td>
+            <td><a href="account/edit?email">Изменить</a></td>
+        </tr>
 
-                {% if current_user.user_type.name == 'seller' %}
-                    <tr>
-                        <th align="left">Статус аккаунта:</th>
-                        <td>
-                            {% if current_user.is_active %}
-                                Включён
-                            {% else %}
-                                Выключен
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if current_user.is_active %}
-                                <a href="account/edit?status">Выключить</a></td>
-                            {% else %}
-                                <a href="account/edit?status">Включить</a></td>
-                            {% endif %}
-                    </tr>
-                    <tr>
-                        <th align="center" colspan="4">
-                            <a href="account/my_shops">Мои магазины</a>
-                        </th>
-                    </tr>
-                {% endif %}
-
-            </table>
+        {% if current_user.user_type.name == 'seller' %}
+            <tr>
+                <th align="left">Статус аккаунта:</th>
+                <td>
+                    {% if current_user.is_active %}
+                        Включён
+                    {% else %}
+                        Выключен
+                    {% endif %}
+                </td>
+                <td>
+                    {% if current_user.is_active %}
+                        <a href="account/edit?status">Выключить</a></td>
+                    {% else %}
+                        <a href="account/edit?status">Включить</a></td>
+                    {% endif %}
+            </tr>
+            <tr>
+                <th align="center" colspan="4">
+                    <a href="account/my_shops">Мои магазины</a>
+                </th>
+            </tr>
         {% endif %}
+
+    </table>
+{% endif %}
 {% endblock %}

@@ -1,0 +1,36 @@
+shop: Связной
+goods:
+  - category: Смартфоны
+    model: apple/iphone/xs-max512white
+    name: Смартфон Apple iPhone XS Max 512GB (белый)
+    price: 110000.00
+    price_rrc: 117647.06
+    quantity: 8
+    parameters:
+      "Диагональ (дюйм)": 6.5
+      "Разрешение (пикс)": 2688x1242
+      "Встроенная память (Гб)": 512
+      "Цвет": белый
+
+  - category: Смартфоны
+    model: apple/iphone/xr256white
+    name: Смартфон Apple iPhone XR 256GB (белый)
+    price: 60000.00
+    price_rrc: 70588.24
+    quantity: 10
+    parameters:
+      "Диагональ (дюйм)": 6.1
+      "Разрешение (пикс)": 1792x828
+      "Встроенная память (Гб)": 256
+      "Цвет": белый
+
+  - category: Flash-накопители
+    model: sandisk/flash/SDCZ600-064G-G35
+    name: Флеш-диск SanDisk 64GB Cruzer Glide USB3.0 (SDCZ600-064G-G35)
+    price: 1020.00
+    price_rrc: 1200.00
+    quantity: 10
+    parameters:
+      "версия USB": 3.0
+      "Цвет": чёрный
+      "Встроенная память (Гб)": 64

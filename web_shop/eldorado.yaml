@@ -1,0 +1,37 @@
+shop: Эльдорадо
+goods:
+  - category: Смартфоны
+    model: apple/iphone/xs-max512gold
+    name: Смартфон Apple iPhone XS Max 512GB (золотистый)
+    price: 112000
+    price_rrc: 131764.71
+    quantity: 3
+    parameters:
+      "Диагональ (дюйм)": 6.5
+      "Разрешение (пикс)": 2688x1242
+      "Встроенная память (Гб)": 512
+      "Цвет": золотистый
+
+  - category: Смартфоны
+    model: apple/iphone/xr256red
+    name: Смартфон Apple iPhone XR 256GB (красный)
+    price: 60000
+    price_rrc: 70588.24
+    quantity: 20
+    parameters:
+      "Диагональ (дюйм)": 6.1
+      "Разрешение (пикс)": 1792x828
+      "Встроенная память (Гб)": 256
+      "Цвет": красный
+
+  - category: Смартфоны
+    model: apple/iphone/xr256black
+    name: Смартфон Apple iPhone XR 256GB (черный)
+    price: 66500
+    price_rrc: 78235.29
+    quantity: 5
+    parameters:
+      "Диагональ (дюйм)": 6.1
+      "Разрешение (пикс)": 1792x828
+      "Встроенная память (Гб)": 256
+      "Цвет": черный

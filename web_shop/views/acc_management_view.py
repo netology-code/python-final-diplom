@@ -17,7 +17,7 @@ from itsdangerous import BadPayload, BadSignature, SignatureExpired
 from werkzeug.security import generate_password_hash
 
 from web_shop import app, db, token_serializer
-from web_shop.database import User
+from web_shop.database import Order, OrderStateChoices, User
 from web_shop.emails import (
     create_confirmation_token,
     create_message,
@@ -29,6 +29,8 @@ from web_shop.forms import (
     MyPasswordChangeForm,
     MyResetPasswordForm,
 )
+from web_shop.validators import MyEmailValidator
+from web_shop.views.orders_view import confirm_order, send_messages_on_order_confirmation
 
 
 @app.route("/account")
@@ -83,29 +85,69 @@ def account_edit():
 
 
 @app.route("/confirm/<token>")
-def confirm_email(token, token_age=None):
+def confirm(token, token_age=None):
     """Confirm email after registration."""
-    email = token_serializer.loads(token, salt=app.config["SECRET_KEY"])
-    user = User.query.filter_by(email=email).first()
-    if user:
+    data = token_serializer.loads(token, salt=app.config["SECRET_KEY"])
+    if isinstance(data, str) and MyEmailValidator(data):
+        email = data
+        user = User.query.filter_by(email=email).first()
+        if user:
+            try:
+                token_serializer.loads(
+                    token,
+                    salt=app.config["SECRET_KEY"],
+                    max_age=token_age if token_age else 60,
+                )
+                user.confirmed_at = datetime.now()
+                user.is_active = True
+                db.session.commit()
+                flash("Учётная запись подтверждена")
+                return make_response(redirect(url_for("login")))
+            except (BadPayload, BadSignature, SignatureExpired):
+                if user.confirmed_at:
+                    return make_response(redirect(url_for("login")))
+                db.session.delete(user)
+                db.session.commit()
+        flash("Ссылка недействительна. Пройдите регистрацию.")
+        return make_response(redirect(url_for("register")))
+
+    if isinstance(data, (tuple, list)):
+        email, order_id, token_age = data
+        order: Order = Order.query.get(order_id)
+
+        if not order:
+            flash("Такого заказа не существует.")
+            return make_response(redirect(url_for("list_orders")))
+
+        if not current_user.email == email:
+            flash("Данная ссылка предназначена для другого пользователя.")
+            return make_response(redirect(url_for("list_orders")))
+
+        if order.status == OrderStateChoices.canceled:
+            flash("Данный заказ был отменён.")
+            return make_response(redirect(url_for("list_orders")))
+
+        if not order.status == OrderStateChoices.awaiting:
+            flash("Данный заказ уже был подтверждён.")
+            return make_response(redirect(url_for("list_orders")))
+
         try:
             token_serializer.loads(
                 token,
                 salt=app.config["SECRET_KEY"],
                 max_age=token_age if token_age else 60,
             )
-            user.confirmed_at = datetime.now()
-            user.is_active = True
-            db.session.commit()
-            flash("Учётная запись подтверждена")
-            return make_response(redirect(url_for("login")))
+            items, total_sum = confirm_order(order)
+            send_messages_on_order_confirmation(order, items, total_sum)
+            return make_response(redirect(url_for("list_orders") + "?type=confirmed"))
+
         except (BadPayload, BadSignature, SignatureExpired):
-            if user.confirmed_at:
-                return make_response(redirect(url_for("login")))
-            db.session.delete(user)
+            order: Order = Order.query.get(order_id)
+            order.status = OrderStateChoices.canceled.name
+            order._last_change = datetime.utcnow()
             db.session.commit()
-    flash("Ссылка недействительна. Пройдите регистрацию.")
-    return make_response(redirect(url_for("register")))
+            flash("Ссылка недействительна. Заказ отменён.")
+            return make_response(redirect(url_for("list_orders")))
 
 
 @app.route("/retrieve", methods=["GET", "POST"])

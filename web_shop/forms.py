@@ -10,7 +10,7 @@ from wtforms import (
 )
 from wtforms.validators import DataRequired, EqualTo
 
-from web_shop.database import UserTypeChoices
+from web_shop.database import OrderStateChoices, UserTypeChoices
 from web_shop.validators.validators import MyEmailValidator, MyPasswordValidator
 
 
@@ -18,10 +18,12 @@ class MyLoginForm(FlaskForm):
     """Web form for login template."""
 
     email = StringField(
-        "Адрес электронной почты", validators=[DataRequired(message="Адрес не указан")],
+        "Адрес электронной почты",
+        validators=[DataRequired(message="Адрес не указан")],
     )
     password = PasswordField(
-        "Пароль учётной записи", validators=[DataRequired(message="Пароль не указан")],
+        "Пароль учётной записи",
+        validators=[DataRequired(message="Пароль не указан")],
     )
     remember_me = BooleanField("Запомнить меня")
     submit = SubmitField("Войти")
@@ -70,7 +72,8 @@ class MyResetPasswordForm(FlaskForm):
     """Form for password reset template."""
 
     email = StringField(
-        "Адрес электронной почты", validators=[DataRequired(message="Адрес не указан")],
+        "Адрес электронной почты",
+        validators=[DataRequired(message="Адрес не указан")],
     )
     submit = SubmitField("Отправить")
 
@@ -122,3 +125,40 @@ class MyPasswordChangeForm(MyForm):
             EqualTo(fieldname="password", message="Пароли не совпадают"),
         ],
     )
+
+
+class SellersOrdersForm(FlaskForm):
+    """Sellers orders choices form."""
+
+    order_current_status = SelectField(
+        "Текущий статус заказа",
+        choices=[
+            (OrderStateChoices.confirmed.name, OrderStateChoices.confirmed.value + "ные"),
+            (OrderStateChoices.assembled.name, OrderStateChoices.assembled.value + "ные"),
+            (OrderStateChoices.sent.name, OrderStateChoices.sent.value + "ные"),
+            (OrderStateChoices.delivered.name, OrderStateChoices.delivered.value + "ные"),
+            (OrderStateChoices.canceled.name, OrderStateChoices.canceled.value + "ные"),
+        ],
+        coerce=str,
+        validators=[DataRequired()],
+    )
+    submit = SubmitField("Выбрать")
+
+
+class OrderStatusForm(FlaskForm):
+    """Order status choices form."""
+
+    order_new_status = SelectField(
+        "Статус заказа",
+        choices=[
+            (OrderStateChoices.confirmed.name, OrderStateChoices.confirmed.value),
+            (OrderStateChoices.assembled.name, OrderStateChoices.assembled.value),
+            (OrderStateChoices.sent.name, OrderStateChoices.sent.value),
+            (OrderStateChoices.delivered.name, OrderStateChoices.delivered.value),
+            (OrderStateChoices.canceled.name, OrderStateChoices.canceled.value),
+        ],
+        coerce=str,
+        validators=[DataRequired()],
+    )
+
+    apply = SubmitField("Применить")

@@ -13,8 +13,9 @@ if __name__ == "__main__":
     # insert users, shops, categories
     users = [User(**user) for user in inits["users"]]
     shops = [Shop(**shop) for shop in inits["shops"]]
+    delivery = [Delivery(**delivery) for delivery in inits["delivery"]]
     categories = [Category(**category) for category in inits["categories"]]
-    models = (users, shops, categories)
+    models = (users, shops, delivery, categories)
     for model in models:
         db.session.bulk_save_objects(model)
     db.session.commit()
