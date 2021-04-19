@@ -99,9 +99,7 @@ def import_data(filename) -> None:
             product = add_to_database(product)
 
         product_info = ProductInfo.query.filter_by(
-            name=good["name"],
-            product=product.id,
-            shop=shop.id,
+            name=good["name"], product=product.id, shop=shop.id,
         ).first()
         if not product_info:
             product_info = ProductInfo(

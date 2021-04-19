@@ -74,9 +74,7 @@ class User(UserMixin, db.Model):
     is_active = db.Column(db.Boolean(), default=False)
     confirmed_at = db.Column(db.DateTime(), nullable=True)
     user_type = db.Column(
-        db.Enum(UserTypeChoices),
-        default=UserTypeChoices.customer,
-        nullable=False,
+        db.Enum(UserTypeChoices), default=UserTypeChoices.customer, nullable=False,
     )
 
     def __init__(
@@ -284,16 +282,10 @@ class ProductParameter(db.Model):
 
     __tablename__ = "x_product_parameter"
     product_info = db.Column(
-        db.Integer(),
-        db.ForeignKey("product_info.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer(), db.ForeignKey("product_info.id"), primary_key=True, nullable=False,
     )
     parameter = db.Column(
-        db.Integer(),
-        db.ForeignKey("parameter.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer(), db.ForeignKey("parameter.id"), primary_key=True, nullable=False,
     )
     value = db.Column(db.String(255), nullable=False)
     p_info = relationship("ProductInfo")
@@ -408,16 +400,10 @@ class OrderItem(db.Model):
 
     __tablename__ = "x_order_item"
     order = db.Column(
-        db.Integer(),
-        db.ForeignKey("order.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer(), db.ForeignKey("order.id"), primary_key=True, nullable=False,
     )
     product = db.Column(
-        db.Integer(),
-        db.ForeignKey("product.id"),
-        primary_key=True,
-        nullable=False,
+        db.Integer(), db.ForeignKey("product.id"), primary_key=True, nullable=False,
     )
     shop = db.Column(
         db.Integer(), db.ForeignKey("shop.id"), primary_key=True, nullable=False

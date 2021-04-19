@@ -228,10 +228,7 @@ def create_order(items, request_):
         ).first()
 
         if not order:
-            order = Order(
-                user=current_user.id,
-                status=OrderStateChoices.awaiting.name,
-            )
+            order = Order(user=current_user.id, status=OrderStateChoices.awaiting.name,)
 
         cart: Order = Order.query.get(items[0].order)
         order.delivery_id = cart.delivery_id

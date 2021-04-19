@@ -150,10 +150,7 @@ def show_product_parameters(request_, categories=None):
         parameters = get_product_parameters(info.product)
         return make_response(
             render_template(
-                "showcase.html",
-                header=info.name,
-                parameters=parameters,
-                cats=categories,
+                "showcase.html", header=info.name, parameters=parameters, cats=categories,
             )
         )
     return make_response(redirect(url_for("index")))
