@@ -17,7 +17,7 @@
    - SMTP_PASSWORD
    providing that "SMTP" keys shall represent an acting email-service smtp-configuration.
 5) Create tables from migrations: `flask db upgrade`
-6) Run `web_shop/database/load_db_inits.py`
+6) Run `python load_db_inits.py`
 7) Run `sudo service redis-server`   
 8) Run `celery -A web_shop.celery worker`
 9) Start app: `flask run` and open `http://127.0.0.1:5000/` in your browser. 
