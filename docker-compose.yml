@@ -1,0 +1,63 @@
+version: '3.5'
+
+services:
+  web:
+    image: web_shop
+    restart: always
+    entrypoint: sh
+    command: run.sh
+    networks:
+      - web_shop
+    depends_on:
+      - db
+      - celery
+    ports:
+      - 5000:5000
+    environment:
+      - DATABASE_URI=postgres+psycopg2://postgres:pass@db:5432/web_shop
+      - SECRET_KEY=some_secret
+      - SMTP_SERVER=smtp.gmail.com
+      - SMTP_NAME=WebShop_Emails
+      # УКАЖИТЕ СВОЮ ПОЧТУ НА GMAIL И ПАРОЛЬ К НЕЙ - она будет использована в качестве сервера отправки писем
+      - SMTP_USERNAME=
+      - SMTP_PASSWORD=
+
+  db:
+    image: postgres:13-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=web_shop
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    networks:
+      - web_shop
+
+  broker:
+    image: redis:6-buster
+    restart: always
+    ports:
+      - 6379:6379
+    networks:
+      - web_shop
+
+  celery:
+    image: web_shop
+    restart: always
+    entrypoint: celery
+    command: -A web_shop.celery worker -Ofair --concurrency=4 --loglevel=DEBUG
+    depends_on:
+      - broker
+    networks:
+      - web_shop
+    environment:
+      - REDIS_HOST=broker
+      - REDIS_PORT=6379
+
+networks:
+  web_shop:
+    name: web_shop
+    driver: bridge

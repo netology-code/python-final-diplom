@@ -140,3 +140,4 @@ venv.bak/
 /tests/uploads/
 /web_shop/uploads/
 /web_shop/database/migrations/versions_old/
+/data/

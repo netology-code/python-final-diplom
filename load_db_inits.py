@@ -7,6 +7,7 @@ if __name__ == "__main__":
     from web_shop import db
     from web_shop.database.models import *
 
+
     with open("web_shop/database/inits.yaml", "r", encoding="utf-8") as f:
         inits = yaml.safe_load(f)
 

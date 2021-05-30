@@ -2,6 +2,16 @@
 
 ## Getting started
 
+At the very first start run `START.sh`. It will build an image, initially fill-in database and start the service.  
+
+To start the service use `docker-compose up -d`. You'll have to wait about 40 seconds before the service is up.  
+To stop service use `docker-compose down`.  
+
+Register your first user at `/register`.  
+If you need an admin - set your user `"is_admin"` field to true in database manually.
+
+---
+
 1) Install requirements: `pip install -r requirements.txt`
 2) Set flask running file: `set FLASK_APP=web_shop/app.py` (for Linux: `export FLASK_APP=web_shop/app.py`)
    2.1) If necessary set flask debugging mode:
