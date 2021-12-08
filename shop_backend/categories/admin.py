@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import Category
+from .models import Category, ShopCategory
 
 
 class ShopCategoryInline(admin.TabularInline):
-    model = Category.shops.through
+    model = ShopCategory
     extra = 1
 
 
