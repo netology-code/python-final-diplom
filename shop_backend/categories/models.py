@@ -18,6 +18,6 @@ class ShopCategory(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, verbose_name='Категория')
 
     class Meta:
-        verbose_name = 'Магазин и его категория'
-        verbose_name_plural = 'Список магазинов и их категорий'
+        verbose_name = 'Магазин и категория'
+        verbose_name_plural = 'Список магазинов и категорий'
         constraints = [models.UniqueConstraint(fields=['shop', 'category'], name='unique_shop_category')]
