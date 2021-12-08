@@ -34,8 +34,8 @@ class Parameter(models.Model):
     products = models.ManyToManyField(Product, through='ParameterValue', blank=True, verbose_name='Список продуктов')
 
     class Meta:
-        verbose_name = 'Имя параметра'
-        verbose_name_plural = 'Список имен параметров'
+        verbose_name = 'Параметра'
+        verbose_name_plural = 'Список параметров'
         ordering = ['-name']
 
 
@@ -47,6 +47,6 @@ class ParameterValue(models.Model):
     value = models.CharField(max_length=50, verbose_name='Значение')
 
     class Meta:
-        verbose_name = 'Продукт и его параметр'
-        verbose_name_plural = 'Список продуктов и их параметров'
+        verbose_name = 'Продукт и параметр'
+        verbose_name_plural = 'Список продуктов и параметров'
         constraints = [models.UniqueConstraint(fields=['product', 'parameter'], name='unique_product_parameter')]
