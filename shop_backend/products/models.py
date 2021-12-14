@@ -4,8 +4,8 @@ from shops.models import Shop
 
 
 class Product(models.Model):
-    categories = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products', blank=True,
-                                   verbose_name='Список категорий')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products', blank=True,
+                                 verbose_name='Список категорий')
     shops = models.ManyToManyField(Shop, through='ProductInfo', blank=True, verbose_name='Список магазинов')
     name = models.CharField(max_length=100, unique=True, verbose_name='Название')
 
@@ -30,7 +30,7 @@ class ProductInfo(models.Model):
 
 
 class Parameter(models.Model):
-    name = models.CharField(max_length=50, verbose_name='Имя')
+    name = models.CharField(max_length=50, unique=True, verbose_name='Имя')
     products = models.ManyToManyField(Product, through='ParameterValue', blank=True, verbose_name='Список продуктов')
 
     class Meta:
