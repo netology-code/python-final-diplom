@@ -1,3 +1,6 @@
 django
 pytz
 psycopg2-binary
+djangorestframework
+requests
+pip install pyyaml
