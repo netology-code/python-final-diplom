@@ -16,12 +16,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from shops.views import ShopViewSet
+from contacts.views import UserViewSet
 from rest_framework.routers import DefaultRouter
 
-router = DefaultRouter()
-router.register('update', ShopViewSet, basename='shop')
+partner_router = DefaultRouter()
+partner_router.register('update', ShopViewSet, basename='partner')
+
+user_router = DefaultRouter()
+user_router.register('register', UserViewSet, basename='user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/partner/', include(router.urls))
+    path('api/v1/partner/', include(partner_router.urls)),
+    path('api/v1/user/', include(user_router.urls))
 ]

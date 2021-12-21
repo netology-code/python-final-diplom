@@ -2,13 +2,13 @@ from django.db import models
 
 
 class User(models.Model):
-    first_name = models.CharField(max_length=50, unique=True, verbose_name='Имя')
-    middle_name = models.CharField(max_length=50, unique=True, verbose_name='Отчество')
-    last_name = models.CharField(max_length=50, unique=True, verbose_name='Фамилия')
-    email = models.CharField(max_length=50, unique=True, verbose_name='Email')
+    first_name = models.CharField(max_length=50, verbose_name='Имя')
+    middle_name = models.CharField(max_length=50, verbose_name='Отчество')
+    last_name = models.CharField(max_length=50, verbose_name='Фамилия')
+    email = models.EmailField(unique=True, verbose_name='Email')
     password = models.CharField(max_length=50, verbose_name='Пароль')
-    company = models.CharField(max_length=50, unique=True, verbose_name='Компания')
-    position = models.CharField(max_length=50, unique=True, verbose_name='Позиция')
+    company = models.CharField(max_length=50, verbose_name='Компания')
+    position = models.CharField(max_length=50, verbose_name='Позиция')
 
     class Meta:
         verbose_name = 'Пользователь'

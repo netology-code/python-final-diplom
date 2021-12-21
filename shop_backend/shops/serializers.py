@@ -27,14 +27,14 @@ def price_list_to_yaml(price_list_filepath: str) -> dict:
                     raise ValidationError(f"Could not parse price list. Error: file '{price_list_filepath} is empty.")
                 if not is_price_list_valid(price_list):
                     raise ValidationError(
-                        'Could not parse price list. Error: price list does not contain shop, categories or goods.')
+                        'Could not parse price list. Error: price list is of invalid format.')
                 return price_list
             except yaml.YAMLError as yaml_load_exception:
                 yaml_load_error = yaml_load_exception.__dict__.get('problem')
                 raise ValidationError(f'Could not load price list. Error: {yaml_load_error}' if yaml_load_error
                                       else 'Unknown error.')
     except FileNotFoundError:
-        raise ValidationError(f"Could not load price list. File '{price_list_filepath}' does not exist.")
+        raise ValidationError(f"Could not load price list. Error: file '{price_list_filepath}' does not exist.")
 
 
 class ShopSerializer(serializers.ModelSerializer):
@@ -44,7 +44,6 @@ class ShopSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         price_list = price_list_to_yaml(validated_data.get('filename'))
-        print(price_list)
 
         # Creating new shop from price list yaml file content
         new_shop, _ = Shop.objects.get_or_create(
@@ -103,10 +102,3 @@ class ShopSerializer(serializers.ModelSerializer):
                 )
 
         return validated_data
-
-    def validate(self, data):
-        price_list_filename = data.get('filename')
-        if not price_list_filename:
-            raise ValidationError('Please provide a path to your price list file.')
-
-        return data
