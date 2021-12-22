@@ -1,19 +1,12 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
-class User(models.Model):
-    first_name = models.CharField(max_length=50, verbose_name='Имя')
+class UserInfo(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Информация о пользователе')
     middle_name = models.CharField(max_length=50, verbose_name='Отчество')
-    last_name = models.CharField(max_length=50, verbose_name='Фамилия')
-    email = models.EmailField(unique=True, verbose_name='Email')
-    password = models.CharField(max_length=50, verbose_name='Пароль')
     company = models.CharField(max_length=50, verbose_name='Компания')
     position = models.CharField(max_length=50, verbose_name='Позиция')
-
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Список пользователей'
-        ordering = ['-email']
 
 
 class Contact(models.Model):

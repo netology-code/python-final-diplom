@@ -1,9 +1,11 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticated
 from .models import User
-from .serializers import UserSerializer
+from .serializers import UserRegisterSerializer
 
 
-class UserViewSet(ModelViewSet):
+class UserRegisterViewSet(ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserRegisterSerializer
     http_method_names = ['post']
+    # permission_classes = [IsAuthenticated]

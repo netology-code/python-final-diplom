@@ -37,7 +37,7 @@ def price_list_to_yaml(price_list_filepath: str) -> dict:
         raise ValidationError(f"Could not load price list. Error: file '{price_list_filepath}' does not exist.")
 
 
-class ShopSerializer(serializers.ModelSerializer):
+class ShopImportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
         fields = ['filename']
@@ -102,3 +102,15 @@ class ShopSerializer(serializers.ModelSerializer):
                 )
 
         return validated_data
+
+
+class OrdersStateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Shop
+        fields = ['state']
+
+    def retrieve(self, request):
+        pass
+
+    def create(self, validated_data):
+        pass
