@@ -28,7 +28,7 @@ user_router.register('register', UserRegisterViewSet, basename='user_register')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api-token-auth/', views.obtain_auth_token),
+    path('api/v1/auth/', views.obtain_auth_token),
     path('api/v1/partner/', include(partner_router.urls)),
     path('api/v1/user/', include(user_router.urls))
 ]
