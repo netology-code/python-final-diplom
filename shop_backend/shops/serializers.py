@@ -1,9 +1,12 @@
-from rest_framework import serializers
+import django.db.utils
+
 from .models import Shop
 from categories.models import Category
+from contacts.models import User
 from products.models import Product, ProductInfo, Parameter, ParameterValue
 from rest_framework.exceptions import ValidationError
 import yaml
+from rest_framework import serializers
 
 
 def is_price_list_valid(price_list: dict) -> bool:
@@ -46,60 +49,63 @@ class ShopImportSerializer(serializers.ModelSerializer):
         price_list = price_list_to_yaml(validated_data.get('filename'))
 
         # Creating new shop from price list yaml file content
-        new_shop, _ = Shop.objects.get_or_create(
+        new_shop = Shop(
+            user=User.objects.get(email=self.context.get('request').user),
             name=price_list.get('shop'),
-            defaults={
-                'url': validated_data.get('url'),
-                'filename': validated_data.get('filename')
-            }
+            filename=validated_data.get('filename')
         )
+        try:
+            new_shop.save()
+        except django.db.utils.IntegrityError as err:
+            print(err)
+            raise ValidationError({'name': ['Shop with this name already exists.']})
 
         # Creating new categories from price list yaml file content
         for category in price_list.get('categories'):
-            new_category, _ = Category.objects.update_or_create(
+            new_category = Category(
                 id=category.get('id'),
-                defaults={'name': category.get('name')}
+                name=category.get('name')
             )
-            new_category.shops.add(new_shop.id)
             new_category.save()
+            new_category.shops.add(new_shop.id)
 
-        # Creating new products from price list yaml file content
-        for product in price_list.get('goods'):
-            new_product_category = Category.objects.get(id=product.get('category'))
-            new_product, _ = Product.objects.update_or_create(
-                id=product.get('id'),
-                defaults={
-                    'name': product.get('name'),
-                    'category': new_product_category
-                }
-            )
-
-            ProductInfo.objects.update_or_create(
-                shop_id=new_shop.id,
-                product_id=new_product.id,
-                defaults={
-                    'quantity': product.get('quantity'),
-                    'price': product.get('price'),
-                    'price_rrc': product.get('price_rrc')
-                }
-            )
-
-            # Creating new parameters from price list yaml file content
-            for parameter, value in product['parameters'].items():
-                new_parameter, _ = Parameter.objects.get_or_create(
-                    name=parameter,
-                    defaults={
-                        'name': parameter
-                    }
-                )
-
-                ParameterValue.objects.update_or_create(
-                    product_id=new_product.id,
-                    parameter_id=new_parameter.id,
-                    defaults={
-                        'value': value
-                    }
-                )
+        # # Creating new products from price list yaml file content
+        # for product in price_list.get('goods'):
+        #     new_product_category = Category.objects.get(id=product.get('category'))
+        #     new_product, _ = Product.objects.update_or_create(
+        #         id=product.get('id'),
+        #         defaults={
+        #             'name': product.get('name'),
+        #             'category': new_product_category
+        #         }
+        #     )
+        #
+        #     ProductInfo.objects.update_or_create(
+        #         shop_id=new_shop.id,
+        #         product_id=new_product.id,
+        #         defaults={
+        #             'quantity': product.get('quantity'),
+        #             'price': product.get('price'),
+        #             'price_rrc': product.get('price_rrc')
+        #         }
+        #     )
+        #
+        #     # Creating new parameters from price list yaml file content
+        #     for parameter, value in product['parameters'].items():
+        #         new_parameter, _ = Parameter.objects.get_or_create(
+        #             name=parameter,
+        #             defaults={
+        #                 'name': parameter
+        #             }
+        #         )
+        #
+        #         ParameterValue.objects.update_or_create(
+        #             product_id=new_product.id,
+        #             parameter_id=new_parameter.id,
+        #             defaults={
+        #                 'value': value
+        #             }
+        #         )
 
         return validated_data
 
