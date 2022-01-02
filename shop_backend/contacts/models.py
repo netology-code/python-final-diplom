@@ -1,12 +1,56 @@
+from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
-from django.contrib.auth.models import User
 
 
-class UserInfo(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Информация о пользователе')
+class UserManager(BaseUserManager):
+    def __create_user(self, email, password):
+        user = self.model(
+            email=self.normalize_email(email)
+        )
+
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_supplier(self, email, password):
+        user = self.__create_user(
+            email,
+            password=password
+        )
+        user.role = 'S'
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password):
+        user = self.__create_user(
+            email,
+            password=password
+        )
+        user.role = 'A'
+        user.is_admin = True
+        user.save(using=self._db)
+        return user
+
+
+class User(AbstractBaseUser):
+    USER_TYPE_CHOICES = [('C', 'Клиент'), ('S', 'Поставщик'), ('A', 'Администратор')]
+    REQUIRED_FIELDS = []
+    USERNAME_FIELD = 'email'
+    is_admin = models.BooleanField(default=False)
+    objects = UserManager()
+    email = models.EmailField('email address', unique=True)
+    first_name = models.CharField(max_length=50, verbose_name='Имя')
     middle_name = models.CharField(max_length=50, verbose_name='Отчество')
+    last_name = models.CharField(max_length=50, verbose_name='Фамилия')
     company = models.CharField(max_length=50, verbose_name='Компания')
     position = models.CharField(max_length=50, verbose_name='Позиция')
+    role = models.CharField(verbose_name='Тип пользователя', choices=USER_TYPE_CHOICES, max_length=8)
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = "Список пользователей"
+        ordering = ['email']
 
 
 class Contact(models.Model):

@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
-from .models import User
+from contacts.models import User
 from .serializers import UserRegisterSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
 class UserRegisterViewSet(ModelViewSet):

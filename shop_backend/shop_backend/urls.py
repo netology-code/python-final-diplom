@@ -23,12 +23,12 @@ from rest_framework.authtoken import views
 partner_router = DefaultRouter()
 partner_router.register('update', ShopImportViewSet, basename='partner_update')
 
-user_router = DefaultRouter()
-user_router.register('register', UserRegisterViewSet, basename='user_register')
+common_router = DefaultRouter()
+common_router.register('reg', UserRegisterViewSet, basename='user_register')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/auth/', views.obtain_auth_token),
-    path('api/v1/partner/', include(partner_router.urls)),
-    path('api/v1/user/', include(user_router.urls))
+    path('api/v1/', include(common_router.urls)),
+    path('api/v1/partner/', include(partner_router.urls))
 ]
