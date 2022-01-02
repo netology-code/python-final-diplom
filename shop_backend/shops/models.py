@@ -3,7 +3,7 @@ from contacts.models import User
 
 
 class Shop(models.Model):
-    user = models.OneToOneField(User, verbose_name='Пользователь', blank=True, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, verbose_name='Пользователь')
     name = models.CharField(max_length=50, unique=True, verbose_name='Название')
     filename = models.CharField(max_length=255)
     state = models.BooleanField(verbose_name='Статус заказов', default=True)

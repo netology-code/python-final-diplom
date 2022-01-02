@@ -49,15 +49,14 @@ class ShopImportSerializer(serializers.ModelSerializer):
         price_list = price_list_to_yaml(validated_data.get('filename'))
 
         # Creating new shop from price list yaml file content
-        new_shop = Shop(
-            user=User.objects.get(email=self.context.get('request').user),
+        new_shop, is_new_shop_created = Shop.objects.get_or_create(
             name=price_list.get('shop'),
-            filename=validated_data.get('filename')
+            defaults={
+                'user': self.context.get('request').user,
+                'filename': validated_data.get('filename')
+            }
         )
-        try:
-            new_shop.save()
-        except django.db.utils.IntegrityError as err:
-            print(err)
+        if not is_new_shop_created:
             raise ValidationError({'name': ['Shop with this name already exists.']})
 
         # Creating new categories from price list yaml file content
@@ -69,45 +68,39 @@ class ShopImportSerializer(serializers.ModelSerializer):
             new_category.save()
             new_category.shops.add(new_shop.id)
 
-        # # Creating new products from price list yaml file content
-        # for product in price_list.get('goods'):
-        #     new_product_category = Category.objects.get(id=product.get('category'))
-        #     new_product, _ = Product.objects.update_or_create(
-        #         id=product.get('id'),
-        #         defaults={
-        #             'name': product.get('name'),
-        #             'category': new_product_category
-        #         }
-        #     )
-        #
-        #     ProductInfo.objects.update_or_create(
-        #         shop_id=new_shop.id,
-        #         product_id=new_product.id,
-        #         defaults={
-        #             'quantity': product.get('quantity'),
-        #             'price': product.get('price'),
-        #             'price_rrc': product.get('price_rrc')
-        #         }
-        #     )
-        #
-        #     # Creating new parameters from price list yaml file content
-        #     for parameter, value in product['parameters'].items():
-        #         new_parameter, _ = Parameter.objects.get_or_create(
-        #             name=parameter,
-        #             defaults={
-        #                 'name': parameter
-        #             }
-        #         )
-        #
-        #         ParameterValue.objects.update_or_create(
-        #             product_id=new_product.id,
-        #             parameter_id=new_parameter.id,
-        #             defaults={
-        #                 'value': value
-        #             }
-        #         )
+        # Creating new products from price list yaml file content
+        for product in price_list.get('goods'):
+            new_product_category = Category.objects.get(id=product.get('category'))
+            new_product = Product(
+                id=product.get('id'),
+                name=product.get('name'),
+                category=new_product_category
+            )
+            new_product.save()
 
-        return validated_data
+            new_product_info = ProductInfo(
+                shop_id=new_shop.id,
+                product_id=new_product.id,
+                quantity=product.get('quantity'),
+                price=product.get('price'),
+                price_rrc=product.get('price_rrc')
+            )
+            new_product_info.save()
+
+            # Creating new parameters from price list yaml file content
+            for parameter, value in product['parameters'].items():
+                new_parameter, _ = Parameter.objects.get_or_create(
+                    name=parameter
+                )
+
+                new_parameter_value = ParameterValue(
+                    product_id=new_product.id,
+                    parameter_id=new_parameter.id,
+                    value=value
+                )
+                new_parameter_value.save()
+
+        return new_shop
 
 
 class OrdersStateSerializer(serializers.ModelSerializer):
