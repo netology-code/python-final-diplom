@@ -1,12 +1,11 @@
-import django.db.utils
-
 from .models import Shop
 from categories.models import Category
-from contacts.models import User
 from products.models import Product, ProductInfo, Parameter, ParameterValue
 from rest_framework.exceptions import ValidationError
 import yaml
 from rest_framework import serializers
+from orders.models import Order
+from contacts.models import User
 
 
 def is_price_list_valid(price_list: dict) -> bool:
@@ -61,22 +60,22 @@ class ShopImportSerializer(serializers.ModelSerializer):
 
         # Creating new categories from price list yaml file content
         for category in price_list.get('categories'):
-            new_category = Category(
+            new_category, _ = Category.objects.get_or_create(
                 id=category.get('id'),
-                name=category.get('name')
+                defaults={'name': category.get('name')}
             )
-            new_category.save()
             new_category.shops.add(new_shop.id)
 
         # Creating new products from price list yaml file content
         for product in price_list.get('goods'):
             new_product_category = Category.objects.get(id=product.get('category'))
-            new_product = Product(
+            new_product, _ = Product.objects.get_or_create(
                 id=product.get('id'),
-                name=product.get('name'),
-                category=new_product_category
+                defaults={
+                    'name': product.get('name'),
+                    'category': new_product_category
+                }
             )
-            new_product.save()
 
             new_product_info = ProductInfo(
                 shop_id=new_shop.id,
@@ -93,23 +92,31 @@ class ShopImportSerializer(serializers.ModelSerializer):
                     name=parameter
                 )
 
-                new_parameter_value = ParameterValue(
+                ParameterValue.objects.get_or_create(
                     product_id=new_product.id,
                     parameter_id=new_parameter.id,
-                    value=value
+                    defaults={'value': value}
                 )
-                new_parameter_value.save()
 
         return new_shop
 
 
-class OrdersStateSerializer(serializers.ModelSerializer):
+class ShopStateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
-        fields = ['state']
+        fields = ['id', 'name', 'is_closed']
+        read_only_fields = ['id', 'name']
 
-    def retrieve(self, request):
-        pass
 
-    def create(self, validated_data):
-        pass
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['id', 'created_at', 'status']
+
+
+class ShopOrderSerializer(serializers.ModelSerializer):
+    orders = OrderSerializer(many=True, allow_null=True)
+
+    class Meta:
+        model = Shop
+        fields = ['id', 'name', 'orders']

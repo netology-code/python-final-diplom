@@ -1,5 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 
 
@@ -28,16 +28,18 @@ class UserManager(BaseUserManager):
             password=password
         )
         user.role = 'A'
-        user.is_admin = True
+        user.is_superuser = True
+        user.is_staff = True
         user.save(using=self._db)
         return user
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     USER_TYPE_CHOICES = [('C', 'Клиент'), ('S', 'Поставщик'), ('A', 'Администратор')]
     REQUIRED_FIELDS = []
     USERNAME_FIELD = 'email'
-    is_admin = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
     objects = UserManager()
     email = models.EmailField('email address', unique=True)
     first_name = models.CharField(max_length=50, verbose_name='Имя')

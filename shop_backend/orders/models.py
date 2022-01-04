@@ -1,5 +1,6 @@
 from django.db import models
 from contacts.models import User
+from shops.models import Shop
 from products.models import ProductInfo
 
 
@@ -13,11 +14,13 @@ class Order(models.Model):
         ('new', 'Новый'),
         ('sent', 'Отправлен')
     ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders', blank=True,
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_orders', blank=True,
                              verbose_name='Пользователь')
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='orders', blank=True,
+                             verbose_name='Магазин')
     products = models.ManyToManyField(ProductInfo, through='OrderContent', blank=True, verbose_name='Список продуктов')
     created_at = models.DateTimeField(auto_now_add=True, blank=True, verbose_name='Дата создания')
-    status = models.CharField(max_length=15, choices=STATE_CHOICES, verbose_name='Статус')
+    status = models.CharField(max_length=15, choices=STATE_CHOICES, default='new', verbose_name='Статус')
 
     class Meta:
         verbose_name = 'Заказ'

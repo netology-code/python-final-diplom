@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50, unique=True, verbose_name='Название')),
                 ('filename', models.CharField(max_length=255)),
-                ('state', models.BooleanField(default=True, verbose_name='Статус заказов')),
+                ('is_closed', models.BooleanField(default=True, verbose_name='Статус заказов')),
             ],
             options={
                 'verbose_name': 'Магазин',
