@@ -4,8 +4,7 @@ from products.models import Product, ProductInfo, Parameter, ParameterValue
 from rest_framework.exceptions import ValidationError
 import yaml
 from rest_framework import serializers
-from orders.models import Order
-from contacts.models import User
+from orders.serializers import OrderInfoSerializer
 
 
 def is_price_list_valid(price_list: dict) -> bool:
@@ -108,14 +107,8 @@ class ShopStateSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'name']
 
 
-class OrderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = ['id', 'created_at', 'status']
-
-
 class ShopOrderSerializer(serializers.ModelSerializer):
-    orders = OrderSerializer(many=True, allow_null=True)
+    orders = OrderInfoSerializer(many=True, allow_null=True)
 
     class Meta:
         model = Shop

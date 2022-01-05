@@ -32,5 +32,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/auth/', views.obtain_auth_token),
     path('api/v1/', include(common_router.urls)),
-    path('api/v1/partner/', include(partner_router.urls)),
+    path('api/v1/partner/', include(partner_router.urls))
 ]

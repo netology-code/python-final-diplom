@@ -19,7 +19,8 @@ class Order(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='orders', blank=True,
                              verbose_name='Магазин')
     products = models.ManyToManyField(ProductInfo, through='OrderContent', blank=True, verbose_name='Список продуктов')
-    created_at = models.DateTimeField(auto_now_add=True, blank=True, verbose_name='Дата создания')
+    created_at = models.DateTimeField(auto_now_add=True, blank=True,
+                                      verbose_name='Дата создания')
     status = models.CharField(max_length=15, choices=STATE_CHOICES, default='new', verbose_name='Статус')
 
     class Meta:

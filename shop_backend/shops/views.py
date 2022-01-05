@@ -3,6 +3,7 @@ from .models import Shop
 from .serializers import ShopImportSerializer, ShopStateSerializer, ShopOrderSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from orders.serializers import OrderItemsSerializer
 from orders.models import Order
 
 
@@ -31,28 +32,27 @@ class ShopStateViewSet(ModelViewSet):
 
 
 class ShopOrderViewSet(ModelViewSet):
-    serializer_class = ShopOrderSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ['get']
 
     def get_queryset(self):
-        # return Order.objects.prefetch_related('products').filter(products__shop__in=shops).distinct()
-        # shops = Shop.objects.filter(user=self.request.user)
-        # pis = ProductInfo.objects.select_related('shop').filter(shop__in=shops)
-        # return Order.objects.filter(products__in=pis)
-        # Order.objects.prefetch_related('products__shop') <- best one for just orders
-        # return Shop.objects.filter(user=self.request.user)
-        # Order.objects.prefetch_related('products__shop').filter(products__shop__in=shops)
-        # shops = Shop.objects.filter(user=self.request.user)
-        return Shop.objects.only('id', 'name')
+        shops = Shop.objects.filter(user=self.request.user)
+        if self.kwargs.get('pk'):
+            return Order.objects.filter(shop__in=shops)
+
+        return shops
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        print(f'queryset: {queryset}')
         if not queryset:
             return Response({'results': 'There is no orders associated with shops you manage.'})
 
-        serializer = self.get_serializer(queryset, many=True)
-        print(f'serializer.data: {serializer.data}')
+        serializer = ShopOrderSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        print(f'instance: {instance}')
+        serializer = OrderItemsSerializer(instance)
+        print(f'serializer: {serializer}')
+        return Response(serializer.data)
