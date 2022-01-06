@@ -20,6 +20,7 @@ class OrderInfoSerializer(serializers.ModelSerializer):
 
 class OrderItemsSerializer(OrderInfoSerializer):
     items = ProductInfoSerializer(many=True, allow_null=True, source='products')
+    # total = serializers.IntegerField()
 
     class Meta(OrderInfoSerializer.Meta):
         fields = OrderInfoSerializer.Meta.fields + ['items']
