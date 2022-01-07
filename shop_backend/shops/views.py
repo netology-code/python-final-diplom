@@ -3,8 +3,9 @@ from .models import Shop
 from .serializers import ShopImportSerializer, ShopStateSerializer, ShopOrderSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from orders.serializers import OrderItemsSerializer
 from orders.models import Order
+from django.db import models
+from orders.serializers import OrderItemsSerializer
 
 
 class ShopImportViewSet(ModelViewSet):
@@ -38,7 +39,8 @@ class ShopOrderViewSet(ModelViewSet):
     def get_queryset(self):
         shops = Shop.objects.filter(user=self.request.user)
         if self.kwargs.get('pk'):
-            return Order.objects.filter(shop__in=shops)
+            return Order.objects.filter(shop__in=shops).annotate(
+                total=(models.Sum(models.F('contents__quantity') * models.F('products__price'))))
 
         return shops
 
@@ -52,7 +54,5 @@ class ShopOrderViewSet(ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        print(f'instance: {instance}')
         serializer = OrderItemsSerializer(instance)
-        print(f'serializer: {serializer}')
         return Response(serializer.data)

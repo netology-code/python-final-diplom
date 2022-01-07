@@ -1,14 +1,14 @@
 from rest_framework import serializers
-from products.models import ProductInfo
-from orders.models import Order
+from orders.models import Order, OrderContent
 
 
-class ProductInfoSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(read_only=True, source='product')
-    name = serializers.SlugRelatedField(read_only=True, slug_field='name', source='product')
+class OrderContentSerializer(serializers.ModelSerializer):
+    id = serializers.SlugRelatedField(read_only=True, slug_field='product_id', source='product_info')
+    name = serializers.SlugRelatedField(read_only=True, slug_field='name', source='product_info.product')
+    price = serializers.SlugRelatedField(read_only=True, slug_field='price', source='product_info')
 
     class Meta:
-        model = ProductInfo
+        model = OrderContent
         fields = ['id', 'name', 'quantity', 'price']
 
 
@@ -19,8 +19,8 @@ class OrderInfoSerializer(serializers.ModelSerializer):
 
 
 class OrderItemsSerializer(OrderInfoSerializer):
-    items = ProductInfoSerializer(many=True, allow_null=True, source='products')
-    # total = serializers.IntegerField()
+    items = OrderContentSerializer(many=True, allow_null=True, source='contents')
+    total = serializers.ReadOnlyField()
 
     class Meta(OrderInfoSerializer.Meta):
-        fields = OrderInfoSerializer.Meta.fields + ['items']
+        fields = OrderInfoSerializer.Meta.fields + ['total', 'items']

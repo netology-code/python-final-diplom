@@ -30,8 +30,10 @@ class Order(models.Model):
 
 
 class OrderContent(models.Model):
-    product_info = models.ForeignKey(ProductInfo, on_delete=models.CASCADE, blank=True, verbose_name='Продукт')
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', blank=True, verbose_name='Заказ')
+    product_info = models.ForeignKey(ProductInfo, on_delete=models.CASCADE, related_name='contents', blank=True,
+                                     verbose_name='Продукт')
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='contents', blank=True,
+                              verbose_name='Заказ')
     quantity = models.PositiveIntegerField(verbose_name='Количество')
 
     class Meta:
