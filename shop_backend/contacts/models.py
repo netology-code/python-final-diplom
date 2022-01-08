@@ -4,7 +4,7 @@ from django.db import models
 
 
 class UserManager(BaseUserManager):
-    def __create_user(self, email, password):
+    def create_user(self, email, password):
         user = self.model(
             email=self.normalize_email(email)
         )
@@ -14,20 +14,13 @@ class UserManager(BaseUserManager):
         return user
 
     def create_supplier(self, email, password):
-        user = self.__create_user(
-            email,
-            password=password
-        )
-        user.role = 'S'
+        user = self.create_user(email, password=password)
+        user.is_supplier = True
         user.save(using=self._db)
         return user
 
     def create_superuser(self, email, password):
-        user = self.__create_user(
-            email,
-            password=password
-        )
-        user.role = 'A'
+        user = self.create_user(email, password=password)
         user.is_superuser = True
         user.is_staff = True
         user.save(using=self._db)
@@ -35,11 +28,11 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    USER_TYPE_CHOICES = [('C', 'Клиент'), ('S', 'Поставщик'), ('A', 'Администратор')]
     REQUIRED_FIELDS = []
     USERNAME_FIELD = 'email'
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
+    is_supplier = models.BooleanField(default=False)
     objects = UserManager()
     email = models.EmailField('email address', unique=True)
     first_name = models.CharField(max_length=50, verbose_name='Имя')
@@ -47,7 +40,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=50, verbose_name='Фамилия')
     company = models.CharField(max_length=50, verbose_name='Компания')
     position = models.CharField(max_length=50, verbose_name='Позиция')
-    role = models.CharField(verbose_name='Тип пользователя', choices=USER_TYPE_CHOICES, max_length=8)
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -56,8 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Contact(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='contacts', blank=True,
-                             verbose_name='Пользователь')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, verbose_name='Пользователь')
     city = models.CharField(max_length=50, verbose_name='Город')
     street = models.CharField(max_length=50, verbose_name='Улица')
     house = models.CharField(max_length=10, blank=True, verbose_name='Дом')
