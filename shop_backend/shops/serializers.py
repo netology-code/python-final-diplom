@@ -4,16 +4,14 @@ from .models import Shop
 from rest_framework.exceptions import ValidationError
 from categories.models import Category
 from products.models import Product, ProductInfo, Parameter, ParameterValue
-from orders.serializers import OrderInfoSerializer
-from products.serializers import ProductInfoSerializer
+from orders.serializers import OrderSerializer
 
 
 class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
         fields = ['id', 'name', 'is_closed']
-        read_only_fields = ['id', 'name', 'is_closed']
-        write_only_fields = ['filename']
+        read_only_fields = ['id', 'name']
 
 
 class ShopImportSerializer(ShopSerializer):
@@ -78,19 +76,11 @@ class ShopImportSerializer(ShopSerializer):
 
 
 class ShopStateSerializer(ShopSerializer):
-    class Meta(ShopSerializer.Meta):
-        read_only_fields = ['id', 'name']
+    pass
 
 
 class ShopOrderSerializer(ShopSerializer):
-    orders = OrderInfoSerializer(many=True, allow_null=True)
+    orders = OrderSerializer(many=True, allow_null=True)
 
     class Meta(ShopSerializer.Meta):
         fields = ShopSerializer.Meta.fields + ['orders']
-
-
-class ShopProductSerializer(ShopSerializer):
-    products = ProductInfoSerializer(many=True, allow_null=True)
-
-    class Meta(ShopSerializer.Meta):
-        fields = ShopSerializer.Meta.fields + ['products']

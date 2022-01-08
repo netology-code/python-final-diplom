@@ -1,12 +1,13 @@
 from rest_framework.viewsets import ModelViewSet
 from .models import Shop
-from .serializers import ShopSerializer, ShopImportSerializer, ShopStateSerializer, ShopOrderSerializer, \
-    ShopProductSerializer
+from .serializers import ShopSerializer, ShopImportSerializer, ShopStateSerializer, \
+    ShopOrderSerializer  # , ShopProductSerializer
 from .permissions import IsAuthenticatedSupplier
 from rest_framework.response import Response
 from orders.models import Order
 from django.db import models
 from orders.serializers import OrderItemsSerializer
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class ShopViewSet(ModelViewSet):
@@ -63,9 +64,3 @@ class ShopOrderViewSet(ModelViewSet):
         instance = self.get_object()
         serializer = OrderItemsSerializer(instance)
         return Response(serializer.data)
-
-
-class ShopProductViewSet(ModelViewSet):
-    queryset = Shop.objects.prefetch_related('products')
-    serializer_class = ShopProductSerializer
-    http_method_names = ['get']

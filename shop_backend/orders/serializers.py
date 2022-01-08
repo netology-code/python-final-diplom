@@ -12,15 +12,15 @@ class OrderContentSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'quantity', 'price']
 
 
-class OrderInfoSerializer(serializers.ModelSerializer):
+class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id', 'created_at', 'status']
 
 
-class OrderItemsSerializer(OrderInfoSerializer):
+class OrderItemsSerializer(OrderSerializer):
     items = OrderContentSerializer(many=True, allow_null=True, source='contents')
     total = serializers.ReadOnlyField()
 
-    class Meta(OrderInfoSerializer.Meta):
-        fields = OrderInfoSerializer.Meta.fields + ['total', 'items']
+    class Meta(OrderSerializer.Meta):
+        fields = OrderSerializer.Meta.fields + ['total', 'items']
