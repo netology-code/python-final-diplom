@@ -15,9 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from shops.views import ShopImportViewSet, ShopStateViewSet, ShopOrderViewSet
+from shops.views import ShopViewSet, ShopImportViewSet, ShopStateViewSet, ShopOrderViewSet, ShopProductViewSet
 from contacts.views import UserRegisterViewSet
-from products.views import ProductViewSet
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views
 
@@ -30,7 +29,8 @@ common_router = DefaultRouter()
 common_router.register('reg', UserRegisterViewSet, basename='user_register')
 
 shop_router = DefaultRouter()
-shop_router.register('products', ProductViewSet, basename='shop_products')
+shop_router.register('products', ShopProductViewSet, basename='shop_products')
+shop_router.register('shops', ShopViewSet, basename='shop_shops')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

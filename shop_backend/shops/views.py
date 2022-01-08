@@ -1,6 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 from .models import Shop
-from .serializers import ShopImportSerializer, ShopStateSerializer, ShopOrderSerializer
+from .serializers import ShopSerializer, ShopImportSerializer, ShopStateSerializer, ShopOrderSerializer, \
+    ShopProductSerializer
 from .permissions import IsAuthenticatedSupplier
 from rest_framework.response import Response
 from orders.models import Order
@@ -10,8 +11,7 @@ from orders.serializers import OrderItemsSerializer
 
 class ShopViewSet(ModelViewSet):
     queryset = Shop.objects.all()
-    serializer_class = ShopImportSerializer
-    permission_classes = [IsAuthenticatedSupplier]
+    serializer_class = ShopSerializer
     http_method_names = ['get']
 
 
@@ -63,3 +63,9 @@ class ShopOrderViewSet(ModelViewSet):
         instance = self.get_object()
         serializer = OrderItemsSerializer(instance)
         return Response(serializer.data)
+
+
+class ShopProductViewSet(ModelViewSet):
+    queryset = Shop.objects.prefetch_related('products')
+    serializer_class = ShopProductSerializer
+    http_method_names = ['get']

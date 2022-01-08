@@ -4,8 +4,7 @@ from shops.models import Shop
 
 
 class Product(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products', blank=True,
-                                 verbose_name='Список категорий')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, verbose_name='Список категорий')
     shops = models.ManyToManyField(Shop, through='ProductInfo', blank=True, verbose_name='Список магазинов')
     name = models.CharField(max_length=100, unique=True, verbose_name='Название')
 
@@ -17,8 +16,7 @@ class Product(models.Model):
 
 class ProductInfo(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='products', blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='prices', blank=True,
-                                verbose_name='Продукт')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, verbose_name='Продукт')
     quantity = models.PositiveIntegerField(verbose_name='Количество')
     price = models.PositiveIntegerField(verbose_name='Цена')
     price_rrc = models.PositiveIntegerField(verbose_name='Рекомендуемая розничная цена')
