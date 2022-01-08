@@ -1,0 +1,40 @@
+shop: Перекресток
+categories:
+  - id: 5
+    name: Фрукты
+  - id: 6
+    name: Овощи
+
+goods:
+  - id: 111
+    category: 5
+    name: Бананы
+    price: 75
+    price_rrc: 100
+    quantity: 1000000
+    parameters:
+      "Страна производителя": Африка
+  - id: 222
+    category: 5
+    name: Яблоки
+    price: 50
+    price_rrc: 80
+    quantity: 1000000
+    parameters:
+      "Страна производителя": Турция
+  - id: 333
+    category: 6
+    name: Капуста
+    price: 150
+    price_rrc: 250
+    quantity: 5000000
+    parameters:
+      "Тип": Цветная
+  - id: 444
+    category: 6
+    name: Морковь
+    price: 10
+    price_rrc: 15
+    quantity: 9999999
+    parameters:
+      "Тип": Мытая

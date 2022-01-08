@@ -8,6 +8,13 @@ from django.db import models
 from orders.serializers import OrderItemsSerializer
 
 
+class ShopViewSet(ModelViewSet):
+    queryset = Shop.objects.all()
+    serializer_class = ShopImportSerializer
+    permission_classes = [IsAuthenticatedSupplier]
+    http_method_names = ['get']
+
+
 class ShopImportViewSet(ModelViewSet):
     queryset = Shop.objects.all()
     serializer_class = ShopImportSerializer

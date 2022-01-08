@@ -7,10 +7,15 @@ from products.models import Product, ProductInfo, Parameter, ParameterValue
 from orders.serializers import OrderInfoSerializer
 
 
-class ShopImportSerializer(serializers.ModelSerializer):
+class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
-        fields = ['filename']
+        fields = ['id', 'name']
+
+
+class ShopImportSerializer(ShopSerializer):
+    class Meta(ShopSerializer.Meta):
+        fields = ShopSerializer.Meta.fields + ['filename']
 
     def create(self, validated_data):
         price_list = price_list_to_yaml(validated_data.get('filename'))
@@ -69,16 +74,15 @@ class ShopImportSerializer(serializers.ModelSerializer):
         return new_shop
 
 
-class ShopStateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Shop
-        fields = ['id', 'name', 'is_closed']
+class ShopStateSerializer(ShopSerializer):
+    class Meta(ShopSerializer.Meta):
+        fields = ShopSerializer.Meta.fields + ['is_closed']
         read_only_fields = ['id', 'name']
 
 
-class ShopOrderSerializer(serializers.ModelSerializer):
+class ShopOrderSerializer(ShopSerializer):
     orders = OrderInfoSerializer(many=True, allow_null=True)
 
-    class Meta:
+    class Meta(ShopSerializer.Meta):
         model = Shop
-        fields = ['id', 'name', 'orders']
+        fields = ShopSerializer.Meta.fields + ['orders']
