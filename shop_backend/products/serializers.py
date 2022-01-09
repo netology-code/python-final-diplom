@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ProductInfo, ParameterValue
+from .models import ParameterValue, ProductInfo, Product
 
 
 class ParameterSerializer(serializers.ModelSerializer):
@@ -10,13 +10,19 @@ class ParameterSerializer(serializers.ModelSerializer):
         fields = ['name', 'value']
 
 
-class ProductSerializer(serializers.ModelSerializer):
-    id = serializers.SlugRelatedField(read_only=True, slug_field='id', source='product')
-    name = serializers.SlugRelatedField(read_only=True, slug_field='name', source='product')
+class ProductInfoSerializer(serializers.ModelSerializer):
     shop = serializers.SlugRelatedField(read_only=True, slug_field='name')
     category = serializers.SlugRelatedField(read_only=True, slug_field='name', source='product.category')
-    parameters = ParameterSerializer(many=True, allow_null=True, source='product.parameters')
+    # parameters = ParameterSerializer(many=True, allow_null=True, source='product.parameters')
 
     class Meta:
         model = ProductInfo
-        fields = ['id', 'name', 'price', 'shop', 'category', 'parameters']
+        fields = ['shop', 'category', 'price']
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    available_in = ProductInfoSerializer(many=True, allow_null=True, source='infos')
+
+    class Meta:
+        model = Product
+        fields = ['name', 'available_in']
