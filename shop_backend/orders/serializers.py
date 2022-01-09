@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from orders.models import Order, OrderContent
+from products.serializers import ProductInfoSerializer
+from rest_framework.exceptions import ValidationError
 
 
 class OrderContentSerializer(serializers.ModelSerializer):
@@ -13,9 +15,25 @@ class OrderContentSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    products = ProductInfoSerializer(many=True)
+
     class Meta:
         model = Order
-        fields = ['id', 'created_at', 'status']
+        fields = ['id', 'created_at', 'status', 'products']
+
+    def create(self, validated_data):
+        new_order = Order(
+            user=self.context.get('request').user
+        )
+        new_order.save()
+
+        return new_order
+
+    def validate(self, data):
+        if not data.get('products'):
+            raise ValidationError({'results': ['Please add at least one product to basket.']})
+
+        return data
 
 
 class OrderItemsSerializer(OrderSerializer):
