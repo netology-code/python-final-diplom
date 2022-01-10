@@ -8,7 +8,7 @@ class BasketViewSet(ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticatedClient]
-    http_method_names = ['post']
+    http_method_names = ['post', 'get', 'put', 'delete']
 
 
 class OrderViewSet(ModelViewSet):
