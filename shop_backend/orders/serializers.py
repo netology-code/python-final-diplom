@@ -5,6 +5,12 @@ from products.models import ProductInfo
 from django.db import transaction
 
 
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['id', 'created_at', 'status']
+
+
 class OrderContentSerializer(serializers.ModelSerializer):
     id = serializers.SlugRelatedField(read_only=True, slug_field='product_id', source='product_info')
     name = serializers.SlugRelatedField(read_only=True, slug_field='name', source='product_info.product')
@@ -16,15 +22,13 @@ class OrderContentSerializer(serializers.ModelSerializer):
 
 
 class OrderProductSerializer(serializers.ModelSerializer):
-    # quantity = serializers.SlugRelatedField(read_only=True, slug_field='quantity', source='product_info.contents')
-
     class Meta:
         model = ProductInfo
         fields = ['shop', 'product', 'quantity']
-        extra_kwargs = {i: {'required': True} for i in fields}
+        extra_kwargs = {field: {'required': True} for field in fields}
 
 
-class OrderSerializer(serializers.ModelSerializer):
+class BasketSerializer(serializers.ModelSerializer):
     products = OrderProductSerializer(many=True)
 
     class Meta:
@@ -32,7 +36,6 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'created_at', 'status', 'products']
 
     def create(self, validated_data):
-        print()
         new_order = Order(
             user=self.context.get('request').user
         )
@@ -45,7 +48,7 @@ class OrderSerializer(serializers.ModelSerializer):
             order_product_quantity = product.get('quantity')
             if order_product_quantity > product_info.quantity:
                 raise ValidationError({'results': [
-                    f'Cannot put {order_product_quantity} positions of product <{product.get("product").name}> '
+                    f'Cannot put {order_product_quantity} positions of product "{product.get("product").name}" '
                     f'to basket. Only {product_info.quantity} is available.']})
 
             order_contents.append(
@@ -73,9 +76,9 @@ class OrderSerializer(serializers.ModelSerializer):
         return data
 
 
-class OrderItemsSerializer(OrderSerializer):
+class OrderItemsSerializer(BasketSerializer):
     items = OrderContentSerializer(many=True, allow_null=True, source='contents')
     total = serializers.ReadOnlyField()
 
-    class Meta(OrderSerializer.Meta):
-        fields = OrderSerializer.Meta.fields + ['total', 'items']
+    class Meta(BasketSerializer.Meta):
+        fields = BasketSerializer.Meta.fields + ['total', 'items']

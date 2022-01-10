@@ -4,7 +4,7 @@ from .models import Shop
 from rest_framework.exceptions import ValidationError
 from categories.models import Category, ShopCategory
 from products.models import Product, ProductInfo, Parameter, ParameterValue
-from orders.serializers import OrderSerializer
+from orders.serializers import BasketSerializer
 from categories.serializers import CategorySerializer
 
 
@@ -87,7 +87,7 @@ class ShopStateSerializer(ShopSerializer):
 
 
 class ShopOrderSerializer(ShopSerializer):
-    orders = OrderSerializer(many=True, allow_null=True)
+    orders = BasketSerializer(many=True, allow_null=True)
 
     class Meta(ShopSerializer.Meta):
         fields = ShopSerializer.Meta.fields + ['orders']

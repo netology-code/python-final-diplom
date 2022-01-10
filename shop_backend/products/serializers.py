@@ -11,6 +11,7 @@ class ParameterSerializer(serializers.ModelSerializer):
 
 
 class ProductInfoSerializer(serializers.ModelSerializer):
+    id = serializers.SlugRelatedField(read_only=True, slug_field='id', source='shop')
     shop = serializers.SlugRelatedField(read_only=True, slug_field='name')
     category = serializers.SlugRelatedField(read_only=True, slug_field='name', source='product.category')
 
