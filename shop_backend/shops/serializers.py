@@ -2,15 +2,20 @@ from rest_framework import serializers
 from .utils import price_list_to_yaml
 from .models import Shop
 from rest_framework.exceptions import ValidationError
-from categories.models import Category
+from categories.models import Category, ShopCategory
 from products.models import Product, ProductInfo, Parameter, ParameterValue
-from orders.serializers import OrderInfoSerializer
+from orders.serializers import BasketSerializer
 
 
-class ShopImportSerializer(serializers.ModelSerializer):
+class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
-        fields = ['filename']
+        fields = ['id', 'name']
+
+
+class ShopImportSerializer(ShopSerializer):
+    class Meta(ShopSerializer.Meta):
+        fields = ShopSerializer.Meta.fields + ['filename']
 
     def create(self, validated_data):
         price_list = price_list_to_yaml(validated_data.get('filename'))
@@ -29,25 +34,31 @@ class ShopImportSerializer(serializers.ModelSerializer):
         # Creating new categories from price list yaml file content
         for category in price_list.get('categories'):
             new_category, _ = Category.objects.get_or_create(
-                id=category.get('id'),
-                defaults={'name': category.get('name')}
+                name=category.get('name'),
+
             )
-            new_category.shops.add(new_shop.id)
+
+            new_shop_category = ShopCategory(
+                shop_id=new_shop.id,
+                category_id=new_category.id,
+                internal_category_id=category.get('id')
+            )
+            new_shop_category.save()
 
         # Creating new products from price list yaml file content
         for product in price_list.get('goods'):
-            new_product_category = Category.objects.get(id=product.get('category'))
+            new_product_category = ShopCategory.objects.get(internal_category_id=product.get('category'))
             new_product, _ = Product.objects.get_or_create(
-                id=product.get('id'),
+                name=product.get('name'),
                 defaults={
-                    'name': product.get('name'),
-                    'category': new_product_category
+                    'category': new_product_category.category
                 }
             )
 
             new_product_info = ProductInfo(
                 shop_id=new_shop.id,
                 product_id=new_product.id,
+                internal_product_id=product.get('id'),
                 quantity=product.get('quantity'),
                 price=product.get('price'),
                 price_rrc=product.get('price_rrc')
@@ -69,16 +80,12 @@ class ShopImportSerializer(serializers.ModelSerializer):
         return new_shop
 
 
-class ShopStateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Shop
-        fields = ['id', 'name', 'is_closed']
-        read_only_fields = ['id', 'name']
+class ShopStateSerializer(ShopSerializer):
+    pass
 
 
-class ShopOrderSerializer(serializers.ModelSerializer):
-    orders = OrderInfoSerializer(many=True, allow_null=True)
+class ShopOrderSerializer(ShopSerializer):
+    orders = BasketSerializer(many=True, allow_null=True)
 
-    class Meta:
-        model = Shop
-        fields = ['id', 'name', 'orders']
+    class Meta(ShopSerializer.Meta):
+        fields = ShopSerializer.Meta.fields + ['orders']

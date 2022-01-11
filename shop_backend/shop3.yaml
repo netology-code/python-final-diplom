@@ -1,0 +1,40 @@
+shop: Дикси
+categories:
+  - id: 10
+    name: Фрукты
+  - id: 11
+    name: Овощи
+
+goods:
+  - id: 1111
+    category: 10
+    name: Бананы
+    price: 50
+    price_rrc: 75
+    quantity: 2000000
+    parameters:
+      "Страна производителя": Россия
+  - id: 2222
+    category: 10
+    name: Яблоки
+    price: 40
+    price_rrc: 70
+    quantity: 2000000
+    parameters:
+      "Страна производителя": Россия
+  - id: 333
+    category: 11
+    name: Капуста
+    price: 100
+    price_rrc: 150
+    quantity: 7500000
+    parameters:
+      "Тип": Цветная
+  - id: 444
+    category: 11
+    name: Морковь
+    price: 5
+    price_rrc: 10
+    quantity: 99999999
+    parameters:
+      "Тип": Мытая

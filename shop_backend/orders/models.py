@@ -16,12 +16,12 @@ class Order(models.Model):
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_orders', blank=True,
                              verbose_name='Пользователь')
-    shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='orders', blank=True,
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='orders', blank=True, null=True,
                              verbose_name='Магазин')
     products = models.ManyToManyField(ProductInfo, through='OrderContent', blank=True, verbose_name='Список продуктов')
     created_at = models.DateTimeField(auto_now_add=True, blank=True,
                                       verbose_name='Дата создания')
-    status = models.CharField(max_length=15, choices=STATE_CHOICES, default='new', verbose_name='Статус')
+    status = models.CharField(max_length=15, choices=STATE_CHOICES, default='basket', verbose_name='Статус')
 
     class Meta:
         verbose_name = 'Заказ'

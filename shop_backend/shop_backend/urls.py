@@ -15,8 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from shops.views import ShopImportViewSet, ShopStateViewSet, ShopOrderViewSet
+from shops.views import ShopImportViewSet, ShopStateViewSet, ShopOrderViewSet, OpenShopViewSet
 from contacts.views import UserRegisterViewSet
+from orders.views import BasketViewSet, OrderViewSet
+from products.views import ProductViewSet
+from categories.views import CategoryViewSet
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views
 
@@ -25,12 +28,20 @@ partner_router.register('update', ShopImportViewSet, basename='shop_update')
 partner_router.register('state', ShopStateViewSet, basename='shop_state')
 partner_router.register('order', ShopOrderViewSet, basename='shop_orders')
 
-common_router = DefaultRouter()
-common_router.register('reg', UserRegisterViewSet, basename='user_register')
+client_router = DefaultRouter()
+client_router.register('reg', UserRegisterViewSet, basename='client_register')
+client_router.register('basket', BasketViewSet, basename='client_basket')
+client_router.register('order', OrderViewSet, basename='client_orders')
+
+shop_router = DefaultRouter()
+shop_router.register('shops', OpenShopViewSet, basename='shop_shops')
+shop_router.register('products', ProductViewSet, basename='shop_products')
+shop_router.register('categories', CategoryViewSet, basename='shop_categories')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/auth/', views.obtain_auth_token),
-    path('api/v1/', include(common_router.urls)),
-    path('api/v1/partner/', include(partner_router.urls))
+    path('api/v1/', include(client_router.urls)),
+    path('api/v1/', include(shop_router.urls)),
+    path('api/v1/partner/', include(partner_router.urls)),
 ]

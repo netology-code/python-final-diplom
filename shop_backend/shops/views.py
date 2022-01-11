@@ -1,23 +1,29 @@
 from rest_framework.viewsets import ModelViewSet
 from .models import Shop
-from .serializers import ShopImportSerializer, ShopStateSerializer, ShopOrderSerializer
-from rest_framework.permissions import IsAuthenticated
+from .serializers import ShopSerializer, ShopImportSerializer, ShopStateSerializer, ShopOrderSerializer
+from .permissions import IsAuthenticatedSupplier
 from rest_framework.response import Response
 from orders.models import Order
 from django.db import models
 from orders.serializers import OrderItemsSerializer
 
 
+class ShopViewSet(ModelViewSet):
+    queryset = Shop.objects.all()
+    serializer_class = ShopSerializer
+    http_method_names = ['get']
+
+
 class ShopImportViewSet(ModelViewSet):
     queryset = Shop.objects.all()
     serializer_class = ShopImportSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedSupplier]
     http_method_names = ['post']
 
 
 class ShopStateViewSet(ModelViewSet):
     serializer_class = ShopStateSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedSupplier]
     http_method_names = ['get', 'put']
 
     def get_queryset(self):
@@ -33,7 +39,7 @@ class ShopStateViewSet(ModelViewSet):
 
 
 class ShopOrderViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedSupplier]
     http_method_names = ['get']
 
     def get_queryset(self):
@@ -56,3 +62,9 @@ class ShopOrderViewSet(ModelViewSet):
         instance = self.get_object()
         serializer = OrderItemsSerializer(instance)
         return Response(serializer.data)
+
+
+class OpenShopViewSet(ModelViewSet):
+    queryset = Shop.objects.filter(is_closed=False)
+    serializer_class = ShopSerializer
+    http_method_names = ['get']

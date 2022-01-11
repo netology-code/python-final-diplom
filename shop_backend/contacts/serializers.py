@@ -4,7 +4,8 @@ from rest_framework.exceptions import ValidationError
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
-    password_repeat = serializers.CharField(max_length=50, write_only=True)
+    password = serializers.CharField(write_only=True)
+    password_repeat = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
@@ -18,21 +19,22 @@ class UserRegisterSerializer(serializers.ModelSerializer):
                 'first_name': validated_data.get('first_name'),
                 'middle_name': validated_data.get('middle_name'),
                 'last_name': validated_data.get('last_name'),
-                'password': validated_data.get('password'),
                 'company': validated_data.get('company'),
                 'position': validated_data.get('position')
             }
         )
 
         if not is_new_user_created:
-            raise ValidationError({'email': ['User with this email already exists.']})
+            raise ValidationError({'results': ['User with this email already exists.']})
 
+        new_user.set_password(validated_data.get('password'))
+        new_user.save()
         return new_user
 
     def validate(self, data):
         password = data.get('password')
         password_repeat = data.get('password_repeat')
         if password != password_repeat:
-            raise ValidationError({'password': ['Passwords are different.']})
+            raise ValidationError({'results': ['Passwords are different.']})
 
         return data
