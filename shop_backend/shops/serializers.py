@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError
 from categories.models import Category, ShopCategory
 from products.models import Product, ProductInfo, Parameter, ParameterValue
 from orders.serializers import BasketSerializer
+from django.db import transaction
 
 
 class ShopSerializer(serializers.ModelSerializer):
@@ -22,63 +23,64 @@ class ShopImportSerializer(ShopSerializer):
         price_list = price_list_to_yaml(validated_data.get('filename'))
 
         # Creating new shop from price list yaml file content
-        new_shop, is_new_shop_created = Shop.objects.get_or_create(
-            name=price_list.get('shop'),
-            defaults={
-                'user': self.context.get('request').user,
-                'filename': validated_data.get('filename')
-            }
-        )
-        if not is_new_shop_created:
-            raise ValidationError({'name': ['Shop with this name already exists.']})
-
-        # Creating new categories from price list yaml file content
-        for category in price_list.get('categories'):
-            new_category, _ = Category.objects.get_or_create(
-                name=category.get('name'),
-
-            )
-
-            new_shop_category = ShopCategory(
-                shop_id=new_shop.id,
-                category_id=new_category.id,
-                internal_category_id=category.get('id')
-            )
-            new_shop_category.save()
-
-        # Creating new products from price list yaml file content
-        for product in price_list.get('goods'):
-            new_product_category = ShopCategory.objects.get(internal_category_id=product.get('category'))
-            new_product, _ = Product.objects.get_or_create(
-                name=product.get('name'),
+        with transaction.atomic():
+            new_shop, is_new_shop_created = Shop.objects.get_or_create(
+                name=price_list.get('shop'),
                 defaults={
-                    'category': new_product_category.category
+                    'user': self.context.get('request').user,
+                    'filename': validated_data.get('filename')
                 }
             )
+            if not is_new_shop_created:
+                raise ValidationError({'name': ['Shop with this name already exists.']})
 
-            new_product_info = ProductInfo(
-                shop_id=new_shop.id,
-                product_id=new_product.id,
-                internal_product_id=product.get('id'),
-                quantity=product.get('quantity'),
-                price=product.get('price'),
-                price_rrc=product.get('price_rrc')
-            )
-            new_product_info.save()
+            # Creating new categories from price list yaml file content
+            for category in price_list.get('categories'):
+                new_category, _ = Category.objects.get_or_create(
+                    name=category.get('name'),
 
-            # Creating new parameters from price list yaml file content
-            for parameter, value in product['parameters'].items():
-                new_parameter, _ = Parameter.objects.get_or_create(
-                    name=parameter
                 )
 
-                ParameterValue.objects.get_or_create(
+                new_shop_category = ShopCategory(
+                    shop_id=new_shop.id,
+                    category_id=new_category.id,
+                    internal_category_id=category.get('id')
+                )
+                new_shop_category.save()
+
+            # Creating new products from price list yaml file content
+            for product in price_list.get('goods'):
+                new_product_category = ShopCategory.objects.get(internal_category_id=product.get('category'))
+                new_product, _ = Product.objects.get_or_create(
+                    name=product.get('name'),
+                    defaults={
+                        'category': new_product_category.category
+                    }
+                )
+
+                new_product_info = ProductInfo(
+                    shop_id=new_shop.id,
                     product_id=new_product.id,
-                    parameter_id=new_parameter.id,
-                    defaults={'value': value}
+                    internal_product_id=product.get('id'),
+                    quantity=product.get('quantity'),
+                    price=product.get('price'),
+                    price_rrc=product.get('price_rrc')
                 )
+                new_product_info.save()
 
-        return new_shop
+                # Creating new parameters from price list yaml file content
+                for parameter, value in product['parameters'].items():
+                    new_parameter, _ = Parameter.objects.get_or_create(
+                        name=parameter
+                    )
+
+                    ParameterValue.objects.get_or_create(
+                        product_id=new_product.id,
+                        parameter_id=new_parameter.id,
+                        defaults={'value': value}
+                    )
+
+            return new_shop
 
 
 class ShopStateSerializer(ShopSerializer):
