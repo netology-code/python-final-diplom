@@ -13,15 +13,15 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from shops.views import ShopImportViewSet, ShopStateViewSet, ShopOrderViewSet, OpenShopViewSet
 from contacts.views import UserRegisterViewSet
 from orders.views import BasketViewSet, OrderViewSet
 from products.views import ProductViewSet
 from categories.views import CategoryViewSet
-from rest_framework.routers import DefaultRouter
+from django.contrib import admin
 from rest_framework.authtoken import views
+from django.urls import path, include
 
 partner_router = DefaultRouter()
 partner_router.register('import', ShopImportViewSet, basename='shop_import')
