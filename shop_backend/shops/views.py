@@ -48,7 +48,7 @@ class ShopOrderViewSet(ModelViewSet):
             return Order.objects.filter(shop__in=shops).annotate(
                 total=(models.Sum(models.F('contents__quantity') * models.F('products__price'))))
 
-        return shops
+        return None
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
