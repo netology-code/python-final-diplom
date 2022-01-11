@@ -18,11 +18,26 @@ class OrderProductSerializer(serializers.ModelSerializer):
         extra_kwargs = {field: {'required': True} for field in fields}
 
 
-class BasketSerializer(OrderSerializer):
-    products = OrderProductSerializer(many=True)
+class OrderContentTestSerializer(serializers.ModelSerializer):
+    shop = serializers.SlugRelatedField(read_only=True, slug_field='id', source='product_info.shop')
+    product = serializers.SlugRelatedField(read_only=True, slug_field='id', source='product_info.product')
 
-    class Meta(OrderSerializer.Meta):
-        fields = OrderSerializer.Meta.fields + ['products']
+    class Meta:
+        model = OrderContent
+        fields = ['shop', 'product', 'quantity']
+
+
+# class BasketSerializer(OrderSerializer):
+class BasketSerializer(serializers.ModelSerializer):
+    # products = OrderProductSerializer(many=True, source='product_info')
+    products = OrderContentTestSerializer(read_only=True, many=True, allow_null=True, source='contents')
+
+    class Meta:
+        model = Order
+        fields = ['id', 'created_at', 'products']
+
+    # class Meta(OrderSerializer.Meta):
+    #     fields = OrderSerializer.Meta.fields + ['products']
 
     def create(self, validated_data):
         new_order = Order(
