@@ -31,7 +31,7 @@ class UserOrderViewSet(ModelViewSet):
     http_method_names = ['get']
 
     def get_queryset(self):
-        return Order.objects.prefetch_related('products').filter(~Q(status='basket'), user=self.request.user)
+        return Order.objects.filter(~Q(status='basket'), user=self.request.user)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
