@@ -8,17 +8,7 @@ from django.db import transaction
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['id', 'created_at', 'status']
-
-
-class OrderContentSerializer(serializers.ModelSerializer):
-    id = serializers.SlugRelatedField(read_only=True, slug_field='product_id', source='product_info')
-    name = serializers.SlugRelatedField(read_only=True, slug_field='name', source='product_info.product')
-    price = serializers.SlugRelatedField(read_only=True, slug_field='price', source='product_info')
-
-    class Meta:
-        model = OrderContent
-        fields = ['id', 'name', 'quantity', 'price']
+        fields = ['id', 'created_at']
 
 
 class OrderProductSerializer(serializers.ModelSerializer):
@@ -28,12 +18,11 @@ class OrderProductSerializer(serializers.ModelSerializer):
         extra_kwargs = {field: {'required': True} for field in fields}
 
 
-class BasketSerializer(serializers.ModelSerializer):
+class BasketSerializer(OrderSerializer):
     products = OrderProductSerializer(many=True)
 
-    class Meta:
-        model = Order
-        fields = ['id', 'created_at', 'products']
+    class Meta(OrderSerializer.Meta):
+        fields = OrderSerializer.Meta.fields + ['products']
 
     def create(self, validated_data):
         new_order = Order(
@@ -67,12 +56,22 @@ class BasketSerializer(serializers.ModelSerializer):
             pass
         else:
             raise ValidationError(
-                {'results': [f'Basket already exists. Id: {order.id}. Either delete it, or add products to it']})
+                {'results': [f'Basket already exists. Id: {order.id}. Either delete it, or add products to it.']})
 
         if not data.get('products'):
             raise ValidationError({'results': ['Please add at least one product to basket.']})
 
         return data
+
+
+class OrderContentSerializer(serializers.ModelSerializer):
+    id = serializers.SlugRelatedField(read_only=True, slug_field='product_id', source='product_info')
+    name = serializers.SlugRelatedField(read_only=True, slug_field='name', source='product_info.product')
+    price = serializers.SlugRelatedField(read_only=True, slug_field='price', source='product_info')
+
+    class Meta:
+        model = OrderContent
+        fields = ['id', 'name', 'quantity', 'price']
 
 
 class OrderItemsSerializer(BasketSerializer):
