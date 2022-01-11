@@ -4,8 +4,8 @@ from .models import Shop
 from rest_framework.exceptions import ValidationError
 from categories.models import Category, ShopCategory
 from products.models import Product, ProductInfo, Parameter, ParameterValue
-from orders.serializers import BasketSerializer
 from django.db import transaction
+from orders.serializers import BasketSerializer
 
 
 class ShopSerializer(serializers.ModelSerializer):
