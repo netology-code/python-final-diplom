@@ -34,7 +34,7 @@ class ShopStateViewSet(ModelViewSet):
         if not queryset:
             return Response({'results': 'There is no shops associated with your account.'})
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = super().get_serializer(queryset, many=True)
         return Response(serializer.data)
 
 

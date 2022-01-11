@@ -84,7 +84,9 @@ class ShopImportSerializer(ShopSerializer):
 
 
 class ShopStateSerializer(ShopSerializer):
-    pass
+    class Meta(ShopSerializer.Meta):
+        fields = ShopSerializer.Meta.fields + ['is_closed']
+        write_only_field = ['is_closed']
 
 
 class ShopOrderSerializer(ShopSerializer):
