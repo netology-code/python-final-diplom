@@ -1,7 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 from contacts.models import User
 from .serializers import UserRegisterSerializer
-from .permissions import IsAuthenticatedClient
 
 
 class UserRegisterViewSet(ModelViewSet):

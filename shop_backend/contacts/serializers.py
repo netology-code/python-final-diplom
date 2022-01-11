@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from contacts.models import User
+from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 
@@ -13,23 +14,24 @@ class UserRegisterSerializer(serializers.ModelSerializer):
                   'position']
 
     def create(self, validated_data):
-        new_user, is_new_user_created = User.objects.get_or_create(
-            email=validated_data.get('email'),
-            defaults={
-                'first_name': validated_data.get('first_name'),
-                'middle_name': validated_data.get('middle_name'),
-                'last_name': validated_data.get('last_name'),
-                'company': validated_data.get('company'),
-                'position': validated_data.get('position')
-            }
-        )
+        with transaction.atomic():
+            new_user, is_new_user_created = User.objects.get_or_create(
+                email=validated_data.get('email'),
+                defaults={
+                    'first_name': validated_data.get('first_name'),
+                    'middle_name': validated_data.get('middle_name'),
+                    'last_name': validated_data.get('last_name'),
+                    'company': validated_data.get('company'),
+                    'position': validated_data.get('position')
+                }
+            )
 
-        if not is_new_user_created:
-            raise ValidationError({'results': ['User with this email already exists.']})
+            if not is_new_user_created:
+                raise ValidationError({'results': ['User with this email already exists.']})
 
-        new_user.set_password(validated_data.get('password'))
-        new_user.save()
-        return new_user
+            new_user.set_password(validated_data.get('password'))
+            new_user.save()
+            return new_user
 
     def validate(self, data):
         password = data.get('password')
