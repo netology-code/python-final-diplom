@@ -11,7 +11,7 @@ class Product(models.Model):
     class Meta:
         verbose_name = 'Продукт'
         verbose_name_plural = 'Список продуктов'
-        ordering = ['-name']
+        ordering = ['name']
 
 
 class ProductInfo(models.Model):

@@ -1,7 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 from .models import Shop
-from .serializers import ShopSerializer, ShopImportSerializer, ShopStateSerializer, ShopOrderSerializer, \
-    ShopCategorySerializer
+from .serializers import ShopSerializer, ShopImportSerializer, ShopStateSerializer, ShopOrderSerializer
 from .permissions import IsAuthenticatedSupplier
 from rest_framework.response import Response
 from orders.models import Order
@@ -65,7 +64,7 @@ class ShopOrderViewSet(ModelViewSet):
         return Response(serializer.data)
 
 
-class ShopCategoryViewSet(ModelViewSet):
-    queryset = Shop.objects.prefetch_related('categories')
-    serializer_class = ShopCategorySerializer
+class OpenShopViewSet(ModelViewSet):
+    queryset = Shop.objects.filter(is_closed=False)
+    serializer_class = ShopSerializer
     http_method_names = ['get']

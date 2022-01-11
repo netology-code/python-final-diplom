@@ -15,10 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from shops.views import ShopViewSet, ShopImportViewSet, ShopStateViewSet, ShopOrderViewSet, ShopCategoryViewSet
+from shops.views import ShopImportViewSet, ShopStateViewSet, ShopOrderViewSet, OpenShopViewSet
 from contacts.views import UserRegisterViewSet
 from orders.views import BasketViewSet, OrderViewSet
 from products.views import ProductViewSet
+from categories.views import CategoryViewSet
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views
 
@@ -33,9 +34,9 @@ client_router.register('basket', BasketViewSet, basename='client_basket')
 client_router.register('order', OrderViewSet, basename='client_orders')
 
 shop_router = DefaultRouter()
-shop_router.register('shops', ShopViewSet, basename='shop_shops')
-shop_router.register('categories', ShopCategoryViewSet, basename='shop_categories')
+shop_router.register('shops', OpenShopViewSet, basename='shop_shops')
 shop_router.register('products', ProductViewSet, basename='shop_products')
+shop_router.register('categories', CategoryViewSet, basename='shop_categories')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

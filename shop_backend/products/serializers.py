@@ -23,8 +23,6 @@ class ProductInfoSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    available_in = ProductInfoSerializer(many=True, allow_null=True, source='infos')
-
     class Meta:
         model = Product
-        fields = ['id', 'name', 'available_in']
+        fields = ['id', 'name']
