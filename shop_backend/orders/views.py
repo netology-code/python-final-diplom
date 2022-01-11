@@ -13,7 +13,7 @@ class BasketViewSet(ModelViewSet):
     http_method_names = ['post', 'get', 'put', 'delete']
 
     def get_queryset(self):
-        return Order.objects.prefetch_related('products').filter(user=self.request.user, status='basket')
+        return Order.objects.filter(user=self.request.user, status='basket')
 
 
 class OrderViewSet(ModelViewSet):

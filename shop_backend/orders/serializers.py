@@ -49,16 +49,15 @@ class BasketSerializer(serializers.ModelSerializer):
             if order_product_quantity > product_info.quantity:
                 raise ValidationError({'results': [
                     f'Cannot put {order_product_quantity} positions of product "{product.get("product").name}" '
-                    f'to basket. Only {product_info.quantity} is available.']})
+                    f'to basket. Only {product_info.quantity} is in stock.']})
 
             order_contents.append(
                 OrderContent(quantity=product.get('quantity'), order=new_order, product_info=product_info))
-        else:
-            with transaction.atomic():
-                new_order.save()
-                OrderContent.objects.bulk_create(order_contents)
 
-        new_order.save()
+        with transaction.atomic():
+            new_order.save()
+            OrderContent.objects.bulk_create(order_contents)
+
         return new_order
 
     def validate(self, data):
