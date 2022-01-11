@@ -15,9 +15,6 @@ class BasketViewSet(ModelViewSet):
     def get_queryset(self):
         return Order.objects.prefetch_related('products').filter(user=self.request.user, status='basket')
 
-    def retrieve(self, request, *args, **kwargs):
-        raise Http404
-
 
 class OrderViewSet(ModelViewSet):
     # queryset = Order.objects.prefetch_related('products')

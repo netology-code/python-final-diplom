@@ -33,7 +33,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'created_at', 'status', 'products']
+        fields = ['id', 'created_at', 'products']
 
     def create(self, validated_data):
         new_order = Order(
