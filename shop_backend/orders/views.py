@@ -15,9 +15,18 @@ class BasketViewSet(ModelViewSet):
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user, status='basket')
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.status = 'new'
+        instance.save()
+        serializer = OrderSerializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        super().perform_update(serializer)
+
+        return Response(serializer.data)
+
 
 class OrderViewSet(ModelViewSet):
-    # queryset = Order.objects.prefetch_related('products')
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticatedClient]
     http_method_names = ['get', 'put']
