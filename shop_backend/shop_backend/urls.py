@@ -24,7 +24,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views
 
 partner_router = DefaultRouter()
-partner_router.register('update', ShopImportViewSet, basename='shop_update')
+partner_router.register('import', ShopImportViewSet, basename='shop_update')
 partner_router.register('state', ShopStateViewSet, basename='shop_state')
 partner_router.register('order', ShopOrderViewSet, basename='shop_orders')
 
