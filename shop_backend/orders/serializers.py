@@ -12,19 +12,20 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class BasketPositionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source='product_info.id')
+    price = serializers.SlugRelatedField(read_only=True, slug_field='price', source='product_info')
 
     class Meta:
         model = OrderContent
-        fields = ['id', 'quantity']
+        fields = ['id', 'price', 'quantity']
 
 
 class BasketSerializer(serializers.ModelSerializer):
     positions = BasketPositionSerializer(many=True, source='contents')
+    total = serializers.ReadOnlyField()
 
     class Meta:
         model = Order
-        fields = ['id', 'positions']
-        extra_kwargs = {field: {'required': True} for field in fields}
+        fields = ['id', 'total', 'positions']
 
     def update(self, instance, validated_data):
         basket_positions = validated_data.pop('contents')
