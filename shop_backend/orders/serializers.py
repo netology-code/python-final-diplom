@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from orders.models import Order, OrderContent
-from rest_framework.exceptions import ValidationError
 from products.models import ProductInfo
-from django.db import transaction
+from rest_framework.exceptions import ValidationError
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -11,72 +10,35 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'created_at']
 
 
-class OrderProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductInfo
-        fields = ['shop', 'product', 'quantity']
-        extra_kwargs = {field: {'required': True} for field in fields}
-
-
-class OrderContentTestSerializer(serializers.ModelSerializer):
-    shop = serializers.SlugRelatedField(read_only=True, slug_field='id', source='product_info.shop')
-    product = serializers.SlugRelatedField(read_only=True, slug_field='id', source='product_info.product')
+class BasketPositionSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='product_info.id')
 
     class Meta:
         model = OrderContent
-        fields = ['shop', 'product', 'quantity']
+        fields = ['id', 'quantity']
 
 
-# class BasketSerializer(OrderSerializer):
 class BasketSerializer(serializers.ModelSerializer):
-    # products = OrderProductSerializer(many=True, source='product_info')
-    products = OrderContentTestSerializer(read_only=True, many=True, allow_null=True, source='contents')
+    positions = BasketPositionSerializer(many=True, source='contents')
 
     class Meta:
         model = Order
-        fields = ['id', 'created_at', 'products']
+        fields = ['id', 'positions']
+        extra_kwargs = {field: {'required': True} for field in fields}
 
-    # class Meta(OrderSerializer.Meta):
-    #     fields = OrderSerializer.Meta.fields + ['products']
+    def update(self, instance, validated_data):
+        positions = validated_data.pop('contents')
+        if not positions:
+            raise ValidationError({'results': ['You need to add at least one position to basket.']})
 
-    def create(self, validated_data):
-        new_order = Order(
-            user=self.context.get('request').user
-        )
+        for position in positions:
+            OrderContent.objects.update_or_create(
+                order=instance,
+                product_info=ProductInfo.objects.get(id=position.get('product_info').get('id')),
+                defaults={'quantity': position.get('quantity')}
+            )
 
-        products = validated_data.pop('products')
-        order_contents = []
-        for product in products:
-            product_info = ProductInfo.objects.get(shop=product.get('shop'), product=product.get('product'))
-
-            order_product_quantity = product.get('quantity')
-            if order_product_quantity > product_info.quantity:
-                raise ValidationError({'results': [
-                    f'Cannot put {order_product_quantity} positions of product "{product.get("product").name}" '
-                    f'to basket. Only {product_info.quantity} is in stock.']})
-
-            order_contents.append(
-                OrderContent(quantity=product.get('quantity'), order=new_order, product_info=product_info))
-
-        with transaction.atomic():
-            new_order.save()
-            OrderContent.objects.bulk_create(order_contents)
-
-        return new_order
-
-    def validate(self, data):
-        try:
-            order = Order.objects.get(user=self.context['request'].user, status='basket')
-        except Order.DoesNotExist:
-            pass
-        else:
-            raise ValidationError(
-                {'results': [f'Basket already exists. Id: {order.id}. Either delete it, or add products to it.']})
-
-        if not data.get('products'):
-            raise ValidationError({'results': ['Please add at least one product to basket.']})
-
-        return data
+        return instance
 
 
 class OrderContentSerializer(serializers.ModelSerializer):

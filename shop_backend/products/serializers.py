@@ -9,6 +9,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class ProductInfoSerializer(serializers.ModelSerializer):
+    position_id = serializers.IntegerField(source='id')
     shop_id = serializers.SlugRelatedField(read_only=True, slug_field='id', source='shop')
     shop = serializers.SlugRelatedField(read_only=True, slug_field='name')
     category_id = serializers.SlugRelatedField(read_only=True, slug_field='id', source='product.category')
@@ -17,7 +18,7 @@ class ProductInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductInfo
-        fields = ['shop_id', 'shop', 'category_id', 'category', 'in_stock', 'price']
+        fields = ['position_id', 'shop_id', 'shop', 'category_id', 'category', 'in_stock', 'price']
 
 
 class ProductDetailsSerializer(ProductSerializer):
