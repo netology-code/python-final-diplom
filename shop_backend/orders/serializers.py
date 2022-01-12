@@ -27,15 +27,25 @@ class BasketSerializer(serializers.ModelSerializer):
         extra_kwargs = {field: {'required': True} for field in fields}
 
     def update(self, instance, validated_data):
-        positions = validated_data.pop('contents')
-        if not positions:
+        basket_positions = validated_data.pop('contents')
+        if not basket_positions:
             raise ValidationError({'results': ['You need to add at least one position to basket.']})
 
-        for position in positions:
+        for basket_position in basket_positions:
+            basket_position_id = basket_position.get('product_info').get('id')
+            basket_position_quantity = basket_position.get('quantity')
+            position_in_stock = ProductInfo.objects.get(id=basket_position_id)
+
+            if basket_position.get('quantity') > position_in_stock.quantity:
+                raise ValidationError(
+                    {'results': [
+                        f'Cannot add {basket_position_quantity} items of position {basket_position_id}. '
+                        f'Only {position_in_stock.quantity} is in stock.']})
+
             OrderContent.objects.update_or_create(
                 order=instance,
-                product_info=ProductInfo.objects.get(id=position.get('product_info').get('id')),
-                defaults={'quantity': position.get('quantity')}
+                product_info=position_in_stock,
+                defaults={'quantity': basket_position_quantity}
             )
 
         return instance
