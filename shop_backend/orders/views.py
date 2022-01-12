@@ -12,8 +12,7 @@ class BasketViewSet(ModelViewSet):
     http_method_names = ['get', 'put', 'patch']
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user, status='basket').annotate(
-            total=(Sum(F('contents__quantity') * F('positions__price'))))
+        return Order.objects.filter(user=self.request.user, status='basket')
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -22,7 +21,6 @@ class BasketViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         if partial:
-            instance.total = 0
             instance.contents.all().delete()
         else:
             self.perform_update(serializer)

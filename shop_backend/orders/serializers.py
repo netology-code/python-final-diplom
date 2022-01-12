@@ -2,6 +2,7 @@ from rest_framework import serializers
 from orders.models import Order, OrderContent
 from products.models import ProductInfo
 from rest_framework.exceptions import ValidationError
+from django.db.models import F, Sum
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -21,11 +22,17 @@ class BasketPositionSerializer(serializers.ModelSerializer):
 
 class BasketSerializer(serializers.ModelSerializer):
     positions = BasketPositionSerializer(many=True, source='contents')
-    total = serializers.ReadOnlyField()
+    total = serializers.SerializerMethodField('get_total')
 
     class Meta:
         model = Order
         fields = ['id', 'total', 'positions']
+
+    @staticmethod
+    def get_total(obj):
+        order_total = Order.objects.filter(id=obj.id).aggregate(
+            total=(Sum(F('contents__quantity') * F('positions__price'))))
+        return order_total['total']
 
     def update(self, instance, validated_data):
         basket_positions = validated_data.pop('contents')
@@ -39,15 +46,15 @@ class BasketSerializer(serializers.ModelSerializer):
 
             if basket_position.get('quantity') > position_in_stock.quantity:
                 raise ValidationError(
-                    {'results': [
-                        f'Cannot add {basket_position_quantity} items of position {basket_position_id}. '
-                        f'Only {position_in_stock.quantity} is in stock.']})
+                    {'results': [f'Cannot add {basket_position_quantity} items of position {basket_position_id}. '
+                                 f'Only {position_in_stock.quantity} is in stock.']})
 
             OrderContent.objects.update_or_create(
                 order=instance,
                 product_info=position_in_stock,
                 defaults={'quantity': basket_position_quantity}
             )
+            instance.save()
 
         return instance
 
