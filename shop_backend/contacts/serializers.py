@@ -2,6 +2,7 @@ from rest_framework import serializers
 from contacts.models import User
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
+from orders.models import Order
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -31,6 +32,12 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
             new_user.set_password(validated_data.get('password'))
             new_user.save()
+
+            new_user_basket = Order(
+                user=new_user
+            )
+            new_user_basket.save()
+
             return new_user
 
     def validate(self, data):
