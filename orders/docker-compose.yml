@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+
+  db:
+    image: postgres:13.1
+    ports:
+      - "5432:5432"
+    container_name: postgres_flask
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=diplom_db
+
+  smtp:
+    image: reachfive/fake-smtp-server:latest
+    ports:
+      - "1080:1080"
+      - "1025:1025"

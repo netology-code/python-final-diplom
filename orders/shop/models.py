@@ -1,5 +1,5 @@
 from django.db import models
-from ..custom_auth.models import User, Contact
+from custom_auth.models import User, Contact
 
 STATE_CHOICES = (
     ('basket', 'Статус корзины'),
@@ -21,7 +21,7 @@ class Shop(models.Model):
     class Meta:
         verbose_name = 'Магазин'
         verbose_name_plural = 'Магазины'
-        ordering = ('-name', )
+        ordering = ('-name',)
 
     def __str__(self):
         return f'{self.name} - {self.user}'
@@ -34,7 +34,7 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        ordering = ('-name', )
+        ordering = ('-name',)
 
     def __str__(self):
         return self.name
@@ -117,7 +117,7 @@ class Order(models.Model):
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Список заказов'
-        ordering = ('-dt', )
+        ordering = ('-dt',)
 
     def __str__(self):
         return f'{self.user} - {self.dt}'
