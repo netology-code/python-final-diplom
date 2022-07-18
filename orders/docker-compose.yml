@@ -6,7 +6,9 @@ services:
     image: postgres:13.1
     ports:
       - "5432:5432"
-    container_name: postgres_flask
+    container_name: postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=admin
       - POSTGRES_USER=admin
@@ -17,3 +19,6 @@ services:
     ports:
       - "1080:1080"
       - "1025:1025"
+      
+volumes:
+  db_data:
