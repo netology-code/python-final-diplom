@@ -139,7 +139,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 EMAIL_HOST = '0.0.0.0'
 EMAIL_PORT = 1025
-# EMAIL_HOST_USER = ''
+EMAIL_HOST_USER = 'service@shop.ru'
 # EMAIL_HOST_PASSWORD = ''
 # EMAIL_USE_SSL = ''
 # SERVER_EMAIL = EMAIL_HOST_USER
@@ -151,4 +151,16 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
+
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
 }
+
+# redis settings
+REDIS_HOST = 'localhost'
+REDIS_PORT = '6379'
+CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
+BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
