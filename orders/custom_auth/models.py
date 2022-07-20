@@ -52,7 +52,7 @@ class User(AbstractUser):
     Стандартная модель пользователей
     """
     objects = UserManager()
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']
     USERNAME_FIELD = 'email'
 
     email = models.EmailField(_('email address'), unique=True)

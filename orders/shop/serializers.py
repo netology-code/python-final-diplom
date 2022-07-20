@@ -3,7 +3,7 @@ from .models import Category, Shop, ProductInfo, Product, ProductParameter, Orde
 from custom_auth.models import User, Contact
 
 
-class ContactSerialiser(serializers.ModelSerializer):
+class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
         fields = ('id', 'city', 'street', 'house', 'apartment', 'email', 'user', 'phone',)
@@ -12,7 +12,7 @@ class ContactSerialiser(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    contacts = ContactSerialiser(read_only=True, many=True)
+    contacts = ContactSerializer(read_only=True, many=True)
 
     class Meta:
         model = User
@@ -68,14 +68,14 @@ class OrderItemSerializer(serializers.ModelSerializer):
         extra_kwargs = {'order': {'write-only': True}}
 
 
-class OrderItemCreateSeriakizer(OrderItemSerializer):
+class OrderItemCreateSerializer(OrderItemSerializer):
     product_info = ProductInfoSerializer(read_only=True)
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    ordered_items = OrderItemCreateSeriakizer(read_only=True, many=True)
+    ordered_items = OrderItemCreateSerializer(read_only=True, many=True)
     total_sum = serializers.IntegerField()
-    contact = ContactSerialiser(read_only=True)
+    contact = ContactSerializer(read_only=True)
 
     class Meta:
         model = Order
