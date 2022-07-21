@@ -1,3 +1,7 @@
-Django
+Django~=4.0.6
 pytz
 psycopg2-binary
+PyYAML
+celery
+djangorestframework
+ujson

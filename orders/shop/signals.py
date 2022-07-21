@@ -4,13 +4,15 @@ from django.dispatch import receiver, Signal
 from django_rest_passwordreset.signals import reset_password_token_created
 
 from custom_auth.models import ConfirmEmailToken, User
+from orders.celery import app
 
 new_user_registered = Signal()
 
 new_order = Signal()
 
 
-@receiver(reset_password_token_created)
+@app.task()
+# @receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, **kwargs):
     """
     Отправляем письмо с токеном для сброса пароля
@@ -36,7 +38,8 @@ def password_reset_token_created(sender, instance, reset_password_token, **kwarg
     msg.send()
 
 
-@receiver(new_user_registered)
+@app.task()
+# @receiver(new_user_registered)
 def new_user_registered_signal(user_id, **kwargs):
     """
     отправляем письмо с подтрердждением почты
@@ -57,7 +60,8 @@ def new_user_registered_signal(user_id, **kwargs):
     msg.send()
 
 
-@receiver(new_order)
+@app.task()
+# @receiver(new_order)
 def new_order_signal(user_id, **kwargs):
     """
     отправяем письмо при изменении статуса заказа

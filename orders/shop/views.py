@@ -437,12 +437,14 @@ class PartnerUpdate(APIView):
             return Response({'Status': False, 'Error': 'Доступно только для магазинов'},
                             status=status.HTTP_403_FORBIDDEN)
 
-        file = request.FILES
-        if file:
-            user_id = request.user.id
-            import_shop_data(file, user_id)
+        url = request.data.get('url')
+        if url:
+            try:
+                import_shop_data.delay(request.user.id, url)
+            except IntegrityError as e:
+                return JsonResponse({'Status': False, 'Errors': f'Integrity Error: {e}'})
 
-            return Response({'Status': True})
+            return Response({'Status': True}, status=status.HTTP_200_OK)
 
         return Response({'Status': False, 'Errors': 'Не указаны все обязательные аргументы'},
                         status=status.HTTP_400_BAD_REQUEST)
