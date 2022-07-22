@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.db import IntegrityError
@@ -176,7 +178,7 @@ class BasketView(APIView):
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
         basket = Order.objects.filter(user_id=request.user.id, status='basket') \
             .prefetch_related('ordered_items__product_info__product__category',
-                              'ordered_items__product_info__product__parameters__parameter') \
+                              'ordered_items__product_info__product_parameters__parameter') \
             .annotate(total_sum=Sum(F('ordered_items__quantity') * F('ordered_items__product_info__price'))) \
             .distinct()
 
@@ -191,24 +193,24 @@ class BasketView(APIView):
         items_sting = request.data.get('items')
         if items_sting:
             try:
-                items_dict = load_json(items_sting)
+                items_dict = json.dumps(items_sting)
             except ValueError:
                 JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
             else:
-                basket, _ = Order.objects.get_or_create(user_id=request.user.id, state='basket')
+                basket, _ = Order.objects.get_or_create(user_id=request.user.id, status='basket')
                 objects_created = 0
-                for order_item in items_dict:
+                for order_item in load_json(items_dict):
                     order_item.update({'order': basket.id})
-                    serializizer = OrderItemSerializer(data=order_item)
-                    if serializizer.is_valid():
+                    serializer = OrderItemSerializer(data=order_item)
+                    if serializer.is_valid(raise_exception=True):
                         try:
-                            serializizer.save()
+                            serializer.save()
                         except IntegrityError as error:
                             return JsonResponse({'Status': False, 'Errors': str(error)})
                         else:
                             objects_created += 1
                     else:
-                        JsonResponse({'Status': False, 'Errors': serializizer.errors})
+                        JsonResponse({'Status': False, 'Errors': serializer.errors})
 
                 return JsonResponse({'Status': True, 'Создано объектов': objects_created})
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все обязательные аргументы'})
@@ -221,7 +223,7 @@ class BasketView(APIView):
         items_sting = request.data.get('items')
         if items_sting:
             items_list = items_sting.split(',')
-            basket, _ = Order.objects.get_or_create(user_id=request.user.id, state='basket')
+            basket, _ = Order.objects.get_or_create(user_id=request.user.id, status='basket')
             query = Q()
             objects_deleted = False
             for order_item_id in items_list:
@@ -243,13 +245,13 @@ class BasketView(APIView):
         items_sting = request.data.get('items')
         if items_sting:
             try:
-                items_dict = load_json(items_sting)
+                items_dict = json.dumps(items_sting)
             except ValueError:
-                JsonResponse({'Satatus': False, 'Errors': 'Неверный формат запроса'})
+                JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
             else:
-                basket, _ = Order.bojects.get_or_create(user_id=request.data.id, state='basket')
+                basket, _ = Order.objects.get_or_create(user_id=request.user.id, status='basket')
                 objects_update = 0
-                for order_item in items_dict:
+                for order_item in json.loads(items_dict):
                     if type(order_item['id']) == int and type(order_item['quantity']) == int:
                         objects_update += OrderItem.objects.filter(order_id=basket.id, id=order_item['id']) \
                             .update(quantity=order_item['quantity'])
@@ -285,7 +287,7 @@ class OrderView(APIView):
                 is_update = Order.objects.filter(id=request.data['id'], user_id=request.user.id) \
                     .update(contact_id=request.data['contact'], status='new')
             except IntegrityError as error:
-                return Response({'Status': False, 'Errors': 'Неверно указаны аргументы'},
+                return Response({'Status': False, 'Errors': error},
                                 status=status.HTTP_400_BAD_REQUEST)
             else:
                 if is_update:

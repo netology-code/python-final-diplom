@@ -65,16 +65,19 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = ('id', 'product_info', 'quantity', 'order',)
         read_only_fields = ('id',)
-        extra_kwargs = {'order': {'write-only': True}}
+        extra_kwargs = {'order': {'write_only': True}}
 
 
-class OrderItemCreateSerializer(OrderItemSerializer):
-    product_info = ProductInfoSerializer(read_only=True)
+class OrderItemCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ('id', 'product_info', 'quantity', 'order',)
+        read_only_fields = ('id',)
 
 
 class OrderSerializer(serializers.ModelSerializer):
     ordered_items = OrderItemCreateSerializer(read_only=True, many=True)
-    total_sum = serializers.IntegerField()
+    total_sum = serializers.IntegerField(read_only=True)
     contact = ContactSerializer(read_only=True)
 
     class Meta:
