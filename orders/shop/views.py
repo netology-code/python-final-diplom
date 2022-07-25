@@ -5,10 +5,9 @@ from django.contrib.auth.password_validation import validate_password
 from django.db import IntegrityError
 from django.db.models import Q, Sum, F
 from django.http import JsonResponse
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -17,6 +16,7 @@ from django.db.models.query import Prefetch
 
 from orders import settings
 from .models import Shop, Category, ProductInfo, Order, OrderItem
+from .permissions import IsOnlyShop
 from .serializers import UserSerializer, ShopSerializer, CategorySerializer, ProductInfoSerializer, OrderSerializer, \
     OrderItemSerializer, ContactSerializer
 from custom_auth.models import ConfirmEmailToken, Contact
@@ -94,20 +94,15 @@ class LoginAccount(APIView):
 
 class AccountDetails(APIView):
     """Класс для работы с данными пользователя"""
+    permission_classes = [IsAuthenticated]
 
     # Возвращаем все данные пользователя + все контакты
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return Response({'Status': False, 'Error': 'Login required'}, status=status.HTTP_403_FORBIDDEN)
-
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
     # Изменяем данные пользователя
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return Response({'Status': False, 'Error': 'Login required'}, status=status.HTTP_403_FORBIDDEN)
-
         # Если пароль есть, проверяем его
         if 'password' in request.data:
             try:
@@ -171,11 +166,11 @@ class ProductInfoView(ReadOnlyModelViewSet):
 
 class BasketView(APIView):
     """ Класс для работы с корзиной пользователя """
+    permission_classes = [IsAuthenticated]
 
     # Получаем корзину
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
+
         basket = Order.objects.filter(user_id=request.user.id, status='basket') \
             .prefetch_related('ordered_items__product_info__product__category',
                               'ordered_items__product_info__product_parameters__parameter') \
@@ -187,8 +182,6 @@ class BasketView(APIView):
 
     # Редактируем корзину
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
 
         items_sting = request.data.get('items')
         if items_sting:
@@ -217,8 +210,6 @@ class BasketView(APIView):
 
     # Удаление позиции из корзины
     def delete(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
 
         items_sting = request.data.get('items')
         if items_sting:
@@ -239,8 +230,6 @@ class BasketView(APIView):
 
     # Добавляем позицию в корзину
     def put(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
 
         items_sting = request.data.get('items')
         if items_sting:
@@ -262,10 +251,9 @@ class BasketView(APIView):
 
 class OrderView(APIView):
     """ Класс для получения и размещения заказов пользователями """
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
 
         order = Order.objects.filter(user_id=request.user.id) \
             .exclude(status='basket') \
@@ -279,8 +267,6 @@ class OrderView(APIView):
 
     # Размещение заказа из корзины и отправка письма об изменении статуса заказа.
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
 
         if request.data['id'].isdigit():
             try:
@@ -301,11 +287,10 @@ class OrderView(APIView):
 
 class ContactView(APIView):
     """ Класс для работы с контактами покупателей """
+    permission_classes = [IsAuthenticated]
 
     # Показать свои контакты
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
 
         contact = Contact.objects.filter(user_id=request.user.id)
         serializer = ContactSerializer(contact, many=True)
@@ -313,8 +298,6 @@ class ContactView(APIView):
 
     # Добавляем новый контакт
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
 
         if {'city', 'phone'}.issubset(request.data):
             request.data._mutable = True
@@ -331,8 +314,6 @@ class ContactView(APIView):
 
     # Удаляем контакт
     def delete(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
 
         items_sting = request.data.get('items')
         if items_sting:
@@ -352,8 +333,6 @@ class ContactView(APIView):
 
     # Редактируем контакт
     def put(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
 
         if 'id' in request.data:
             if request.data['id'].isdigit():
@@ -372,20 +351,14 @@ class ContactView(APIView):
 
 class PartnerOrders(APIView):
     """ Класс для получения заказов поставщиками """
+    permission_classes = [IsAuthenticated, IsOnlyShop]
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
-
-        if request.user.type != 'shop':
-            return Response({'Status': False, 'Error': 'Доступно только для магазинов'},
-                            status=status.HTTP_403_FORBIDDEN)
-
-        pr = Prefetch('orders_items', queryset=OrderItem.objects.filter(shop__user_id=request.user.id))
-        order = Order.objects.filter(ordered_items__shop__user_id=request.user.id) \
+        order = Order.objects.filter(user_id=request.user.id) \
             .exclude(status='basket') \
-            .prefetch_related(pr) \
-            .selecet_related('contact') \
+            .prefetch_related('ordered_items__product_info__product__category',
+                              'ordered_items__product_info__product_parameters__parameter') \
+            .select_related('contact') \
             .annotate(total_sum=Sum('ordered_items__total_amount', total_quantity=Sum('ordered_items__quantity')))
 
         serializer = OrderSerializer(order, many=True)
@@ -394,29 +367,16 @@ class PartnerOrders(APIView):
 
 class PartnerState(APIView):
     """ Класс для работы со статусом поставщика """
+    permission_classes = [IsAuthenticated, IsOnlyShop]
 
     # Получаем текущий статус получения заказов у магазина
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
-
-        if request.user.type != 'shop':
-            return Response({'Status': False, 'Error': 'Доступно только для магазинов'},
-                            status=status.HTTP_403_FORBIDDEN)
-
         shop = request.user.shop
         serializer = ShopSerializer(shop)
         return Response(serializer.data)
 
     # Изменяем текущий статус получения заказа у магазина
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
-
-        if request.user.type != 'shop':
-            return Response({'Status': False, 'Error': 'Доступно только для магазинов'},
-                            status=status.HTTP_403_FORBIDDEN)
-
         state = request.data.get('state')
         if state:
             try:
@@ -430,15 +390,9 @@ class PartnerState(APIView):
 
 class PartnerUpdate(APIView):
     """ Класс для обновления прайса от поставщика """
+    permission_classes = [IsAuthenticated, IsOnlyShop]
 
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=status.HTTP_403_FORBIDDEN)
-
-        if request.user.type != 'shop':
-            return Response({'Status': False, 'Error': 'Доступно только для магазинов'},
-                            status=status.HTTP_403_FORBIDDEN)
-
         url = request.data.get('url')
         if url:
             try:
