@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from ujson import loads as load_json
@@ -25,6 +26,7 @@ from .tasks import import_shop_data, send_email
 
 class RegisterAccount(APIView):
     """Регистрация покупателей"""
+    throttle_classes = [AnonRateThrottle]
 
     def post(self, request, *args, **kwargs):
         if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
@@ -77,6 +79,7 @@ class ConfirmAccount(APIView):
 
 class LoginAccount(APIView):
     """Класс для авторизации пользователя"""
+    throttle_classes = [AnonRateThrottle]
 
     def post(self, request, *args, **kwargs):
         if {'email', 'password'}.issubset(request.data):
@@ -95,6 +98,7 @@ class LoginAccount(APIView):
 class AccountDetails(APIView):
     """Класс для работы с данными пользователя"""
     permission_classes = [IsAuthenticated]
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     # Возвращаем все данные пользователя + все контакты
     def get(self, request, *args, **kwargs):
@@ -140,6 +144,7 @@ class ShopView(ModelViewSet):
 class ProductInfoView(ReadOnlyModelViewSet):
     """ Класс для поиска товаров """
 
+    throttle_classes = [AnonRateThrottle]
     serializer_class = ProductInfoSerializer
     ordering = ('product',)
 
@@ -167,6 +172,7 @@ class ProductInfoView(ReadOnlyModelViewSet):
 class BasketView(APIView):
     """ Класс для работы с корзиной пользователя """
     permission_classes = [IsAuthenticated]
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     # Получаем корзину
     def get(self, request, *args, **kwargs):
@@ -252,6 +258,7 @@ class BasketView(APIView):
 class OrderView(APIView):
     """ Класс для получения и размещения заказов пользователями """
     permission_classes = [IsAuthenticated]
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     def get(self, request, *args, **kwargs):
 
@@ -287,6 +294,7 @@ class OrderView(APIView):
 class ContactView(APIView):
     """ Класс для работы с контактами покупателей """
     permission_classes = [IsAuthenticated]
+    throttle_classes = [UserRateThrottle]
 
     # Показать свои контакты
     def get(self, request, *args, **kwargs):
@@ -351,6 +359,7 @@ class ContactView(APIView):
 class PartnerOrders(APIView):
     """ Класс для получения заказов поставщиками """
     permission_classes = [IsAuthenticated, IsOnlyShop]
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     def get(self, request, *args, **kwargs):
         order = Order.objects.filter(user_id=request.user.id) \
@@ -368,6 +377,7 @@ class PartnerOrders(APIView):
 class PartnerState(APIView):
     """ Класс для работы со статусом поставщика """
     permission_classes = [IsAuthenticated, IsOnlyShop]
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     # Получаем текущий статус получения заказов у магазина
     def get(self, request, *args, **kwargs):
