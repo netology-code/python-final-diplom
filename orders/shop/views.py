@@ -12,7 +12,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from ujson import loads as load_json
-from django.db.models.query import Prefetch
 
 from orders import settings
 from .models import Shop, Category, ProductInfo, Order, OrderItem
@@ -21,7 +20,7 @@ from .serializers import UserSerializer, ShopSerializer, CategorySerializer, Pro
     OrderItemSerializer, ContactSerializer
 from custom_auth.models import ConfirmEmailToken, Contact
 from .signals import new_user_registered
-from .tasks import import_shop_data
+from .tasks import import_shop_data, send_email
 
 
 class RegisterAccount(APIView):
@@ -40,7 +39,6 @@ class RegisterAccount(APIView):
                 return JsonResponse({'Status': False, 'Errors': {'password': error_array}})
             else:
                 # Проверяем уникальность имени пользователя
-                # request.data._mutable = True
                 request.data.update({})
                 user_serializer = UserSerializer(data=request.data)
                 if user_serializer.is_valid():
@@ -48,8 +46,10 @@ class RegisterAccount(APIView):
                     user = user_serializer.save()
                     user.set_password(request.data['password'])
                     user.save()
-                    new_user_registered.send(sender=__class__, user_id=user.id)
-                    return JsonResponse({'Status': True})
+                    token, _ = ConfirmEmailToken.objects.get_or_create(user_id=user.id)
+                    send_email.delay(f'Your confirmation token {token.key}', user.email)
+                    return JsonResponse({'Status': True, 'Token for email confirmation': token.key},
+                                        status=status.HTTP_201_CREATED)
                 else:
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
 
@@ -277,8 +277,7 @@ class OrderView(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
             else:
                 if is_update:
-                    request.user.email_user(f'Обновление статуса заказа', 'Заказ сформирован',
-                                            from_email=settings.EMAIL_HOST_USER)
+                    send_email.delay('Заказ сформирован', request.user.email)
                     return Response({'Status': True})
 
         return Response({'Status': False, 'Errors': 'Не указаны все обязательные аргументы'},
@@ -362,6 +361,7 @@ class PartnerOrders(APIView):
             .annotate(total_sum=Sum('ordered_items__total_amount', total_quantity=Sum('ordered_items__quantity')))
 
         serializer = OrderSerializer(order, many=True)
+        send_email.delay('Заказ обработан', request.user.email)
         return Response(serializer.data)
 
 
