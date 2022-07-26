@@ -15,7 +15,7 @@ class CustomUserAdmin(UserAdmin):
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     list_display = ('email', 'first_name', 'last_name', 'is_staff', 'is_active')
-    list_editable = ('is_activ',)
+    list_editable = ('is_active',)
 
 
 @admin.register(Contact)
