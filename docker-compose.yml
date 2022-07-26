@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+
+  db:
+    image: postgres:14.2-alpine
+    ports:
+      - "5432:5432"
+    container_name: postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      - 'POSTGRES_HOST_AUTH_METHOD=trust'
+    restart: always
+
+  api:
+    build: ./orders
+    container_name: api
+    env_file:
+      - .env
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./orders:/usr/src/app
+    ports:
+      - '8000:8000'
+    depends_on:
+      - db
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - '6379:6379'
+    restart: always
+
+  smtp:
+    image: reachfive/fake-smtp-server:latest
+    container_name: smtp-server
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    depends_on:
+      - db
+      - api
+      - redis
+      - celery
+
+  celery:
+    build: ./orders
+    container_name: celery
+    command: celery -A orders worker -l info
+    depends_on:
+      - db
+      - api
+      - redis
+
+volumes:
+  db_data:
