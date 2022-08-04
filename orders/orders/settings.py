@@ -145,7 +145,7 @@ EMAIL_HOST_USER = 'service@shop.ru'
 # SERVER_EMAIL = EMAIL_HOST_USER
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10,
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
