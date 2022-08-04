@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'custom_auth',
     'drf_spectacular',
     'drf_spectacular_sidecar',
+    'social_django',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
             ],
         },
     },
@@ -182,3 +184,19 @@ REDIS_PORT = '6379'
 CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
+
+# social app - VK
+SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+
+AUTHENTICATION_BACKENDS = (
+    # бекенд авторизации через ВКонтакте
+    'social_core.backends.vk.VKOAuth2',
+    # бекенд классической аутентификации, чтобы работала авторизация через обычный логин и пароль
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_VK_OAUTH2_KEY = 'ID приложения'
+SOCIAL_AUTH_VK_OAUTH2_SECRET = 'Защищённый ключ'
+
+LOGIN_REDIRECT_URL = '/'
+SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']

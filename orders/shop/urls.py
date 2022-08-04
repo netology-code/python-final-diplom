@@ -30,4 +30,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('schema', SpectacularAPIView.as_view(), name='schema'),
     path('schema/swagger-ui', SpectacularSwaggerView.as_view(url_name='shop:schema'), name='swagger-ui'),
+    path('social', include('social_django.urls')),
 ] + router.urls

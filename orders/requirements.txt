@@ -65,3 +65,5 @@ webencodings==0.5.1
 wrapt==1.14.1
 drf-spectacular==0.23.1
 drf-spectacular-sidecar==2022.8.1
+social-auth-app-django==5.0.0
+social-auth-core==4.3.0
