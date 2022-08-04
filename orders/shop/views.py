@@ -275,20 +275,20 @@ class OrderView(APIView):
     # Размещение заказа из корзины и отправка письма об изменении статуса заказа.
     def post(self, request, *args, **kwargs):
 
-        if request.data['id'].isdigit():
-            try:
-                is_update = Order.objects.filter(id=request.data['id'], user_id=request.user.id) \
-                    .update(contact_id=request.data['contact'], status='new')
-            except IntegrityError as error:
-                return Response({'Status': False, 'Errors': error},
-                                status=status.HTTP_400_BAD_REQUEST)
-            else:
-                if is_update:
-                    send_email.delay('Заказ сформирован', request.user.email)
-                    return Response({'Status': True})
+        if {'id', 'contact'}.issubset(request.data):
+            if request.data['id'].isdigit():
+                try:
+                    is_updated = Order.objects.filter(id=request.data['id'], user_id=request.user.id) \
+                        .update(contact_id=request.data['contact'], status='new')
+                except IntegrityError as error:
+                    return JsonResponse({'Status': False, 'Errors': error}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    if is_updated:
+                        send_email.delay('Заказ сформирован', request.user.email)
+                        return JsonResponse({'Status': True})
 
-        return Response({'Status': False, 'Errors': 'Не указаны все обязательные аргументы'},
-                        status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все обязательные аргументы'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContactView(APIView):
