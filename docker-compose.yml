@@ -54,6 +54,10 @@ services:
     build: ./orders
     container_name: celery
     command: celery -A orders worker -l info
+    volumes:
+      - ./orders:/usr/src/app
+    env_file:
+      - .env
     depends_on:
       - db
       - api
