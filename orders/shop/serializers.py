@@ -94,7 +94,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 class UserRegisterConfirmSerializer(serializers.Serializer):
     email = serializers.CharField()
-    key = serializers.CharField()
+    token = serializers.CharField()
 
 
 class UserLoginSerializer(serializers.Serializer):
