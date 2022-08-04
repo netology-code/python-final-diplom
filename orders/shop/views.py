@@ -5,6 +5,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.db import IntegrityError
 from django.db.models import Q, Sum, F
 from django.http import JsonResponse
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
@@ -14,19 +15,20 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from ujson import loads as load_json
 
-from orders import settings
 from .models import Shop, Category, ProductInfo, Order, OrderItem
 from .permissions import IsOnlyShop
 from .serializers import UserSerializer, ShopSerializer, CategorySerializer, ProductInfoSerializer, OrderSerializer, \
-    OrderItemSerializer, ContactSerializer
+    OrderItemSerializer, ContactSerializer, UserRegisterSerializer, UserRegisterConfirmSerializer, UserLoginSerializer, \
+    ParnerUpdateSerializer
 from custom_auth.models import ConfirmEmailToken, Contact
-from .signals import new_user_registered
 from .tasks import import_shop_data, send_email
 
 
+@extend_schema(request=UserRegisterSerializer)
 class RegisterAccount(APIView):
     """Регистрация покупателей"""
     throttle_classes = [AnonRateThrottle]
+    # serializer_class = UserSerializer
 
     def post(self, request, *args, **kwargs):
         if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
@@ -58,6 +60,7 @@ class RegisterAccount(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
 
+@extend_schema(request=UserRegisterConfirmSerializer)
 class ConfirmAccount(APIView):
     """Класс для подтверждения электронного адреса"""
 
@@ -77,6 +80,7 @@ class ConfirmAccount(APIView):
                         status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(request=UserLoginSerializer)
 class LoginAccount(APIView):
     """Класс для авторизации пользователя"""
     throttle_classes = [AnonRateThrottle]
@@ -95,6 +99,7 @@ class LoginAccount(APIView):
                         status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(request=UserSerializer)
 class AccountDetails(APIView):
     """Класс для работы с данными пользователя"""
     permission_classes = [IsAuthenticated]
@@ -169,6 +174,7 @@ class ProductInfoView(ReadOnlyModelViewSet):
         return queryset
 
 
+@extend_schema(request=OrderSerializer, responses=OrderSerializer)
 class BasketView(APIView):
     """ Класс для работы с корзиной пользователя """
     permission_classes = [IsAuthenticated]
@@ -255,6 +261,7 @@ class BasketView(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все обязательные аргументы'})
 
 
+@extend_schema(request=OrderSerializer, responses=OrderSerializer)
 class OrderView(APIView):
     """ Класс для получения и размещения заказов пользователями """
     permission_classes = [IsAuthenticated]
@@ -291,6 +298,7 @@ class OrderView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(request=ContactSerializer, responses=ContactSerializer)
 class ContactView(APIView):
     """ Класс для работы с контактами покупателей """
     permission_classes = [IsAuthenticated]
@@ -356,6 +364,7 @@ class ContactView(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все обязательные аргументы'})
 
 
+@extend_schema(request=OrderSerializer, responses=OrderSerializer)
 class PartnerOrders(APIView):
     """ Класс для получения заказов поставщиками """
     permission_classes = [IsAuthenticated, IsOnlyShop]
@@ -374,6 +383,7 @@ class PartnerOrders(APIView):
         return Response(serializer.data)
 
 
+@extend_schema(request=ShopSerializer, responses=ShopSerializer)
 class PartnerState(APIView):
     """ Класс для работы со статусом поставщика """
     permission_classes = [IsAuthenticated, IsOnlyShop]
@@ -398,6 +408,7 @@ class PartnerState(APIView):
         return Response({'Status': False, 'Errors': 'Не указан аргумент state'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(request=ParnerUpdateSerializer)
 class PartnerUpdate(APIView):
     """ Класс для обновления прайса от поставщика """
     permission_classes = [IsAuthenticated, IsOnlyShop]

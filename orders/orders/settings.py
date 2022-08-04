@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'shop',
     'custom_auth',
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
 ]
 
 MIDDLEWARE = [
@@ -160,6 +162,17 @@ REST_FRAMEWORK = {
         'user': '1000/day',
         'anon': '10/minute',
     },
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
+    'TITLE': 'Netotlogy diploma project',
+    'DESCRIPTION': 'API service for shop',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 # redis settings

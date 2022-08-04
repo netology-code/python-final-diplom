@@ -5,6 +5,8 @@ from rest_framework.routers import SimpleRouter
 from .views import RegisterAccount, LoginAccount, ConfirmAccount, AccountDetails, ContactView, ShopView, CategoryView, \
     ProductInfoView, PartnerUpdate, PartnerState, PartnerOrders, BasketView, OrderView
 
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+
 app_name = 'shop'
 
 router = SimpleRouter()
@@ -26,4 +28,6 @@ urlpatterns = [
     path('basket', BasketView.as_view(), name='basket'),
     path('order', OrderView.as_view(), name='order'),
     path('', include(router.urls)),
+    path('schema', SpectacularAPIView.as_view(), name='schema'),
+    path('schema/swagger-ui', SpectacularSwaggerView.as_view(url_name='shop:schema'), name='swagger-ui'),
 ] + router.urls

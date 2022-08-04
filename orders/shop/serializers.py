@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Category, Shop, ProductInfo, Product, ProductParameter, Order, OrderItem
-from custom_auth.models import User, Contact
+from custom_auth.models import User, Contact, ConfirmEmailToken
 
 
 class ContactSerializer(serializers.ModelSerializer):
@@ -84,3 +84,23 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ('id', 'ordered_items', 'status', 'dt', 'total_sum', 'contact',)
         read_only_fields = ('id',)
+
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email', 'company', 'position', 'password',)
+
+
+class UserRegisterConfirmSerializer(serializers.Serializer):
+    email = serializers.CharField()
+    key = serializers.CharField()
+
+
+class UserLoginSerializer(serializers.Serializer):
+    email = serializers.CharField()
+    password = serializers.CharField()
+
+
+class ParnerUpdateSerializer(serializers.Serializer):
+    file_url = serializers.CharField()

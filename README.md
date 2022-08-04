@@ -55,5 +55,5 @@ docker-compose exec -it api python manage.py createsuperuser
 
 **Приложение доступно по адресу:** http://127.0.0.1:8000
 
-**API запросы доступны на сервере POSTMAN:** https://documenter.getpostman.com/view/22128489/UzXNTwjw
+**API документация доступна по ссылке:** http://127.0.0.1:8000/api/v1/schema/swagger-ui
 
