@@ -93,14 +93,14 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 class UserRegisterConfirmSerializer(serializers.Serializer):
-    email = serializers.CharField()
+    email = serializers.EmailField()
     token = serializers.CharField()
 
 
 class UserLoginSerializer(serializers.Serializer):
-    email = serializers.CharField()
+    email = serializers.EmailField()
     password = serializers.CharField()
 
 
 class ParnerUpdateSerializer(serializers.Serializer):
-    file_url = serializers.CharField()
+    file_url = serializers.URLField()
