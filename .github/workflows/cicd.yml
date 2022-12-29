@@ -1,0 +1,52 @@
+name:
+  Django Testing and Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_DB: "commercial_net_service"
+      POSTGRES_HOST: localhost
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "secret"
+      POSTGRES_PORT: 5432
+      SECRET_KEY: "django-insecure-q3#&9mct^3yc4j2%bo6-08n1wguv+kmbg3rf2##$8g5kx6s8xq"
+      ALLOWED_HOSTS: "*"
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_PORT: ${{ env.POSTGRES_PORT }}
+
+    steps:
+      - name: Check updates
+        uses: actions/checkout@v2
+
+      - name: Python setup
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Activate enviroments
+        run: python -m venv .venv
+
+      - name: setup libs
+        run: |
+          pip install --upgrade pip |
+          pip install -r requirements.txt
+
+      - name: Linting of  commercial_net_service
+        run: flake8  commercial_net_service
+
+      - name: Linting of orders
+        run: flake8 orders
+
+
+
