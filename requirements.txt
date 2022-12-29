@@ -1,3 +1,9 @@
-Django
-pytz==2018.5
-flake8
+django-filter==22.1
+djangorestframework==3.14.0
+flake8==5.0.4
+django
+tzdata
+sqlparse
+asgiref
+python-dotenv
+psycopg2
