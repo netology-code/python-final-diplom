@@ -7,3 +7,4 @@ sqlparse
 asgiref
 python-dotenv
 psycopg2
+django_rest_passwordreset
