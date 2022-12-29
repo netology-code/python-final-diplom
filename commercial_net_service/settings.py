@@ -12,6 +12,12 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,12 +26,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
 
 # Application definition
@@ -37,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'orders',
 ]
 
 MIDDLEWARE = [
@@ -75,8 +83,12 @@ WSGI_APPLICATION = 'commercial_net_service.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': os.getenv('DB_NAME'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
     }
 }
 
@@ -86,23 +98,20 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': """django.contrib.auth.
-        password_validation.UserAttributeSimilarityValidator""",
+        'NAME': """django.contrib.auth.password_validation.UserAttributeSimilarityValidator""",
     },
     {
-        'NAME': """django.contrib.auth.
-        password_validation.MinimumLengthValidator""",
+        'NAME': """django.contrib.auth.password_validation.MinimumLengthValidator""",
     },
     {
-        'NAME': """django.contrib.auth.
-        password_validation.CommonPasswordValidator""",
+        'NAME': """django.contrib.auth.password_validation.CommonPasswordValidator""",
     },
     {
-        'NAME': """django.contrib.auth.
-        password_validation.NumericPasswordValidator""",
+        'NAME': """django.contrib.auth.password_validation.NumericPasswordValidator""",
     },
 ]
 
+AUTH_USER_MODEL = 'orders.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
