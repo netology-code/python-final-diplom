@@ -238,10 +238,10 @@ class OrderItem(models.Model):
                               related_name='ordered_items',
                               on_delete=models.CASCADE)
     product_info = models.ForeignKey(ProductInfo,
-                                verbose_name='Информация о продукте',
-                                related_name='ordered_items',
-                                blank=True,
-                                on_delete=models.CASCADE)
+                                     verbose_name='Информация о продукте',
+                                     related_name='ordered_items',
+                                     blank=True,
+                                     on_delete=models.CASCADE)
     shop = models.ForeignKey(Shop,
                              verbose_name='Магазин',
                              on_delete=models.CASCADE)
