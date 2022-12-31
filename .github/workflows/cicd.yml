@@ -42,11 +42,8 @@ jobs:
           pip install --upgrade pip |
           pip install -r requirements.txt
 
-#      - name: Linting of  commercial_net_service
-#        run: flake8  commercial_net_service
-
-      - name: Linting of orders
-        run: flake8 orders
+      - name: Linting of project files
+        run: flake8
 
 
 
