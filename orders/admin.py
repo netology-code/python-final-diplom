@@ -1,11 +1,10 @@
-from django.contrib.admin import register, ModelAdmin
+from django.contrib.admin import ModelAdmin, register
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 # from django.utils.translation import ugettext_lazy as _
 
-from .models import User, ConfirmEmailToken
-from orders.models import Shop, Category, Product, \
-    ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
-    Contact
+from .models import ConfirmEmailToken, User
+from orders.models import Category, Contact, Order, OrderItem, \
+    Parameter, Product, ProductInfo, ProductParameter, Shop
 
 
 @register(User)

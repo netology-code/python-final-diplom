@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
 from django_rest_passwordreset.tokens import get_token_generator
 
 STATE_CHOICES = (
@@ -87,12 +88,13 @@ class User(AbstractUser):
         default=False,
         help_text=_(
             'Designates whether this user should be treated as active. '
-            'Unselect this instead of deleting accounts.'
+            'Unselect this instead of deleting accounts.',
         ),
     )
     type = models.CharField(verbose_name='Тип пользователя',
                             choices=USER_TYPE_CHOICES,
-                            max_length=5, default='buyer')
+                            max_length=5,
+                            default='buyer')
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
@@ -302,12 +304,12 @@ class ConfirmEmailToken(models.Model):
         related_name='confirm_email_tokens',
         on_delete=models.CASCADE,
         verbose_name=_(
-            "The User which is associated to this password reset token")
+            "The User which is associated to this password reset token"),
     )
 
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_("When was this token generated")
+        verbose_name=_("When was this token generated"),
     )
 
     # Key field, though it is not the primary key of the model
@@ -315,7 +317,7 @@ class ConfirmEmailToken(models.Model):
         _("Key"),
         max_length=64,
         db_index=True,
-        unique=True
+        unique=True,
     )
 
     def save(self, *args, **kwargs):

@@ -1,3 +1,4 @@
+from orders.models import Product, Shop, ProductInfo, Parameter, ProductParameter, Category
 # from distutils.util import strtobool
 #
 # from django.contrib.auth import authenticate
@@ -7,16 +8,19 @@ from django.core.validators import URLValidator
 # from django.db.models import Q, Sum, F
 from django.http import JsonResponse
 from requests import get
+
 # from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 # from rest_framework.generics import ListAPIView
 # from rest_framework.permissions import IsAuthenticated, AllowAny
 # from rest_framework.response import Response
-from rest_framework.views import APIView
+
 # from rest_framework.viewsets import ModelViewSet
-from yaml import load as load_yaml, Loader
-from orders.models import Product, Shop, ProductInfo, \
-    Parameter, ProductParameter, Category
+
+
+from rest_framework.views import APIView
+
+from yaml import Loader, load as load_yaml
 
 
 # , Order, OrderItem, \
