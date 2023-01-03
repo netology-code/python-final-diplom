@@ -111,9 +111,9 @@ class User(AbstractUser):
 class Shop(models.Model):
     name = models.CharField(max_length=120, verbose_name="Название")
     url = models.URLField(verbose_name="Ссылка", null=True, blank=True)
-    # user = models.OneToOneField(User, verbose_name='Пользователь',
-    #                             blank=True, null=True,
-    #                             on_delete=models.CASCADE)
+    user = models.OneToOneField(User, verbose_name='Пользователь',
+                                blank=True, null=True,
+                                on_delete=models.CASCADE)
     state = models.BooleanField(verbose_name='статус получения заказов',
                                 default=True)
 
