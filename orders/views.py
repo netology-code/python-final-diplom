@@ -30,12 +30,15 @@ class PartnerUpdate(APIView):
     """
     Класс для обновления прайса от поставщика
     """
-    throttle_scope = 'price-list'
-
     def post(self, request, *args, **kwargs):
-        if request.user.type != 'shop':
-            return JsonResponse({'Status': 403,
-                                 'Error': 'Только для магазинов'})
+
+        # если пользователь не авторизован
+        if not request.user.is_authenticated:
+            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+
+        # если тип пользователя не "магазин"
+        if request.user.user_type != 'shop':
+            return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
 
         url = request.data.get('url')
         if url:
@@ -43,40 +46,34 @@ class PartnerUpdate(APIView):
             try:
                 validate_url(url)
             except ValidationError as e:
-                return JsonResponse({'Status': 404, 'Error': str(e)})
+                return JsonResponse({'Status': False, 'Error': str(e)})
             else:
                 stream = get(url).content
 
                 data = load_yaml(stream, Loader=Loader)
 
-                shop, _ = Shop.objects.get_or_create(name=data['shop'])
+                shop, _ = Shop.objects.get_or_create(name=data['shop'], user_id=request.user.id)
                 for category in data['categories']:
-                    category_object, _ = Category.objects.get_or_create(
-                        id=category['id'],
-                        name=category['name'])
+                    category_object, _ = Category.objects.get_or_create(id=category['id'], name=category['name'])
                     category_object.shops.add(shop.id)
                     category_object.save()
                 ProductInfo.objects.filter(shop_id=shop.id).delete()
                 for item in data['goods']:
-                    product, _ = Product.objects.get_or_create(
-                        name=item['name'], category_id=item['category'])
+                    product, _ = Product.objects.get_or_create(name=item['name'], category_id=item['category'])
 
-                    product_info = ProductInfo.objects.create(
-                        product_id=product.id,
-                        name=item['model'],
-                        price=item['price'],
-                        price_rrc=item['price_rrc'],
-                        quantity=item['quantity'],
-                        shop_id=shop.id)
+                    product_info = ProductInfo.objects.create(product_id=product.id,
+                                                              external_id=item['id'],
+                                                              model=item['model'],
+                                                              price=item['price'],
+                                                              price_rrc=item['price_rrc'],
+                                                              quantity=item['quantity'],
+                                                              shop_id=shop.id)
                     for name, value in item['parameters'].items():
-                        parameter_object, _ = Parameter.objects.get_or_create(
-                            name=name)
-                        ProductParameter.objects.create(
-                            product_info_id=product_info.id,
-                            parameter_id=parameter_object.id,
-                            value=value)
+                        parameter_object, _ = Parameter.objects.get_or_create(name=name)
+                        ProductParameter.objects.create(product_info_id=product_info.id,
+                                                        parameter_id=parameter_object.id,
+                                                        value=value)
 
-                return JsonResponse({'Status': 200, 'Message': 'Success'})
+                return JsonResponse({'Status': True})
 
-        return JsonResponse({'Status': 411,
-                             'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
