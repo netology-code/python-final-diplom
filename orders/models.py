@@ -25,7 +25,7 @@ USER_TYPE_CHOICES = (
 
 class UserManager(BaseUserManager):
     """
-    Миксин для управления пользователями
+    User Model Manager
     """
     use_in_migrations = True
 
@@ -34,9 +34,15 @@ class UserManager(BaseUserManager):
         Create and save a user with the given username, email, and password.
         """
         if not email:
-            raise ValueError('The given email must be set')
+            raise ValueError('Users must have email Address')
+        if not password:
+            raise ValueError('User must have Password')
         email = self.normalize_email(email)
+
         user = self.model(email=email, **extra_fields)
+        # user.set_password(password)
+        # user.save(using=self._db)
+
         user.set_password(password)
         user.save(using=self._db)
         return user

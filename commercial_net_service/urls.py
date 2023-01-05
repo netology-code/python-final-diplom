@@ -16,6 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from orders.views import PartnerUpdate
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('partner/update', PartnerUpdate.as_view(), name='partner-update'),
 ]
