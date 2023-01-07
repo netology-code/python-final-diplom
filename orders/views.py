@@ -22,6 +22,8 @@ from rest_framework.views import APIView
 
 from yaml import Loader, load as load_yaml
 
+from pprint import pprint
+
 
 # , Order, OrderItem, \
 # ConfirmEmailToken, Contact, User
@@ -37,23 +39,29 @@ class PartnerUpdate(APIView):
 
         # если пользователь не авторизован
         if not request.user.is_authenticated:
+            print('пользователь не авторизован')
             return JsonResponse({'Status': False, 'Error': 'Login required'}, status=403)
 
         # если тип пользователя не "магазин"
         if request.user.user_type != 'shop':
+            print('тип пользователя не "магазин"')
             return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
 
         url = request.data.get('url')
+        print(f'url: {url}')
         if url:
             validate_url = URLValidator()
             try:
                 validate_url(url)
             except ValidationError as e:
+                print('ValidationError')
                 return JsonResponse({'Status': False, 'Error': str(e)})
             else:
                 stream = get(url).content
 
                 data = load_yaml(stream, Loader=Loader)
+                print('data:')
+                pprint(data)
 
                 shop, _ = Shop.objects.get_or_create(name=data['shop'], user_id=request.user.id)
                 for category in data['categories']:
@@ -79,4 +87,5 @@ class PartnerUpdate(APIView):
 
                 return JsonResponse({'Status': True})
 
+        print('Не указаны все необходимые аргументы')
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
