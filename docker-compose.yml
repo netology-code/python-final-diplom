@@ -1,0 +1,30 @@
+version: "3.9"
+
+networks:
+  commercial_net_service:
+
+services:
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: "commercial_net_service"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "secret"
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    networks:
+      - commercial_net_service
+    volumes:
+      - ./logs:/var/log
+      - .:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready - U smm -d new_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+
