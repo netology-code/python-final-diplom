@@ -168,6 +168,7 @@ class Product(models.Model):
 
 class ProductInfo(models.Model):
     name = models.CharField(max_length=120, verbose_name="Название")
+    external_id = models.PositiveIntegerField(verbose_name='Внешний ключ')
     shop = models.ForeignKey(Shop, verbose_name='Магазин',
                              related_name='prod_info_shop',
                              on_delete=models.CASCADE,
@@ -177,6 +178,7 @@ class ProductInfo(models.Model):
                                 related_name='product_info',
                                 blank=True,
                                 on_delete=models.CASCADE)
+    model = models.CharField(max_length=80, verbose_name='Модель', blank=True)
     quantity = models.PositiveIntegerField(verbose_name="Количество")
     price = models.PositiveIntegerField(verbose_name='Цена')
     price_rrc = models.PositiveIntegerField(
