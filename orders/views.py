@@ -49,6 +49,7 @@ class PartnerUpdate(APIView):
 
         url = request.data.get('url')
         print(f'url: {url}')
+
         if url:
             validate_url = URLValidator()
             try:
@@ -63,15 +64,25 @@ class PartnerUpdate(APIView):
                 print('data:')
                 pprint(data)
 
-                shop, _ = Shop.objects.get_or_create(name=data['shop'], user_id=request.user.id)
+                # Обработка данных магазина
+                shop, _ = Shop.objects.get_or_create(name=data['shop'],
+                                                     user_id=request.user.id)
+
+                # Обработка категории товара
                 for category in data['categories']:
-                    category_object, _ = Category.objects.get_or_create(id=category['id'], name=category['name'])
+                    category_object, _ = Category.objects.get_or_create(id=category['id'],
+                                                                        name=category['name'])
                     category_object.shops.add(shop.id)
                     category_object.save()
+
+                # Обработка данных товара
                 ProductInfo.objects.filter(shop_id=shop.id).delete()
                 for item in data['goods']:
-                    product, _ = Product.objects.get_or_create(name=item['name'], category_id=item['category'])
 
+                    # Продукт
+                    product, _ = Product.objects.get_or_create(name=item['name'],
+                                                               category_id=item['category'])
+                    # Данные продукта
                     product_info = ProductInfo.objects.create(product_id=product.id,
                                                               external_id=item['id'],
                                                               model=item['model'],
@@ -80,6 +91,8 @@ class PartnerUpdate(APIView):
                                                               quantity=item['quantity'],
                                                               shop_id=shop.id)
                     for name, value in item['parameters'].items():
+
+                        # Параметры продукта
                         parameter_object, _ = Parameter.objects.get_or_create(name=name)
                         ProductParameter.objects.create(product_info_id=product_info.id,
                                                         parameter_id=parameter_object.id,
