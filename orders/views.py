@@ -1,7 +1,9 @@
+from rest_framework.authtoken.models import Token
+
 from orders.models import Product, Shop, ProductInfo, Parameter, ProductParameter, Category
 # from distutils.util import strtobool
 #
-# from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate
 # from django.contrib.auth.password_validation import validate_password
 from django.core.validators import URLValidator
 # from django.db import IntegrityError
@@ -101,4 +103,32 @@ class PartnerUpdate(APIView):
                 return JsonResponse({'Status': True})
 
         print('Не указаны все необходимые аргументы')
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class UserLogin(APIView):
+    """
+    Точки входа API сервиса:
+        Класс для авторизации пользователей методом POST
+    """
+    def post(self, request, *args, **kwargs):
+
+        print("0")
+
+        if {'email', 'password'}.issubset(request.data):
+            user = authenticate(request,
+                                username=request.data['email'],
+                                password=request.data['password'])
+
+            if user is not None:
+                if user.is_active:
+                    token, _ = Token.objects.get_or_create(user=user)
+
+                    return JsonResponse({'Status': True, 'Token': token.key})
+
+            return JsonResponse({'Status': False, 'Errors': 'Не удалось авторизовать'})
+
+        else:
+            print("Ups")
+
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
