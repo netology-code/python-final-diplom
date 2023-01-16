@@ -1,7 +1,9 @@
-from orders.models import Product, Shop, ProductInfo, Parameter, ProductParameter, Category
+from rest_framework.permissions import AllowAny
+
+from orders.models import Product, Shop, ProductInfo, Parameter, ProductParameter, Category, ConfirmEmailToken
 # from distutils.util import strtobool
 #
-# from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate
 # from django.contrib.auth.password_validation import validate_password
 from django.core.validators import URLValidator
 # from django.db import IntegrityError
@@ -9,7 +11,7 @@ from django.core.validators import URLValidator
 from django.http import JsonResponse
 from requests import get
 
-# from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 # from rest_framework.generics import ListAPIView
 # from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -32,6 +34,7 @@ class PartnerUpdate(APIView):
     """
     Класс для обновления прайса от поставщика
     """
+
     def post(self, request, *args, **kwargs):
 
         print(f'request: {request} \nargs: {args}\nkwargs: {kwargs}')
@@ -91,7 +94,6 @@ class PartnerUpdate(APIView):
                                                               quantity=item['quantity'],
                                                               shop_id=shop.id)
                     for name, value in item['parameters'].items():
-
                         # Параметры продукта
                         parameter_object, _ = Parameter.objects.get_or_create(name=name)
                         ProductParameter.objects.create(product_info_id=product_info.id,
@@ -101,4 +103,26 @@ class PartnerUpdate(APIView):
                 return JsonResponse({'Status': True})
 
         print('Не указаны все необходимые аргументы')
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class LoginAccount(APIView):
+    """
+    Класс для авторизации пользователей
+    """
+
+    # Авторизация методом POST
+    def post(self, request, *args, **kwargs):
+
+        if {'email', 'password'}.issubset(request.data):
+            user = authenticate(request, username=request.data['email'], password=request.data['password'])
+
+            if user is not None:
+                if user.is_active:
+                    token, _ = Token.objects.get_or_create(user=user)
+
+                    return JsonResponse({'Status': True, 'Token': token.key})
+
+            return JsonResponse({'Status': False, 'Errors': 'Не удалось авторизовать'})
+
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
