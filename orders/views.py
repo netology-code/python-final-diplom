@@ -1,6 +1,7 @@
-from rest_framework.permissions import AllowAny
+# from rest_framework.permissions import AllowAny
 
-from orders.models import Product, Shop, ProductInfo, Parameter, ProductParameter, Category, ConfirmEmailToken
+from orders.models import Product, Shop, ProductInfo, Parameter, \
+    ProductParameter, Category  # , ConfirmEmailToken
 # from distutils.util import strtobool
 #
 from django.contrib.auth import authenticate
