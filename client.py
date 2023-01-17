@@ -38,6 +38,9 @@ request = requests.get(f'{url}/products/list',
                        headers={
                            'Authorization': f'Token {TOKEN}',
                        },
+                       data={
+                           "page": "1",
+                       },
                        )
 print("request:")
 pprint(request.json())
