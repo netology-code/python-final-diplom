@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework.relations import StringRelatedField
 
-from orders.models import User, Contact, Product
+from orders.models import User, Contact, Product, Shop
 
 
 class ContactSerializer(ModelSerializer):
@@ -30,3 +30,9 @@ class ProductSerializer(ModelSerializer):
         model = Product
         fields = ('id', 'name', 'category')
         extra_kwargs = {'name': {'required': False}}
+
+class ShopSerializer(ModelSerializer):
+    class Meta:
+        model = Shop
+        fields = ('id', 'name', 'state',)
+        read_only_fields = ('id',)

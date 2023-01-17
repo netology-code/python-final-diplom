@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
 
-from orders.views import PartnerUpdate, LoginAccount, RegisterAccount, ProductsList
+from orders.views import PartnerUpdate, LoginAccount, RegisterAccount, ProductsList, ShopView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,5 +25,7 @@ urlpatterns = [
     path('token/', obtain_auth_token),
     path('user/login', LoginAccount.as_view(), name='user-login'),
     path('user/register', RegisterAccount.as_view(), name='user-register'),
-    path('products/list', ProductsList.as_view(), name='user-register'),
+    path('products/list', ProductsList.as_view(), name='products-list'),
+    path('shop/list', ShopView.as_view(), name='shop-list'),
+
 ]

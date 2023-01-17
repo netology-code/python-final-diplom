@@ -28,12 +28,11 @@ from yaml import Loader, load as load_yaml
 
 from pprint import pprint
 
-
 # , Order, OrderItem, \
 # ConfirmEmailToken, Contact, User
 # from orders.serializers import UserSerializer
 # orders.signals import new_user_registered
-from orders.serializers import UserSerializer, ProductSerializer
+from orders.serializers import UserSerializer, ProductSerializer, ShopSerializer
 
 
 class PartnerUpdate(APIView):
@@ -138,6 +137,7 @@ class RegisterAccount(APIView):
     """
     Для регистрации покупателей
     """
+
     # Регистрация методом POST
     def post(self, request, *args, **kwargs):
 
@@ -178,5 +178,11 @@ class ProductsList(ListAPIView):
     Список товаров
     """
     queryset = Product.objects.filter(product_info__shop__state=True)
-    # queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+
+class ShopView(ListAPIView):
+    """ Класс для просмотра списка магазинов """
+
+    queryset = Shop.objects.filter(state=True)
+    serializer_class = ShopSerializer

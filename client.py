@@ -42,5 +42,17 @@ request = requests.get(f'{url}/products/list',
                            "page": "1",
                        },
                        )
-print("request:")
+print("products-list:")
 pprint(request.json())
+
+request = requests.get(f'{url}/shop/list',
+                       headers={
+                           'Authorization': f'Token {TOKEN}',
+                       },
+                       data={
+                           "page": "1",
+                       },
+                       )
+print("shop-list:")
+pprint(request.json())
+
