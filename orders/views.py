@@ -17,7 +17,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 # from rest_framework.generics import ListAPIView
 # from rest_framework.permissions import IsAuthenticated, AllowAny
-# from rest_framework.response import Response
+from rest_framework.response import Response
 
 # from rest_framework.viewsets import ModelViewSet
 
@@ -32,7 +32,7 @@ from pprint import pprint
 # ConfirmEmailToken, Contact, User
 # from orders.serializers import UserSerializer
 # orders.signals import new_user_registered
-from orders.serializers import UserSerializer, ProductSerializer, ShopSerializer
+from orders.serializers import UserSerializer, ProductSerializer, ShopSerializer, ProductViewSerializer
 
 
 class PartnerUpdate(APIView):
@@ -186,3 +186,18 @@ class ShopView(ListAPIView):
 
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
+
+
+class ProductsView(APIView):
+    def get(self, request):
+
+        category = request.data.get('category')
+        shop = request.data.get('shop')
+        print(f'category: {category}')
+        print(f'shop: {shop}')
+
+        products = Product.objects.filter(product_info__shop__name=shop,
+                                          category__name=category)
+
+        serializer = ProductViewSerializer(products, many=True)
+        return Response(serializer.data)

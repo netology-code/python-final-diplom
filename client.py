@@ -55,3 +55,16 @@ request = requests.get(f'{url}/shop/list',
                        )
 print("shop-list:")
 pprint(request.json())
+
+request = requests.get(f'{url}/products/view',
+                       headers={
+                           'Authorization': f'Token {TOKEN}',
+                       },
+                       data={
+                           "page": "1",
+                           'category': 'Смартфоны',
+                           'shop': 'Связной',
+                       },
+                       )
+print("products-view:")
+pprint(request.json())
