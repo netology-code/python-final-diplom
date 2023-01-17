@@ -34,10 +34,10 @@ pprint(data_str)
 TOKEN = data_str.get('Token')
 print(f'TOKEN: {TOKEN}')
 
-# request = requests.get(url,
-#                  headers={
-#                      'Authorization': f'Token {TOKEN}'
-#                  }
-#                  )
-# print("request:")
-# pprint(request.json())
+request = requests.get(f'{url}/products/list',
+                       headers={
+                           'Authorization': f'Token {TOKEN}',
+                       },
+                       )
+print("request:")
+pprint(request.json())

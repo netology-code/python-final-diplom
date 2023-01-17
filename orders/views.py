@@ -1,4 +1,5 @@
 # from rest_framework.permissions import AllowAny
+from rest_framework.generics import ListAPIView
 
 from orders.models import Product, Shop, ProductInfo, Parameter, \
     ProductParameter, Category  # , ConfirmEmailToken
@@ -32,7 +33,7 @@ from pprint import pprint
 # ConfirmEmailToken, Contact, User
 # from orders.serializers import UserSerializer
 # orders.signals import new_user_registered
-from orders.serializers import UserSerializer
+from orders.serializers import UserSerializer, ProductSerializer
 
 
 class PartnerUpdate(APIView):
@@ -170,3 +171,12 @@ class RegisterAccount(APIView):
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class ProductsList(ListAPIView):
+    """
+    Список товаров
+    """
+    queryset = Product.objects.filter(product_info__shop__state=True)
+    # queryset = Product.objects.all()
+    serializer_class = ProductSerializer
