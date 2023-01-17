@@ -55,4 +55,3 @@ request = requests.get(f'{url}/shop/list',
                        )
 print("shop-list:")
 pprint(request.json())
-

@@ -31,8 +31,9 @@ class ProductSerializer(ModelSerializer):
         fields = ('id', 'name', 'category')
         extra_kwargs = {'name': {'required': False}}
 
+
 class ShopSerializer(ModelSerializer):
     class Meta:
         model = Shop
-        fields = ('id', 'name', 'state',)
+        fields = ('id', 'name', 'state')
         read_only_fields = ('id',)
