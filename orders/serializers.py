@@ -46,3 +46,12 @@ class ProductViewSerializer(ModelSerializer):
         model = Product
         fields = ('id', 'name', 'category')
         extra_kwargs = {'name': {'required': False}}
+
+
+class SingleProductViewSerializer(ModelSerializer):
+    category = StringRelatedField()
+
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'category')
+        extra_kwargs = {'name': {'required': False}}

@@ -32,7 +32,8 @@ from pprint import pprint
 # ConfirmEmailToken, Contact, User
 # from orders.serializers import UserSerializer
 # orders.signals import new_user_registered
-from orders.serializers import UserSerializer, ProductSerializer, ShopSerializer, ProductViewSerializer
+from orders.serializers import UserSerializer, ProductSerializer, ShopSerializer, ProductViewSerializer, \
+    SingleProductViewSerializer
 
 
 class PartnerUpdate(APIView):
@@ -143,7 +144,6 @@ class RegisterAccount(APIView):
 
         # проверяем обязательные аргументы
         if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
-            # errors = {}
 
             # проверяем пароль на сложность
 
@@ -165,7 +165,6 @@ class RegisterAccount(APIView):
                     user = user_serializer.save()
                     user.set_password(request.data['password'])
                     user.save()
-                    # new_user_registered.send(sender=self.__class__, user_id=user.id)
                     return JsonResponse({'Status': True})
                 else:
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
@@ -179,6 +178,18 @@ class ProductsList(ListAPIView):
     """
     queryset = Product.objects.filter(product_info__shop__state=True)
     serializer_class = ProductSerializer
+
+
+class SingleProductView(APIView):
+
+    def get(self, request):
+        product_id = request.data.get('product_id')
+        print(f'product_id: {product_id}')
+
+        products = Product.objects.filter(product_id=product_id)
+
+        serializer = SingleProductViewSerializer(products, many=True)
+        return Response(serializer.data)
 
 
 class ShopView(ListAPIView):

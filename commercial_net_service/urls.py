@@ -17,7 +17,8 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
 
-from orders.views import PartnerUpdate, LoginAccount, RegisterAccount, ProductsList, ShopView, ProductsView
+from orders.views import PartnerUpdate, LoginAccount, RegisterAccount, ProductsList, ShopView, ProductsView, \
+    SingleProductView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +28,7 @@ urlpatterns = [
     path('user/register', RegisterAccount.as_view(), name='user-register'),
     path('products/list', ProductsList.as_view(), name='products-list'),
     path('products/view', ProductsView.as_view(), name='products-view'),
+    path('products/view', SingleProductView.as_view(), name='product-cart-view'),
     path('shop/list', ShopView.as_view(), name='shop-list'),
 
 ]
