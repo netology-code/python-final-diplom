@@ -1,5 +1,6 @@
 # from rest_framework.permissions import AllowAny
 from rest_framework.generics import ListAPIView
+from rest_framework.serializers import ModelSerializer
 
 from orders.models import Product, Shop, ProductInfo, Parameter, \
     ProductParameter, Category  # , ConfirmEmailToken
@@ -9,7 +10,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import URLValidator
 # from django.db import IntegrityError
-# from django.db.models import Q, Sum, F
+from django.db.models import Q  # , Sum, F
 from django.http import JsonResponse
 from requests import get
 
@@ -33,7 +34,7 @@ from pprint import pprint
 # from orders.serializers import UserSerializer
 # orders.signals import new_user_registered
 from orders.serializers import UserSerializer, ProductSerializer, ShopSerializer, ProductViewSerializer, \
-    SingleProductViewSerializer
+    SingleProductViewSerializer, CategorySerializer
 
 
 class PartnerUpdate(APIView):
@@ -180,16 +181,12 @@ class ProductsList(ListAPIView):
     serializer_class = ProductSerializer
 
 
-class SingleProductView(APIView):
-
-    def get(self, request):
-        product_id = request.data.get('product_id')
-        print(f'product_id: {product_id}')
-
-        products = Product.objects.filter(product_id=product_id)
-
-        serializer = SingleProductViewSerializer(products, many=True)
-        return Response(serializer.data)
+class CategoryView(ListAPIView):
+    """
+    Список категорий
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 
 class ShopView(ListAPIView):
@@ -201,7 +198,6 @@ class ShopView(ListAPIView):
 
 class ProductsView(APIView):
     def get(self, request):
-
         category = request.data.get('category')
         shop = request.data.get('shop')
         print(f'category: {category}')
@@ -211,4 +207,26 @@ class ProductsView(APIView):
                                           category__name=category)
 
         serializer = ProductViewSerializer(products, many=True)
+        return Response(serializer.data)
+
+
+class SingleProductView(APIView):
+    """
+        Поиск товаров
+        фильтры по параметрам
+            shop_id
+            category_id
+            product_id
+        """
+
+    # permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+
+        product_id = request.data.get('product_id')
+        print(f'product_id: {product_id}')
+
+        queryset = ProductInfo.objects.filter(product_id=product_id)
+
+        serializer = SingleProductViewSerializer(queryset, many=True)
+
         return Response(serializer.data)
