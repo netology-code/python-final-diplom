@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework.relations import StringRelatedField  # , PrimaryKeyRelatedField
 
-from orders.models import User, Contact, Product, Shop, Category, ProductInfo
+from orders.models import User, Contact, Product, Shop, Category, ProductInfo, ProductParameter
 
 
 class ContactSerializer(ModelSerializer):
@@ -36,7 +36,7 @@ class ProductParameterSerializer(ModelSerializer):
     parameter = StringRelatedField()
 
     class Meta:
-        model = ProductInfo
+        model = ProductParameter
         fields = ('parameter', 'value')
 
 

@@ -4,7 +4,7 @@ from pprint import pprint
 url = 'http://127.0.0.1:8000'
 
 # Регистрация
-
+#
 # request = requests.post(f'{url}/user/register',
 #                         data={
 #                             "first_name": "magaz",
@@ -49,7 +49,7 @@ print(f'TOKEN: {TOKEN}')
 #                         )
 # print("post:")
 # pprint(request.json())
-## {"url": "https://drive.google.com/uc?export=download&confirm=no_antivirus&id=1K30Oeujse-05WCEGEFZC6oOX4Q_kACPy"}
+# {"url": "https://drive.google.com/uc?export=download&confirm=no_antivirus&id=1K30Oeujse-05WCEGEFZC6oOX4Q_kACPy"}
 #
 # # Список товаров
 # request = requests.get(f'{url}/products/list',

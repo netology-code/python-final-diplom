@@ -1,6 +1,6 @@
 # from rest_framework.permissions import AllowAny
 from rest_framework.generics import ListAPIView
-from rest_framework.serializers import ModelSerializer
+# from rest_framework.serializers import ModelSerializer
 
 from orders.models import Product, Shop, ProductInfo, Parameter, \
     ProductParameter, Category  # , ConfirmEmailToken
@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import URLValidator
 # from django.db import IntegrityError
-from django.db.models import Q  # , Sum, F
+# from django.db.models import Q  # , Sum, F
 from django.http import JsonResponse
 from requests import get
 
@@ -225,7 +225,7 @@ class SingleProductView(APIView):
         product_id = request.data.get('product_id')
         print(f'product_id: {product_id}')
 
-        queryset = ProductInfo.objects.filter(product_id=product_id)
+        queryset = ProductInfo.objects.filter(product__id=product_id)
 
         serializer = SingleProductViewSerializer(queryset, many=True)
 
