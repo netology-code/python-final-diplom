@@ -1,6 +1,7 @@
 # from rest_framework.permissions import AllowAny
 from rest_framework.generics import ListAPIView
 # from rest_framework.serializers import ModelSerializer
+from rest_framework.permissions import IsAuthenticated
 
 from orders.models import Product, Shop, ProductInfo, Parameter, \
     ProductParameter, Category  # , ConfirmEmailToken
@@ -10,7 +11,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import URLValidator
 # from django.db import IntegrityError
-# from django.db.models import Q  # , Sum, F
+from django.db.models import Q  # , Sum, F
 from django.http import JsonResponse
 from requests import get
 
@@ -19,6 +20,7 @@ from rest_framework.exceptions import ValidationError
 # from rest_framework.generics import ListAPIView
 # from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 # from rest_framework.viewsets import ModelViewSet
 
@@ -221,11 +223,49 @@ class SingleProductView(APIView):
 
     # permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
-
         product_id = request.data.get('product_id')
         print(f'product_id: {product_id}')
 
         queryset = ProductInfo.objects.filter(product__id=product_id)
+
+        serializer = SingleProductViewSerializer(queryset, many=True)
+
+        return Response(serializer.data)
+
+
+class ProductInfoViewSet(APIView):
+    """ Класс для поиска товаров. """
+
+    # throttle_scope = 'anon'
+    # serializer_class = SingleProductViewSerializer
+    permission_classes = [IsAuthenticated]
+    # ordering = ('product')
+
+    @extend_schema(
+        request=SingleProductViewSerializer,
+        responses={200: SingleProductViewSerializer},
+    )
+    def get(self, request, *args, **kwargs):
+        """
+        Метод get_queryset принимает критерии для поиска,
+        возвращает товары, в соотвествии с запросом. """
+
+        query = Q(shop__state=True)
+        shop_id = request.query_params.get('shop_id')
+        category_id = request.query_params.get('category_id')
+
+        if shop_id:
+            query = query & Q(shop_id=shop_id)
+
+        if category_id:
+            query = query & Q(product__category_id=category_id)
+
+        print(f'query: {query}')
+
+        queryset = ProductInfo.objects.filter(
+            query).select_related(
+            'shop', 'product__category').prefetch_related(
+            'product_parameters__parameter').distinct()
 
         serializer = SingleProductViewSerializer(queryset, many=True)
 

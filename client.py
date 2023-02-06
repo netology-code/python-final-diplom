@@ -38,7 +38,6 @@ pprint(data_str)
 TOKEN = data_str.get('Token')
 print(f'TOKEN: {TOKEN}')
 
-
 # # Обновление списка товаров
 # request = requests.post(f'{url}/partner/update',
 #                         headers={
@@ -90,12 +89,25 @@ print(f'TOKEN: {TOKEN}')
 # pprint(request.json())
 
 # Карточка товара
-request = requests.get(f'{url}/product/view_by_id',
+# request = requests.get(f'{url}/product/view_by_id',
+#                        headers={
+#                            'Authorization': f'Token {TOKEN}',
+#                        },
+#                        data={
+#                            "product_id": "4",
+#                        },
+#                        )
+# print("products-view:")
+# pprint(request.json())
+
+
+# Карточка товара
+request = requests.get(f'{url}/products/search',
                        headers={
                            'Authorization': f'Token {TOKEN}',
                        },
                        data={
-                           "product_id": "4",
+                           "category_id": "1",
                        },
                        )
 print("products-view:")

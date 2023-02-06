@@ -18,7 +18,8 @@ from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
 
 from orders.views import PartnerUpdate, LoginAccount, RegisterAccount, ProductsList, ShopView, ProductsView, \
-    SingleProductView
+    SingleProductView, ProductInfoViewSet
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,5 +31,6 @@ urlpatterns = [
     path('products/view', ProductsView.as_view(), name='products-view'),
     path('product/view_by_id', SingleProductView.as_view(), name='product-cart-view'),
     path('shop/list', ShopView.as_view(), name='shop-list'),
+    path('products/search', ProductInfoViewSet.as_view(), name='products'),
 
 ]
