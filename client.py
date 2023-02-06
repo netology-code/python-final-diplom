@@ -107,7 +107,7 @@ request = requests.get(f'{url}/products/search',
                            'Authorization': f'Token {TOKEN}',
                        },
                        data={
-                           "category_id": "1",
+                           "product_id": "1",
                        },
                        )
 print("products-view:")

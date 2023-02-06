@@ -1,28 +1,19 @@
-# from rest_framework.permissions import AllowAny
 from rest_framework.generics import ListAPIView
-# from rest_framework.serializers import ModelSerializer
 from rest_framework.permissions import IsAuthenticated
 
 from orders.models import Product, Shop, ProductInfo, Parameter, \
-    ProductParameter, Category  # , ConfirmEmailToken
-# from distutils.util import strtobool
-#
+    ProductParameter, Category
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import URLValidator
-# from django.db import IntegrityError
-from django.db.models import Q  # , Sum, F
+from django.db.models import Q
 from django.http import JsonResponse
 from requests import get
 
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
-# from rest_framework.generics import ListAPIView
-# from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
-
-# from rest_framework.viewsets import ModelViewSet
 
 
 from rest_framework.views import APIView
@@ -30,11 +21,6 @@ from rest_framework.views import APIView
 from yaml import Loader, load as load_yaml
 
 from pprint import pprint
-
-# , Order, OrderItem, \
-# ConfirmEmailToken, Contact, User
-# from orders.serializers import UserSerializer
-# orders.signals import new_user_registered
 from orders.serializers import UserSerializer, ProductSerializer, ShopSerializer, ProductViewSerializer, \
     SingleProductViewSerializer, CategorySerializer
 
@@ -192,7 +178,9 @@ class CategoryView(ListAPIView):
 
 
 class ShopView(ListAPIView):
-    """ Класс для просмотра списка магазинов """
+    """
+    Класс для просмотра списка магазинов
+    """
 
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
@@ -214,14 +202,11 @@ class ProductsView(APIView):
 
 class SingleProductView(APIView):
     """
-        Поиск товаров
-        фильтры по параметрам
-            shop_id
-            category_id
-            product_id
-        """
+    Поиск товаров по product_id
+    """
 
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, *args, **kwargs):
         product_id = request.data.get('product_id')
         print(f'product_id: {product_id}')
@@ -234,12 +219,15 @@ class SingleProductView(APIView):
 
 
 class ProductInfoViewSet(APIView):
-    """ Класс для поиска товаров. """
+    """
+    Класс для поиска товаров
+    по:
+    product_id
+    shop_id
+    category_id
+    """
 
-    # throttle_scope = 'anon'
-    # serializer_class = SingleProductViewSerializer
     permission_classes = [IsAuthenticated]
-    # ordering = ('product')
 
     @extend_schema(
         request=SingleProductViewSerializer,
@@ -251,8 +239,12 @@ class ProductInfoViewSet(APIView):
         возвращает товары, в соотвествии с запросом. """
 
         query = Q(shop__state=True)
+        product_id = request.data.get('product_id')
         shop_id = request.query_params.get('shop_id')
         category_id = request.query_params.get('category_id')
+
+        if product_id:
+            query = query & Q(product__id=product_id)
 
         if shop_id:
             query = query & Q(shop_id=shop_id)
