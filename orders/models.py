@@ -234,9 +234,9 @@ class Order(models.Model):
                              verbose_name='Пользователь',
                              on_delete=models.CASCADE)
     dt = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(verbose_name='Статус',
-                              choices=STATE_CHOICES,
-                              max_length=15)
+    state = models.CharField(verbose_name='Статус',
+                             choices=STATE_CHOICES,
+                             max_length=15)
 
     class Meta:
         verbose_name = 'Заказ'

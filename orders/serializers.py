@@ -1,7 +1,8 @@
 from rest_framework.serializers import ModelSerializer, IntegerField
 from rest_framework.relations import StringRelatedField  # , PrimaryKeyRelatedField
 
-from orders.models import User, Contact, Product, Shop, Category, ProductInfo, ProductParameter, Order, OrderItem
+from orders.models import User, Contact, Product, Shop, Category, \
+    ProductInfo, ProductParameter, Order, OrderItem
 
 
 class ContactSerializer(ModelSerializer):

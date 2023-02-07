@@ -287,12 +287,16 @@ class BasketView(APIView):
     # редактировать корзину
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+            return JsonResponse({'Status': False,
+                                 'Error': 'Log in required'},
+                                status=403)
 
         items_sting = request.data.get('items')
         if items_sting:
             try:
                 items_dict = load_json(items_sting)
+                print("items_dict")
+                pprint(items_dict)
             except ValueError:
                 JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
             else:
@@ -334,27 +338,106 @@ class BasketView(APIView):
 
             if objects_deleted:
                 deleted_count = OrderItem.objects.filter(query).delete()[0]
-                return JsonResponse({'Status': True, 'Удалено объектов': deleted_count})
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+                return JsonResponse({'Status': True,
+                                     'Удалено объектов': deleted_count})
+        return JsonResponse({'Status': False,
+                             'Errors': 'Не указаны все необходимые аргументы'})
 
     # добавить позиции в корзину
     def put(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+            return JsonResponse({'Status': False,
+                                 'Error': 'Log in required'}, status=403)
 
         items_sting = request.data.get('items')
+
         if items_sting:
             try:
+                print('items_sting:')
+                pprint(items_sting)
                 items_dict = load_json(items_sting)
+                print('items_dict:')
+                pprint(items_dict)
             except ValueError:
-                JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
+                return JsonResponse({'Status': False,
+                                     'Errors': 'Неверный формат запроса'})
             else:
                 basket, _ = Order.objects.get_or_create(user_id=request.user.id, state='basket')
                 objects_updated = 0
                 for order_item in items_dict:
+                    print('order_item:')
+                    print(order_item)
+                    print(f"order_item['id']: {order_item['id']}")
+                    print(f"order_item['quantity']: {order_item['quantity']}")
                     if type(order_item['id']) == int and type(order_item['quantity']) == int:
-                        objects_updated += OrderItem.objects.filter(order_id=basket.id, id=order_item['id']).update(
-                            quantity=order_item['quantity'])
+                        try:
+                            objects_updated += OrderItem.objects.filter(order_id=basket.id,
+                                                                        id=order_item['id'])\
+                                .update(quantity=order_item['quantity'])
+                        except ValueError:
+                            return JsonResponse({'Status': False,
+                                                 'Errors': 'Неверный формат запроса'})
+                    else:
+                        return JsonResponse({'Status': False,
+                                             'Errors': 'Неверный формат запроса'})
 
                 return JsonResponse({'Status': True, 'Обновлено объектов': objects_updated})
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+        return JsonResponse({'Status': False,
+                             'Errors': 'Не указаны все необходимые аргументы (items_sting)'})
+
+
+class OrderView(APIView):
+    """
+    Класс для получения и размешения заказов пользователями
+    """
+
+    # получить мои заказы
+    def get(self, request, *args, **kwargs):
+        """
+        Метод get проверяет наличие авторизации,
+        возвращает заказы покупателя.
+        """
+        if not request.user.is_authenticated:
+            return JsonResponse({'Status': False,
+                                 'Error': 'Log in required'},
+                                status=403)
+
+        order = Order.objects.filter(
+            user_id=request.user.id).exclude(state='basket').prefetch_related(
+            'ordered_items__product_info__product__category',
+            'ordered_items__product_info__product_parameters__parameter') \
+            .select_related('contact').annotate(
+            total_sum=Sum(F('ordered_items__quantity') *
+                          F('ordered_items__product_info__price'))).distinct()
+
+        serializer = OrderSerializer(order, many=True)
+        return Response(serializer.data)
+
+    # разместить заказ из корзины
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({'Status': False,
+                                 'Error': 'Log in required'},
+                                status=403)
+
+        if {'id', 'contact'}.issubset(request.data):
+            if request.data['id'].isdigit():
+                try:
+                    is_updated = Order.objects.filter(
+                        user_id=request.user.id,
+                        id=request.data['id']).update(
+                        contact_id=request.data['contact'],
+                        state='new')
+                except IntegrityError as error:
+                    print(error)
+                    return JsonResponse({'Status': False,
+                                         'Errors': 'Неправильно указаны аргументы'},
+                                        status=400)
+                else:
+                    if is_updated:
+                        # new_order.send(sender=self.__class__, user_id=request.user.id)
+                        return JsonResponse({'Status': True})
+
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'},
+                            status=400)

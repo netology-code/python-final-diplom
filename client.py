@@ -22,10 +22,6 @@ url = 'http://127.0.0.1:8000'
 
 # Вход
 request = requests.post(f'{url}/user/login',
-                        # headers={
-                        #     # 'Authorization': f'Token 173b6ba6cceccf285f952d2ab5a648c89c20df3b'
-                        # },
-
                         data={
                             "email": "magaz5@gmail.com",
                             "password": "adminadmin",
@@ -102,12 +98,39 @@ print(f'TOKEN: {TOKEN}')
 
 
 # Карточка товара
-request = requests.get(f'{url}/products/search',
+# request = requests.get(f'{url}/products/search',
+#                        headers={
+#                            'Authorization': f'Token {TOKEN}',
+#                        },
+#                        data={
+#                            "product_id": "1",
+#                        },
+#                        )
+# print("products-view:")
+# pprint(request.json())
+
+# Корзина
+
+
+# Добавление товара в корзину
+request = requests.put(f'{url}/basket',
                        headers={
                            'Authorization': f'Token {TOKEN}',
                        },
                        data={
-                           "product_id": "1",
+                           'items': '[{"id":1,"quantity":5},{"id":3,"quantity":2}]',
+                       },
+                       )
+print("request:")
+pprint(request.json())
+
+# Просмотр корзины
+request = requests.get(f'{url}/basket',
+                       headers={
+                           'Authorization': f'Token {TOKEN}',
+                       },
+                       data={
+                           # "name": "1",
                        },
                        )
 print("products-view:")
