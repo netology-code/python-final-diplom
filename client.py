@@ -4,21 +4,21 @@ from pprint import pprint
 url = 'http://127.0.0.1:8000'
 
 # Регистрация
-#
-# request = requests.post(f'{url}/user/register',
-#                         data={
-#                             "first_name": "magaz",
-#                             "last_name": "magaz5",
-#                             "email": "magaz5@gmail.com",
-#                             "password": "adminadmin",
-#                             "company": "Magaz5",
-#                             "position": "funcionario",
-#                             "user_type": "shop"
-#                         })
-#
-# data_str = request.json()
-# print("request:")
-# pprint(data_str)
+
+request = requests.post(f'{url}/user/register',
+                        data={
+                            "first_name": "magaz",
+                            "last_name": "magaz5",
+                            "email": "magaz5@gmail.com",
+                            "password": "adminadmin",
+                            "company": "Magaz5",
+                            "position": "funcionario",
+                            "user_type": "shop",
+                        })
+
+data_str = request.json()
+print("request:")
+pprint(data_str)
 
 # Вход
 request = requests.post(f'{url}/user/login',
@@ -113,16 +113,22 @@ print(f'TOKEN: {TOKEN}')
 
 
 # Добавление товара в корзину
-request = requests.put(f'{url}/basket',
-                       headers={
-                           'Authorization': f'Token {TOKEN}',
-                       },
-                       data={
-                           'items': '[{"id":1,"quantity":5},{"id":3,"quantity":2}]',
-                       },
-                       )
+try:
+    request = requests.put(f'{url}/basket',
+                           headers={
+                               'Authorization': f'Token {TOKEN}',
+                           },
+                           data={
+                               'items': '[{"id":1,"quantity":5},{"id":3,"quantity":2}]',
+                           },
+                           )
+except requests.exceptions.JSONDecodeError:
+    print("requests.exceptions.JSONDecodeError")
+
 print("request:")
-pprint(request.json())
+pprint(request.status_code)
+if request.status_code == 200:
+    pprint(request.json())
 
 # Просмотр корзины
 request = requests.get(f'{url}/basket',
