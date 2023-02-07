@@ -15,7 +15,7 @@ from requests import get
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
+# from drf_spectacular.utils import extend_schema
 
 from rest_framework.views import APIView
 
@@ -231,10 +231,10 @@ class ProductInfoViewSet(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        request=SingleProductViewSerializer,
-        responses={200: SingleProductViewSerializer},
-    )
+    # @extend_schema(
+    #     request=SingleProductViewSerializer,
+    #     responses={200: SingleProductViewSerializer},
+    # )
     def get(self, request, *args, **kwargs):
         """
         Метод get_queryset принимает критерии для поиска,
