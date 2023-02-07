@@ -37,10 +37,11 @@ jobs:
       - name: Activate enviroments
         run: python -m venv .venv
 
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+
       - name: setup libs
-        run: |
-          pip install --upgrade pip |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Linting of project files
         run: flake8 .
