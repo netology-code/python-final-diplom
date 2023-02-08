@@ -136,7 +136,6 @@ request = requests.get(f'{url}/basket',
                            'Authorization': f'Token {TOKEN}',
                        },
                        data={
-                           # "name": "1",
                        },
                        )
 print("products-view:")
