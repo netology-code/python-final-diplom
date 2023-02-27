@@ -79,7 +79,6 @@ class ConfirmAccount(APIView):
 
     # Регистрация методом POST
     def post(self, request, *args, **kwargs):
-        # print(request.data)
         user = User.objects.filter(email=request.data['email'], is_active=True)
         if user:
             return JsonResponse({'Status': 200, 'Message': _('Confirmation has been done earlier')})
