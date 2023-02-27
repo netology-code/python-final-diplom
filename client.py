@@ -1,11 +1,12 @@
 import requests
 from pprint import pprint
 
-url = 'http://127.0.0.1:8000'
+url = 'http://127.0.0.1:8000/api/v1/'
+TOKEN = None
 
 # Регистрация
 
-request = requests.post(f'{url}/user/register',
+request = requests.post(f'{url}user/register',
                         data={
                             "first_name": "magaz",
                             "last_name": "magaz5",
@@ -15,10 +16,12 @@ request = requests.post(f'{url}/user/register',
                             "position": "funcionario",
                             "user_type": "shop",
                         })
-
-data_str = request.json()
-print("request:")
-pprint(data_str)
+if request.status_code == 200:
+    data_str = request.json()
+    print("request:")
+    pprint(data_str)
+else:
+    print(f'request: {request}')
 
 # Вход
 request = requests.post(f'{url}/user/login',
@@ -27,12 +30,15 @@ request = requests.post(f'{url}/user/login',
                             "password": "adminadmin",
                         },
                         )
-data_str = request.json()
-print("request:")
-pprint(data_str)
+if request.status_code == 200:
+    data_str = request.json()
+    print("request:")
+    pprint(data_str)
 
-TOKEN = data_str.get('Token')
-print(f'TOKEN: {TOKEN}')
+    TOKEN = data_str.get('Token')
+    print(f'TOKEN: {TOKEN}')
+else:
+    print(f'request: {request}')
 
 # # Обновление списка товаров
 # request = requests.post(f'{url}/partner/update',
@@ -72,18 +78,31 @@ print(f'TOKEN: {TOKEN}')
 #
 # Список товаров по категории и магазину
 print("Список товаров по категории и магазину")
-request = requests.get(f'{url}/products/view',
-                       headers={
-                           'Authorization': f'Token {TOKEN}',
-                       },
-                       data={
-                           "page": "1",
-                           'category': 'Смартфоны',
-                           'shop': 'Связной',
-                       },
-                       )
-print("products-view:")
-pprint(request.json())
+
+if TOKEN:
+    request = requests.get(f'{url}/products/view',
+                           headers={
+                               'Authorization': f'Token {TOKEN}',
+                           },
+                           data={
+                               "page": "1",
+                               'category': 'Смартфоны',
+                               'shop': 'Связной',
+                           },
+                           )
+    print("products-view:")
+
+    if request.status_code == 200:
+        data_str = request.json()
+        print("request:")
+        pprint(data_str)
+
+        TOKEN = data_str.get('Token')
+        print(f'TOKEN: {TOKEN}')
+    else:
+        print(f'request: {request}')
+else:
+    print('No TOKEN')
 
 # Карточка товара
 # request = requests.get(f'{url}/product/view_by_id',
@@ -112,32 +131,32 @@ pprint(request.json())
 
 # Корзина
 
-
-# Добавление товара в корзину
-try:
-    request = requests.put(f'{url}/basket',
-                           headers={
-                               'Authorization': f'Token {TOKEN}',
-                           },
-                           data={
-                               'items': '[{"id":1,"quantity":5},{"id":3,"quantity":2}]',
-                           },
-                           )
-except requests.exceptions.JSONDecodeError:
-    print("requests.exceptions.JSONDecodeError")
-
-print("request:")
-pprint(request.status_code)
-if request.status_code == 200:
-    pprint(request.json())
-
-# Просмотр корзины
-request = requests.get(f'{url}/basket',
-                       headers={
-                           'Authorization': f'Token {TOKEN}',
-                       },
-                       data={
-                       },
-                       )
-print("products-view:")
-pprint(request.json())
+#
+# # Добавление товара в корзину
+# try:
+#     request = requests.put(f'{url}/basket',
+#                            headers={
+#                                'Authorization': f'Token {TOKEN}',
+#                            },
+#                            data={
+#                                'items': '[{"id":1,"quantity":5},{"id":3,"quantity":2}]',
+#                            },
+#                            )
+# except requests.exceptions.JSONDecodeError:
+#     print("requests.exceptions.JSONDecodeError")
+#
+# print("request:")
+# pprint(request.status_code)
+# if request.status_code == 200:
+#     pprint(request.json())
+#
+# # Просмотр корзины
+# request = requests.get(f'{url}/basket',
+#                        headers={
+#                            'Authorization': f'Token {TOKEN}',
+#                        },
+#                        data={
+#                        },
+#                        )
+# print("products-view:")
+# pprint(request.json())
