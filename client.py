@@ -70,19 +70,20 @@ print(f'TOKEN: {TOKEN}')
 # print("shop-list:")
 # pprint(request.json())
 #
-# # Список товаров по категории и магазину
-# request = requests.get(f'{url}/products/view',
-#                        headers={
-#                            'Authorization': f'Token {TOKEN}',
-#                        },
-#                        data={
-#                            "page": "1",
-#                            'category': 'Смартфоны',
-#                            'shop': 'Связной',
-#                        },
-#                        )
-# print("products-view:")
-# pprint(request.json())
+# Список товаров по категории и магазину
+print("Список товаров по категории и магазину")
+request = requests.get(f'{url}/products/view',
+                       headers={
+                           'Authorization': f'Token {TOKEN}',
+                       },
+                       data={
+                           "page": "1",
+                           'category': 'Смартфоны',
+                           'shop': 'Связной',
+                       },
+                       )
+print("products-view:")
+pprint(request.json())
 
 # Карточка товара
 # request = requests.get(f'{url}/product/view_by_id',
