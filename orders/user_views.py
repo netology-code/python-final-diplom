@@ -4,11 +4,11 @@ from django.http import JsonResponse
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny
 
 from rest_framework.views import APIView
 from orders.serializers import UserSerializer
-from orders.models import User
+from orders.models import User, ConfirmEmailToken
 
 
 class LoginAccount(APIView):
