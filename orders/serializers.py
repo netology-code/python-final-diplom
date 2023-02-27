@@ -8,7 +8,7 @@ from orders.models import User, Contact, Product, Shop, Category, \
 class ContactSerializer(ModelSerializer):
     class Meta:
         model = Contact
-        fields = ('id', 'city', 'street', 'house', 'structure', 'building', 'apartment', 'user', 'phone')
+        fields = ('id', 'user_id', 'city', 'street', 'house', 'structure', 'building', 'apartment', 'user', 'phone')
         read_only_fields = ('id',)
         extra_kwargs = {
             'user': {'write_only': True},
@@ -20,7 +20,7 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'email', 'company', 'position', 'contacts')
+        fields = ('id', 'user', 'first_name', 'last_name', 'email', 'company', 'position', 'contacts')
         read_only_fields = ('id',)
 
 
@@ -75,6 +75,8 @@ class SingleProductViewSerializer(ModelSerializer):
 
 
 class OrderItemSerializer(ModelSerializer):
+    product_info = SingleProductViewSerializer(read_only=True)
+
     class Meta:
         model = OrderItem
         fields = ('id', 'product_info', 'quantity', 'order')

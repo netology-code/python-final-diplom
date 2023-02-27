@@ -38,6 +38,7 @@ class OrderView(APIView):
 
     # разместить заказ из корзины
     def post(self, request, *args, **kwargs):
+        # проверка пользователя
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False,
                                  'Error': 'Log in required'},

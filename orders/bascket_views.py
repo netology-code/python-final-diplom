@@ -1,5 +1,8 @@
 from sqlite3 import IntegrityError
 
+import psycopg2
+from django.template.backends import django
+
 from orders.models import Order, OrderItem
 from django.db.models import Q, F, Sum
 from django.http import JsonResponse
@@ -99,11 +102,7 @@ class BasketView(APIView):
 
         if items_sting:
             try:
-                print('items_sting:')
-                pprint(items_sting)
                 items_dict = load_json(items_sting)
-                print('items_dict:')
-                pprint(items_dict)
             except ValueError:
                 return JsonResponse({'Status': False,
                                      'Errors': 'Неверный формат запроса'})
@@ -116,10 +115,20 @@ class BasketView(APIView):
                     print(f"order_item['id']: {order_item['id']}")
                     print(f"order_item['quantity']: {order_item['quantity']}")
                     if type(order_item['id']) == int and type(order_item['quantity']) == int:
+
                         try:
-                            objects_updated += OrderItem.objects.filter(order_id=basket.id,
-                                                                        id=order_item['id']) \
-                                .update(quantity=order_item['quantity'])
+                            obj, created = OrderItem.objects.update_or_create(
+                                order_id=basket.id,
+                                product_info_id=order_item['id'],
+                                shop_id=1,
+                                defaults={
+                                    'quantity': order_item['quantity']
+                                })
+                            if created:
+                                print("Created!")
+                            else:
+                                print("Updated!")
+                            objects_updated += 1
                         except ValueError:
                             return JsonResponse({'Status': False,
                                                  'Errors': 'Неверный формат запроса'})

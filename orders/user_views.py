@@ -1,14 +1,21 @@
+from pprint import pprint
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 from django.utils.translation import gettext_lazy as _
+from rest_framework.response import Response
+from rest_framework import status
 
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 
 from rest_framework.views import APIView
-from orders.serializers import UserSerializer
-from orders.models import User, ConfirmEmailToken
+from rest_framework.viewsets import ModelViewSet
+
+from orders.serializers import UserSerializer, ContactSerializer
+from orders.models import User, ConfirmEmailToken, Contact
 
 
 class LoginAccount(APIView):
@@ -98,3 +105,38 @@ class ConfirmAccount(APIView):
                 return JsonResponse({'Status': 403, 'Errors': _('Неправильно указан токен или email')})
 
         return JsonResponse({'Status': 411, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class ContactViewSet(ModelViewSet):
+    serializer_class = ContactSerializer
+    queryset = Contact.objects.all()
+
+    def get_queryset(self):
+        """
+        This view should return CRUD of all the contacts
+        for the currently authenticated user.
+        """
+        return super().get_queryset().filter(user_id=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        contact_data = self.request.data
+        # change request data so that it's mutable, otherwise this will raise
+        # a "This QueryDict instance is immutable." error
+        contact_data._mutable = True
+        # set the requesting user ID for the User ForeignKey
+        contact_data['user'] = self.request.user.id
+
+        print(f'comment_data')
+        pprint(contact_data)
+
+        serializer = ContactSerializer(data=contact_data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+

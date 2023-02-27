@@ -156,7 +156,8 @@ class Product(models.Model):
     category = models.ForeignKey(Category,
                                  verbose_name='Категория',
                                  on_delete=models.CASCADE,
-                                 null=True, blank=True)
+                                 null=True,
+                                 blank=True)
 
     class Meta:
         verbose_name = 'Продукт'
