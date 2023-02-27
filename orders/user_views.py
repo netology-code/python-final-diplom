@@ -1,11 +1,14 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.http import JsonResponse
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from rest_framework.views import APIView
 from orders.serializers import UserSerializer
+from orders.models import User
 
 
 class LoginAccount(APIView):
@@ -66,3 +69,33 @@ class RegisterAccount(APIView):
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class ConfirmAccount(APIView):
+    """
+    Подтверждение регистрации
+    """
+    permission_classes = [AllowAny]
+
+    # Регистрация методом POST
+    def post(self, request, *args, **kwargs):
+        # print(request.data)
+        user = User.objects.filter(email=request.data['email'], is_active=True)
+        if user:
+            return JsonResponse({'Status': 200, 'Message': _('Confirmation has been done earlier')})
+
+        # проверяем обязательные аргументы
+        if {'email', 'token'}.issubset(request.data):
+
+            token = ConfirmEmailToken.objects.filter(user__email=request.data['email'],
+                                                     key=request.data['token']).first()
+            if token:
+                token.user.is_active = True
+                token.user.save()
+                # reset_password_token_created.send(sender=self.__class__, user_id=user.id)
+                token.delete()
+                return JsonResponse({'Status': 200, 'Message': _('Registration complete successfully')})
+            else:
+                return JsonResponse({'Status': 403, 'Errors': _('Неправильно указан токен или email')})
+
+        return JsonResponse({'Status': 411, 'Errors': 'Не указаны все необходимые аргументы'})
