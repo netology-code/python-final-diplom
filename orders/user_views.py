@@ -89,12 +89,6 @@ class EditUser(APIView):
         user = get_object_or_404(User.objects.all(), pk=self.request.user.id)
         user_data = self.request.data
 
-        # # change request data so that it's mutable, otherwise this will raise
-        # # a "This QueryDict instance is immutable." error
-        # user_data._mutable = True
-        # # set the requesting user ID for the User ForeignKey
-        # user_data['id'] = self.request.user.id
-
         serializer = UserSerializer(instance=user, data=user_data, partial=True)
 
         if serializer.is_valid():
