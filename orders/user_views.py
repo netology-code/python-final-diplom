@@ -101,11 +101,14 @@ class ConfirmAccount(APIView):
                 token.user.save()
                 # reset_password_token_created.send(sender=self.__class__, user_id=user.id)
                 token.delete()
-                return JsonResponse({'Status': 200, 'Message': _('Registration complete successfully')})
+                return JsonResponse({'Message': _('Registration complete successfully')},
+                                    status=status.HTTP_201_CREATED)
             else:
-                return JsonResponse({'Status': 403, 'Errors': _('Неправильно указан токен или email')})
+                return JsonResponse({'Errors': _('Неправильно указан токен или email')},
+                                    status=status.HTTP_403_FORBIDDEN)
 
-        return JsonResponse({'Status': 411, 'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse({'Errors': 'Не указаны все необходимые аргументы'},
+                            status=status.HTTP_411_LENGTH_REQUIRED)
 
 
 class ContactViewSet(ModelViewSet):
@@ -128,12 +131,21 @@ class ContactViewSet(ModelViewSet):
         # set the requesting user ID for the User ForeignKey
         contact_data['user'] = self.request.user.id
 
-        print('comment_data')
-        pprint(contact_data)
-
         serializer = ContactSerializer(data=contact_data)
 
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        items_list = request.data.get('items').split(',')
+        deleted_items = 0
+
+        for item in items_list:
+            super().get_queryset().filter(pk=item).delete()
+            deleted_items += 1
+
+        return Response({'message': f'Deleted {deleted_items} otems.'}, status=status.HTTP_200_OK)
