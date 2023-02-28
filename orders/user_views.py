@@ -2,7 +2,7 @@ from pprint import pprint
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.contenttypes.models import ContentType
+# from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 from django.utils.translation import gettext_lazy as _
 from rest_framework.response import Response
@@ -126,7 +126,7 @@ class ContactViewSet(ModelViewSet):
         # set the requesting user ID for the User ForeignKey
         contact_data['user'] = self.request.user.id
 
-        print(f'comment_data')
+        print('comment_data')
         pprint(contact_data)
 
         serializer = ContactSerializer(data=contact_data)
@@ -135,8 +135,3 @@ class ContactViewSet(ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-

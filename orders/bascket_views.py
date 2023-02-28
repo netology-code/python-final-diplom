@@ -1,7 +1,7 @@
 from sqlite3 import IntegrityError
 
-import psycopg2
-from django.template.backends import django
+# import psycopg2
+# from django.template.backends import django
 
 from orders.models import Order, OrderItem
 from django.db.models import Q, F, Sum
@@ -122,7 +122,7 @@ class BasketView(APIView):
                                 product_info_id=order_item['id'],
                                 shop_id=1,
                                 defaults={
-                                    'quantity': order_item['quantity']
+                                    'quantity': order_item['quantity'],
                                 })
                             if created:
                                 print("Created!")
