@@ -9,13 +9,14 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from orders.serializers import UserSerializer, ContactSerializer
 from orders.models import User, ConfirmEmailToken, Contact
+from orders.permissions import IsOwner
 
 
 class LoginAccount(APIView):
@@ -110,6 +111,7 @@ class ConfirmAccount(APIView):
 class ContactViewSet(ModelViewSet):
     serializer_class = ContactSerializer
     queryset = Contact.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner]
 
     def get_queryset(self):
         """
