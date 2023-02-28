@@ -27,9 +27,6 @@ class PartnerUpdate(APIView):
 
     def post(self, request, *args, **kwargs):
 
-        print(f'request: {request} \nargs: {args}\nkwargs: {kwargs}')
-        print(f'request.user: {request.user}')
-
         # если пользователь не авторизован
         if not request.user.is_authenticated:
             print('пользователь не авторизован')

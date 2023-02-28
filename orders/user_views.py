@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 # from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from rest_framework.response import Response
 from rest_framework import status
@@ -77,6 +78,31 @@ class RegisterAccount(APIView):
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class EditUser(APIView):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = get_object_or_404(User.objects.all(), pk=self.request.user.id)
+        user_data = self.request.data
+
+        # # change request data so that it's mutable, otherwise this will raise
+        # # a "This QueryDict instance is immutable." error
+        # user_data._mutable = True
+        # # set the requesting user ID for the User ForeignKey
+        # user_data['id'] = self.request.user.id
+
+        serializer = UserSerializer(instance=user, data=user_data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class ConfirmAccount(APIView):
