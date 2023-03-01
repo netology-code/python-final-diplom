@@ -85,6 +85,12 @@ class EditUser(APIView):
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, *args, **kwargs):
+        user = get_object_or_404(User.objects.all(), pk=self.request.user.id)
+        serializer = UserSerializer(instance=user)
+        return Response(serializer.data,
+                        status=status.HTTP_201_CREATED)
+
     def post(self, request, *args, **kwargs):
         user = get_object_or_404(User.objects.all(), pk=self.request.user.id)
         user_data = self.request.data
