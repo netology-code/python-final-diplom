@@ -9,10 +9,10 @@ TOKEN = None
 request = requests.post(f'{url}user/register',
                         data={
                             "first_name": "magaz",
-                            "last_name": "magaz2",
-                            "email": "magaz2@gmail.com",
+                            "last_name": "magaz62",
+                            "email": "magaz6@gmail.com",
                             "password": "adminadmin",
-                            "company": "Magaz2",
+                            "company": "Magaz6",
                             "position": "funcionario",
                             "user_type": "shop",
                         })
@@ -26,7 +26,7 @@ else:
 # Вход
 request = requests.post(f'{url}user/login',
                         data={
-                            "email": "magaz2@gmail.com",
+                            "email": "magaz6@gmail.com",
                             "password": "adminadmin",
                         },
                         )

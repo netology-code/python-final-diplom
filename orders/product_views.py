@@ -1,5 +1,6 @@
+from rest_framework import status
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from orders.models import Product, Shop, ProductInfo, Parameter, \
     ProductParameter, Category
@@ -101,6 +102,13 @@ class ProductsList(ListAPIView):
     serializer_class = ProductSerializer
 
 
+class ProductDetailAPIView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        print(f"self.request: {self.request.query_params.get('shop_id')}")
+        return Response(status=status.HTTP_200_OK)
+
+
 class CategoryView(ListAPIView):
     """
     Список категорий
@@ -159,7 +167,7 @@ class ProductInfoViewSet(APIView):
     category_id
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     # @extend_schema(
     #     request=SingleProductViewSerializer,
