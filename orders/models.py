@@ -123,8 +123,6 @@ class Shop(models.Model):
     state = models.BooleanField(verbose_name='статус получения заказов',
                                 default=True)
 
-    # filename = models.FilePathField(verbose_name="Имя файла")
-
     class Meta:
         verbose_name = 'Магазин'
         verbose_name_plural = 'Список магазинов'
