@@ -36,7 +36,9 @@ class PartnerUpdate(APIView):
         # если тип пользователя не "магазин"
         if request.user.user_type != 'shop':
             print('тип пользователя не "магазин"')
-            return JsonResponse({'Status': False, 'Error': 'Только для магазинов'}, status=403)
+            return JsonResponse(
+                {'Status': False, 'Error': 'Только для магазинов'},
+                status=403)
 
         url = request.data.get('url')
         print(f'url: {url}')
@@ -61,8 +63,9 @@ class PartnerUpdate(APIView):
 
                 # Обработка категории товара
                 for category in data['categories']:
-                    category_object, _ = Category.objects.get_or_create(id=category['id'],
-                                                                        name=category['name'])
+                    category_object, _ = Category.objects.get_or_create(
+                        id=category['id'],
+                        name=category['name'])
                     category_object.shops.add(shop.id)
                     category_object.save()
 
@@ -71,8 +74,9 @@ class PartnerUpdate(APIView):
                 for item in data['goods']:
 
                     # Продукт
-                    product, _ = Product.objects.get_or_create(name=item['name'],
-                                                               category_id=item['category'])
+                    product, _ = Product.objects.get_or_create(
+                        name=item['name'],
+                        category_id=item['category'])
                     # Данные продукта
                     product_info = ProductInfo.objects.create(product_id=product.id,
                                                               external_id=item['id'],
@@ -91,7 +95,9 @@ class PartnerUpdate(APIView):
                 return JsonResponse({'Status': True})
 
         print('Не указаны все необходимые аргументы')
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse(
+            {'Status': False,
+             'Errors': 'Не указаны все необходимые аргументы'})
 
 
 class ProductsList(ListAPIView):

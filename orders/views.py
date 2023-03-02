@@ -55,12 +55,15 @@ class OrderView(APIView):
                 except IntegrityError as error:
                     print(error)
                     return JsonResponse({'Status': False,
-                                         'Errors': 'Неправильно указаны аргументы'},
+                                         'Errors':
+                                             'Неправильно указаны аргументы'},
                                         status=400)
                 else:
                     if is_updated:
-                        # new_order.send(sender=self.__class__, user_id=request.user.id)
+                        # new_order.send(sender=self.__class__,
+                        # user_id=request.user.id)
                         return JsonResponse({'Status': True})
 
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'},
+        return JsonResponse({'Status': False,
+                             'Errors': 'Не указаны все необходимые аргументы'},
                             status=400)

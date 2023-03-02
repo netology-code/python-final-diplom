@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer, IntegerField
-from rest_framework.relations import StringRelatedField  # , PrimaryKeyRelatedField
+from rest_framework.relations import StringRelatedField
 
 from orders.models import User, Contact, Product, Shop, Category, \
     ProductInfo, ProductParameter, Order, OrderItem
@@ -8,7 +8,9 @@ from orders.models import User, Contact, Product, Shop, Category, \
 class ContactSerializer(ModelSerializer):
     class Meta:
         model = Contact
-        fields = ('id', 'user_id', 'city', 'street', 'house', 'structure', 'building', 'apartment', 'user', 'phone')
+        fields = ('id', 'user_id', 'city', 'street', 'house',
+                  'structure', 'building', 'apartment',
+                  'user', 'phone')
         read_only_fields = ('id',)
         extra_kwargs = {
             'user': {'write_only': True},
@@ -20,7 +22,8 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'email', 'company', 'position', 'contacts', 'user_type')
+        fields = ('id', 'first_name', 'last_name', 'email', 'company',
+                  'position', 'contacts', 'user_type')
         read_only_fields = ('id',)
 
 
@@ -66,11 +69,13 @@ class ProductViewSerializer(ModelSerializer):
 
 class SingleProductViewSerializer(ModelSerializer):
     product = ProductSerializer(read_only=True)
-    product_parameters = ProductParameterSerializer(read_only=True, many=True)
+    product_parameters = ProductParameterSerializer(read_only=True,
+                                                    many=True)
 
     class Meta:
         model = ProductInfo
-        fields = ('id', 'name', 'product', 'shop', 'quantity', 'price', 'price_rrc', 'product_parameters')
+        fields = ('id', 'name', 'product', 'shop', 'quantity',
+                  'price', 'price_rrc', 'product_parameters')
         read_only_fields = ('id',)
 
 
@@ -91,12 +96,14 @@ class OrderItemCreateSerializer(OrderItemSerializer):
 
 
 class OrderSerializer(ModelSerializer):
-    ordered_items = OrderItemCreateSerializer(read_only=True, many=True)
+    ordered_items = OrderItemCreateSerializer(read_only=True,
+                                              many=True)
 
     total_sum = IntegerField()
     contact = ContactSerializer(read_only=True)
 
     class Meta:
         model = Order
-        fields = ('id', 'ordered_items', 'state', 'dt', 'total_sum', 'contact')
+        fields = ('id', 'ordered_items', 'state', 'dt',
+                  'total_sum', 'contact')
         read_only_fields = ('id',)

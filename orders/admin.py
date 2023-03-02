@@ -17,8 +17,10 @@ class UserCompanyInline:
 class UserAdmin(DjangoUserAdmin):
     form = UserAdminChangeForm
     add_form = UserAdminCreationForm
-    search_fields = ['email', 'first_name', 'last_name', 'is_staff', 'is_active']
-    list_display = ['email', 'is_staff', 'is_active', 'user_type', 'company', 'position']
+    search_fields = ['email', 'first_name', 'last_name',
+                     'is_staff', 'is_active']
+    list_display = ['email', 'is_staff', 'is_active',
+                    'user_type', 'company', 'position']
     list_filter = ['is_staff', 'is_active']
     add_fieldsets = (
         (None, {

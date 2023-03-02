@@ -5,23 +5,23 @@ url = 'http://127.0.0.1:8000/api/v1/'
 TOKEN = None
 
 # Регистрация
-
-request = requests.post(f'{url}user/register',
-                        data={
-                            "first_name": "magaz",
-                            "last_name": "magaz62",
-                            "email": "magaz6@gmail.com",
-                            "password": "adminadmin",
-                            "company": "Magaz6",
-                            "position": "funcionario",
-                            "user_type": "shop",
-                        })
-if request.status_code == 200:
-    data_str = request.json()
-    print("request:")
-    pprint(data_str)
-else:
-    print(f'request: {request}')
+#
+# request = requests.post(f'{url}user/register',
+#                         data={
+#                             "first_name": "magaz",
+#                             "last_name": "magaz62",
+#                             "email": "magaz6@gmail.com",
+#                             "password": "adminadmin",
+#                             "company": "Magaz6",
+#                             "position": "funcionario",
+#                             "user_type": "shop",
+#                         })
+# if request.status_code == 200:
+#     data_str = request.json()
+#     print("request:")
+#     pprint(data_str)
+# else:
+#     print(f'request: {request}')
 
 # Вход
 request = requests.post(f'{url}user/login',

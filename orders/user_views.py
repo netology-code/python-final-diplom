@@ -29,7 +29,9 @@ class LoginAccount(APIView):
     def post(self, request, *args, **kwargs):
 
         if {'email', 'password'}.issubset(request.data):
-            user = authenticate(request, username=request.data['email'], password=request.data['password'])
+            user = authenticate(request,
+                                username=request.data['email'],
+                                password=request.data['password'])
 
             if user is not None:
                 if user.is_active:
@@ -37,9 +39,13 @@ class LoginAccount(APIView):
 
                     return JsonResponse({'Status': True, 'Token': token.key})
 
-            return JsonResponse({'Status': False, 'Errors': 'Не удалось авторизовать'})
+            return JsonResponse(
+                {'Status': False,
+                 'Errors': 'Не удалось авторизовать'})
 
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse(
+            {'Status': False,
+             'Errors': 'Не указаны все необходимые аргументы'})
 
 
 class RegisterAccount(APIView):
@@ -51,7 +57,11 @@ class RegisterAccount(APIView):
     def post(self, request, *args, **kwargs):
 
         # проверяем обязательные аргументы
-        if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
+        if {'first_name',
+            'last_name', 'email',
+            'password', 'company',
+            'position'}\
+                .issubset(request.data):
 
             # проверяем пароль на сложность
 
@@ -62,7 +72,9 @@ class RegisterAccount(APIView):
                 # noinspection PyTypeChecker
                 for item in password_error:
                     error_array.append(item)
-                return JsonResponse({'Status': False, 'Errors': {'password': error_array}})
+                return JsonResponse(
+                    {'Status': False,
+                     'Errors': {'password': error_array}})
             else:
                 # проверяем данные для уникальности имени пользователя
                 request.data._mutable = True
@@ -75,9 +87,13 @@ class RegisterAccount(APIView):
                     user.save()
                     return JsonResponse({'Status': True})
                 else:
-                    return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
+                    return JsonResponse(
+                        {'Status': False,
+                         'Errors': user_serializer.errors})
 
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+        return JsonResponse(
+            {'Status': False,
+             'Errors': 'Не указаны все необходимые аргументы'})
 
 
 class EditUser(APIView):
@@ -115,23 +131,29 @@ class ConfirmAccount(APIView):
     def post(self, request, *args, **kwargs):
         user = User.objects.filter(email=request.data['email'], is_active=True)
         if user:
-            return JsonResponse({'Status': 200, 'Message': _('Confirmation has been done earlier')})
+            return JsonResponse(
+                {'Status': 200,
+                 'Message': _('Confirmation has been done earlier')})
 
         # проверяем обязательные аргументы
         if {'email', 'token'}.issubset(request.data):
 
-            token = ConfirmEmailToken.objects.filter(user__email=request.data['email'],
-                                                     key=request.data['token']).first()
+            token = ConfirmEmailToken.objects.filter(
+                user__email=request.data['email'],
+                key=request.data['token']).first()
             if token:
                 token.user.is_active = True
                 token.user.save()
-                # reset_password_token_created.send(sender=self.__class__, user_id=user.id)
+                # reset_password_token_created.send(sender=self.__class__,
+                # user_id=user.id)
                 token.delete()
-                return JsonResponse({'Message': _('Registration complete successfully')},
-                                    status=status.HTTP_201_CREATED)
+                return JsonResponse(
+                    {'Message': _('Registration complete successfully')},
+                    status=status.HTTP_201_CREATED)
             else:
-                return JsonResponse({'Errors': _('Неправильно указан токен или email')},
-                                    status=status.HTTP_403_FORBIDDEN)
+                return JsonResponse(
+                    {'Errors': _('Неправильно указан токен или email')},
+                    status=status.HTTP_403_FORBIDDEN)
 
         return JsonResponse({'Errors': 'Не указаны все необходимые аргументы'},
                             status=status.HTTP_411_LENGTH_REQUIRED)
@@ -174,4 +196,5 @@ class ContactViewSet(ModelViewSet):
             super().get_queryset().filter(pk=item).delete()
             deleted_items += 1
 
-        return Response({'message': f'Deleted {deleted_items} otems.'}, status=status.HTTP_200_OK)
+        return Response({'message': f'Deleted {deleted_items} otems.'},
+                        status=status.HTTP_200_OK)
