@@ -1,9 +1,9 @@
-from sqlite3 import IntegrityError
+# from sqlite3 import IntegrityError
 
 # import psycopg2
 # from django.template.backends import django
 
-from orders.models import Order, OrderItem
+from orders.models import Order, OrderItem, ProductInfo
 from django.db.models import Q, F, Sum
 from django.http import JsonResponse
 from rest_framework.response import Response
@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 from ujson import loads as load_json
 
 from pprint import pprint
-from orders.serializers import OrderSerializer, OrderItemSerializer
+from orders.serializers import OrderSerializer, OrderAddItemSerializer
 
 
 class BasketView(APIView):
@@ -54,20 +54,33 @@ class BasketView(APIView):
                 basket, _ = Order.objects.get_or_create(
                     user_id=request.user.id,
                     state='basket')
+                print('basket:')
+                pprint(basket)
                 objects_created = 0
                 for order_item in items_dict:
-                    order_item.update({'order': basket.id})
-                    serializer = OrderItemSerializer(data=order_item)
+                    order_item.update({
+                        'order': basket.id})
+                    product = ProductInfo.objects.get(product_id=order_item.get('id'))
+                    new_order_item = {
+                        'order': basket.id,
+                        # 'product_info': product,
+                        'product_info': product.id,
+                        'quantity': order_item.get('quantity'),
+                        'shop': product.shop.id,
+                    }
+                    print('new_order_item:')
+                    pprint(new_order_item)
+                    serializer = OrderAddItemSerializer(data=new_order_item)
+                    print('serializer')
                     if serializer.is_valid():
                         try:
                             serializer.save()
-                        except IntegrityError as error:
+                        except Exception as error:
                             return JsonResponse({'Status': False, 'Errors': str(error)})
                         else:
                             objects_created += 1
 
                     else:
-
                         JsonResponse({'Status': False, 'Errors': serializer.errors})
 
                 return JsonResponse({'Status': True, 'Создано объектов': objects_created})
