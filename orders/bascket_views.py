@@ -76,6 +76,7 @@ class BasketView(APIView):
                         try:
                             serializer.save()
                         except Exception as error:
+                            print(f"Error: {str(error)}")
                             return JsonResponse({'Status': False, 'Errors': str(error)})
                         else:
                             objects_created += 1

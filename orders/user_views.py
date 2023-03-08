@@ -105,7 +105,7 @@ class EditUser(APIView):
         user = get_object_or_404(User.objects.all(), pk=self.request.user.id)
         serializer = UserSerializer(instance=user)
         return Response(serializer.data,
-                        status=status.HTTP_201_CREATED)
+                        status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         user = get_object_or_404(User.objects.all(), pk=self.request.user.id)

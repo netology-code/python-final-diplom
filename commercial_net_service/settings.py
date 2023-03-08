@@ -126,11 +126,11 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.ScopedRateThrottle',
         'rest_framework.throttling.AnonRateThrottle',
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '5/day',  # limits the rate of unauthorised users = limit registrations per day from one source
-        'orders': '10/day',  # limits the byers' rates
-        'price-list': '20/day',  # limits shops' rates
-    },
+    # 'DEFAULT_THROTTLE_RATES': {
+    #     'anon': '5/day',  # limits the rate of unauthorised users = limit registrations per day from one source
+    #     'orders': '10/day',  # limits the byers' rates
+    #     'price-list': '20/day',  # limits shops' rates
+    # },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 5,
 
