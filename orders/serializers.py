@@ -106,10 +106,10 @@ class OrderSerializer(ModelSerializer):
                                               many=True)
 
     total_sum = IntegerField()
-    contact = ContactSerializer(read_only=True)
+    # contact = ContactSerializer(read_only=True)
 
     class Meta:
         model = Order
         fields = ('id', 'ordered_items', 'state', 'dt',
-                  'total_sum', 'contact')
+                  'total_sum')
         read_only_fields = ('id',)

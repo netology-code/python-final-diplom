@@ -29,7 +29,7 @@ class OrderView(APIView):
             user_id=request.user.id).exclude(state='basket').prefetch_related(
             'ordered_items__product_info__product__category',
             'ordered_items__product_info__product_parameters__parameter') \
-            .select_related('contact').annotate(
+            .annotate(
             total_sum=Sum(F('ordered_items__quantity') *
                           F('ordered_items__product_info__price'))).distinct()
 
