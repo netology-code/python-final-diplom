@@ -5,6 +5,7 @@
 
 from orders.models import Order, OrderItem, ProductInfo
 from django.db.models import Q, F, Sum
+from django.db import IntegrityError
 from django.http import JsonResponse
 from rest_framework.response import Response
 
@@ -75,6 +76,8 @@ class BasketView(APIView):
                     if serializer.is_valid():
                         try:
                             serializer.save()
+                        except IntegrityError:
+                            return JsonResponse({'Status': False, 'Errors': 'Order alredy exists'})
                         except Exception as error:
                             print(f"Error: {str(error)}")
                             return JsonResponse({'Status': False, 'Errors': str(error)})
@@ -154,6 +157,9 @@ class BasketView(APIView):
                             else:
                                 print("Updated!")
                             objects_updated += 1
+                        except IntegrityError:
+                            return JsonResponse({'Status': False,
+                                                 'Errors': 'Неверный запрос'})
                         except ValueError:
                             return JsonResponse({'Status': False,
                                                  'Errors': 'Неверный формат запроса'})
