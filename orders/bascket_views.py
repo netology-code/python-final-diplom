@@ -77,7 +77,8 @@ class BasketView(APIView):
                         try:
                             serializer.save()
                         except IntegrityError:
-                            return JsonResponse({'Status': False, 'Errors': 'Order alredy exists'})
+                            return JsonResponse({'Status': False,
+                                                 'Errors': 'Order alredy exists'})
                         except Exception as error:
                             print(f"Error: {str(error)}")
                             return JsonResponse({'Status': False, 'Errors': str(error)})
