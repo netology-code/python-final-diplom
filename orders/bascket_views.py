@@ -149,10 +149,8 @@ class BasketView(APIView):
                             obj, created = OrderItem.objects.update_or_create(
                                 order_id=basket.id,
                                 product_info_id=order_item['id'],
-                                shop_id=1,
-                                defaults={
-                                    'quantity': order_item['quantity'],
-                                })
+                                shop_id=3,
+                                quantity=order_item['quantity'])
                             if created:
                                 print("Created!")
                             else:
@@ -161,9 +159,11 @@ class BasketView(APIView):
                         except IntegrityError:
                             return JsonResponse({'Status': False,
                                                  'Errors': 'Неверный запрос'})
-                        except ValueError:
-                            return JsonResponse({'Status': False,
-                                                 'Errors': 'Неверный формат запроса'})
+                        except Exception as error:
+                            return JsonResponse({'Status': False, 'Errors': str(error)})
+                        # except ValueError:
+                        #     return JsonResponse({'Status': False,
+                        #                          'Errors': 'Неверный формат запроса'})
                     else:
                         return JsonResponse({'Status': False,
                                              'Errors': 'Неверный формат запроса'})
