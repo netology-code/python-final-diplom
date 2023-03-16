@@ -14,61 +14,40 @@ on:
       - develop
 
 jobs:
-  tests:
-    runs-on: ubuntu-latest
-    env:
-      POSTGRES_DB: "commercial_net_service"
-      POSTGRES_HOST: localhost
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "secret"
-      POSTGRES_PORT: 5432
-      SECRET_KEY: "django-insecure-q3#&9mct^3yc4j2%bo6-08n1wguv+kmbg3rf2##$8g5kx6s8xq"
-      ALLOWED_HOSTS: "*"
+  health-check-job: # health check job for testing and code formatting check
+    runs-on: ubuntu-latest # os for running the job
     services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_PORT: ${{ env.POSTGRES_PORT }}
+      postgres: # we need a postgres docker image to be booted a side car service to run the tests that needs a db
+        image: postgres
+        env: # the environment variable must match with app/settings.py if block of DATBASES variable otherwise test will fail due to connectivity issue.
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: github-actions
         ports:
           - 5432:5432 # exposing 5432 port for application to use
-
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
-      - name: Check updates
+      - name: Checkout code # checking our the code at current commit that triggers the workflow
         uses: actions/checkout@v2
-
-      - name: Python setup
+      - name: Cache dependency # caching dependency will make our build faster.
+        uses: actions/cache@v2 # for more info checkout pip section documentation at https://github.com/actions/cache
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Setup python environment # setting python environment to 3.x
         uses: actions/setup-python@v2
         with:
-          python-version: "3.10"
-
-      - name: Activate enviroments
-        run: python -m venv .venv
-
-      - name: Upgrade pip
-        run: pip install --upgrade pip
-
-      - name: setup libs
+          python-version: '3.x' # if you want multiple python version run just use matrix strategy in job config. See the documentation of GitHub Actions
+      - name: Check Python version # checking the python version to see if 3.x is installed.
+        run: python --version
+      - name: Install requirements # install application requirements
         run: pip install -r requirements.txt
-
-      - name: Linting of project files
-        run: flake8 .
 
       - name: Run Migrations # run migrations to create table in side car db container
         run: python manage.py migrate
-
-      - name: Tests
+      - name: Run Test # running tests
         run: pytest
-#        env:
-#          SECRET_KEY: ${{ env.SECRET_KEY }}
-#          DEBUG: "0"
-#          ALLOWED_HOSTS: ${{ env.ALLOWED_HOSTS }}
-#          DB_ENGINE: django.db.backends.postgresql
-#          DB_NAME: ${{ env.POSTGRES_DB }}
-#          DB_USER: ${{ env.POSTGRES_USER }}
-#          DB_PASSWORD: ${{ env.POSTGRES_PASS }}
-#          DB_HOST: ${{ env.POSTGRES_HOST }}
-#          DB_PORT: ${{ env.POSTGRES_PORT }}
 
