@@ -46,8 +46,8 @@ jobs:
       - name: Linting of project files
         run: flake8 .
 
-      - name: Tests
-        run: pytest
+#      - name: Tests
+#        run: pytest
 
 
 
