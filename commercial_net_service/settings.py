@@ -33,7 +33,7 @@ SECRET_KEY = "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
 DEBUG = True
 
 # ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
-ALLOWED_HOSTS = "*"
+ALLOWED_HOSTS = ("*", "127.0.0.1")
 
 # Application definition
 
