@@ -3,25 +3,25 @@ from pprint import pprint
 
 url = 'http://127.0.0.1:8000/api/v1/'
 TOKEN = None
-#
-# # Регистрация
-#
-# request = requests.post(f'{url}user/register',
-#                         data={
-#                             "first_name": "magaz",
-#                             "last_name": "magaz62",
-#                             "email": "magaz6@gmail.com",
-#                             "password": "adminadmin",
-#                             "company": "Magaz6",
-#                             "position": "funcionario",
-#                             "user_type": "shop",
-#                         })
-# if request.status_code == 200:
-#     data_str = request.json()
-#     print("request:")
-#     pprint(data_str)
-# else:
-#     print(f'request: {request}')
+
+# Регистрация
+
+request = requests.post(f'{url}user/register',
+                        data={
+                            "first_name": "magaz",
+                            "last_name": "magaz62",
+                            "email": "magaz6@gmail.com",
+                            "password": "adminadmin",
+                            "company": "Magaz6",
+                            "position": "funcionario",
+                            "user_type": "shop",
+                        })
+if request.status_code == 200:
+    data_str = request.json()
+    print("request:")
+    pprint(data_str)
+else:
+    print(f'request: {request}')
 
 # Вход
 request = requests.post(f'{url}user/login',
@@ -39,36 +39,36 @@ if request.status_code == 200:
     print(f'TOKEN: {TOKEN}')
 else:
     print(f'request: {request}')
+# #
+# # Обновление списка товаров
+# request = requests.post(f'{url}partner/update',
+#                         headers={
+#                             'Authorization': f'Token {TOKEN}',
+#                         },
+#                         data={"url":
+#                                   "https://drive.google.com/uc?export=download&confirm=no_antivirus&id=1K30Oeujse-05WCEGEFZC6oOX4Q_kACPy"},
+#                         )
+# print("post:")
+# if request.status_code == 200:
+#     pprint(request.json())
+# else:
+#     print(f'request: {request}')
+# {"url": "https://drive.google.com/uc?export=download&confirm=no_antivirus&id=1K30Oeujse-05WCEGEFZC6oOX4Q_kACPy"}
 #
-# Обновление списка товаров
-request = requests.post(f'{url}partner/update',
-                        headers={
-                            'Authorization': f'Token {TOKEN}',
-                        },
-                        data={"url":
-                                  "https://drive.google.com/uc?export=download&confirm=no_antivirus&id=1K30Oeujse-05WCEGEFZC6oOX4Q_kACPy"},
-                        )
-print("post:")
-if request.status_code == 200:
-    pprint(request.json())
-else:
-    print(f'request: {request}')
-{"url": "https://drive.google.com/uc?export=download&confirm=no_antivirus&id=1K30Oeujse-05WCEGEFZC6oOX4Q_kACPy"}
-
-# Список товаров
-request = requests.get(f'{url}/api/v1/products/list',
-                       headers={
-                           'Authorization': f'Token {TOKEN}',
-                       },
-                       data={
-                           "page": "1",
-                       },
-                       )
-print("products-list:")
-if request.status_code == 200:
-    pprint(request.json())
-else:
-    print(f'request: {request}')
+# # Список товаров
+# request = requests.get(f'{url}/api/v1/products/list',
+#                        headers={
+#                            'Authorization': f'Token {TOKEN}',
+#                        },
+#                        data={
+#                            "page": "1",
+#                        },
+#                        )
+# print("products-list:")
+# if request.status_code == 200:
+#     pprint(request.json())
+# else:
+#     print(f'request: {request}')
 #
 # # Список магазинов
 # request = requests.get(f'{url}/shop/list',
