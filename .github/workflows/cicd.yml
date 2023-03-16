@@ -49,15 +49,22 @@ jobs:
       - name: Tests
         run: pytest
         env:
-           SECRET_KEY: ${{ env.SECRET_KEY }}
-           DEBUG: "0"
-           ALLOWED_HOSTS: ${{ env.ALLOWED_HOSTS }}
-           DB_ENGINE: django.db.backends.postgresql
-           DB_NAME: ${{ env.POSTGRES_DB }}
-           DB_USER: ${{ env.POSTGRES_USER }}
-           DB_PASSWORD: ${{ env.POSTGRES_PASS }}
-           DB_HOST: ${{ env.POSTGRES_HOST }}
-           DB_PORT: ${{ env.POSTGRES_PORT }}
+          POSTGRES_DB: "commercial_net_service"
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: "postgres"
+          POSTGRES_PASSWORD: "secret"
+          POSTGRES_PORT: 5432
+          SECRET_KEY: "django-insecure-q3#&9mct^3yc4j2%bo6-08n1wguv+kmbg3rf2##$8g5kx6s8xq"
+          ALLOWED_HOSTS: "*"
+#           SECRET_KEY: ${{ env.SECRET_KEY }}
+#           DEBUG: "0"
+#           ALLOWED_HOSTS: ${{ env.ALLOWED_HOSTS }}
+#           DB_ENGINE: django.db.backends.postgresql
+#           DB_NAME: ${{ env.POSTGRES_DB }}
+#           DB_USER: ${{ env.POSTGRES_USER }}
+#           DB_PASSWORD: ${{ env.POSTGRES_PASS }}
+#           DB_HOST: ${{ env.POSTGRES_HOST }}
+#           DB_PORT: ${{ env.POSTGRES_PORT }}
 
 
 
