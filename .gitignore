@@ -120,4 +120,4 @@ venv.bak/
 .mypy_cache/
 
 # migrations
-orders/migrations/
+#orders/migrations/
