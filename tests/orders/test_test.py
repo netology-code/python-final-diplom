@@ -18,7 +18,7 @@ def test_user():
     user_count = User.objects.count()
 
     # Act
-    request = client.post(path=f'{url}user/register',
+    request = client.post(path='/api/v1/user/register',
                           data={
                               "first_name": "test",
                               "last_name": "test_last",
