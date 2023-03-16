@@ -2,8 +2,16 @@ name:
   Django Testing and Deploy
 
 on:
+  # opening a pull request to master and develop branch will be a trigger
+  pull_request:
+    branches:
+      - develop
+      - master
+  # any code pushed to master and develop branch will also be a trigger
   push:
-    branches: [master]
+    branches:
+      - master
+      - develop
 
 jobs:
   tests:
@@ -24,6 +32,8 @@ jobs:
           POSTGRES_USER: ${{ env.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
           POSTGRES_PORT: ${{ env.POSTGRES_PORT }}
+        ports:
+          - 5432:5432 # exposing 5432 port for application to use
 
     steps:
       - name: Check updates
@@ -46,23 +56,19 @@ jobs:
       - name: Linting of project files
         run: flake8 .
 
+      - name: Run Migrations # run migrations to create table in side car db container
+        run: python manage.py migrate
+
       - name: Tests
         run: pytest
-        env:
-          POSTGRES_DB: "commercial_net_service"
-          POSTGRES_HOST: localhost
-          POSTGRES_USER: "postgres"
-          POSTGRES_PASSWORD: "secret"
-          POSTGRES_PORT: 5432
-          SECRET_KEY: ${{ env.SECRET_KEY }}
-          DEBUG: "0"
-          ALLOWED_HOSTS: ${{ env.ALLOWED_HOSTS }}
-          DB_ENGINE: django.db.backends.postgresql
-          DB_NAME: ${{ env.POSTGRES_DB }}
-          DB_USER: ${{ env.POSTGRES_USER }}
-          DB_PASSWORD: ${{ env.POSTGRES_PASS }}
-          DB_HOST: ${{ env.POSTGRES_HOST }}
-          DB_PORT: ${{ env.POSTGRES_PORT }}
-
-
+#        env:
+#          SECRET_KEY: ${{ env.SECRET_KEY }}
+#          DEBUG: "0"
+#          ALLOWED_HOSTS: ${{ env.ALLOWED_HOSTS }}
+#          DB_ENGINE: django.db.backends.postgresql
+#          DB_NAME: ${{ env.POSTGRES_DB }}
+#          DB_USER: ${{ env.POSTGRES_USER }}
+#          DB_PASSWORD: ${{ env.POSTGRES_PASS }}
+#          DB_HOST: ${{ env.POSTGRES_HOST }}
+#          DB_PORT: ${{ env.POSTGRES_PORT }}
 
