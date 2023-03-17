@@ -41,10 +41,22 @@ def test_create_user(client, user_data, user_factory):
 
     # Assert
     assert request.status_code == 200
-    assert request.json() == {"Status": True, }
+    assert request.json() == {"Status": True}
 
     user_count += 1
     assert User.objects.count() == user_count
 
     user_factory(_quantity=10)
     assert User.objects.count() == user_count + 10
+
+
+@pytest.mark.django_db
+def test_user_login(client, user_factory):
+    user = user_factory()
+    request = client.post('/api/v1/user/login',
+                          data={
+                              "email": user.email,
+                              "password": user.password,
+                          },
+                          )
+    assert request.status_code == 200
