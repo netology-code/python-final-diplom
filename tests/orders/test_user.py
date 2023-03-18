@@ -1,7 +1,9 @@
 import pytest
+from rest_framework import status
 from rest_framework.test import APIClient
 from orders.models import User
 from model_bakery import baker
+from rest_framework.authtoken.models import Token
 
 
 @pytest.fixture
@@ -30,18 +32,29 @@ def user_factory():
     return factory
 
 
+# @pytest.fixture
+# def client_login(client, user):
+#     client = client
+#     token = client.post('/api/v1/user/login',
+#                         data={
+#                             "email": user.email,
+#                             "password": user.password,
+#                         }, )
+#     return client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+
 @pytest.mark.django_db
 def test_create_user(client, user_data, user_factory):
     # Arrange
     user_count = User.objects.count()
 
     # Act
-    request = client.post(path='/api/v1/user/register',
-                          data=user_data)
+    response = client.post(path='/api/v1/user/register',
+                           data=user_data)
 
     # Assert
-    assert request.status_code == 200
-    assert request.json() == {"Status": True}
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"Status": True}
 
     user_count += 1
     assert User.objects.count() == user_count
@@ -53,10 +66,26 @@ def test_create_user(client, user_data, user_factory):
 @pytest.mark.django_db
 def test_user_login(client, user_factory):
     user = user_factory()
-    request = client.post('/api/v1/user/login',
-                          data={
-                              "email": user.email,
-                              "password": user.password,
-                          },
-                          )
-    assert request.status_code == 200
+    response = client.post('/api/v1/user/login',
+                           data={
+                               "email": user.email,
+                               "password": user.password,
+                           },
+                           )
+    assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+def test_get_user(client, user_factory):
+    user = user_factory()
+    token, _ = Token.objects.get_or_create(user=user)
+    response = client.get('/api/v1/user/details')
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    headers = {'HTTP_AUTHORIZATION': f"Token {token.key}"}
+
+    response = client.get('/api/v1/user/details', **headers)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data.get('email') == user.email
