@@ -32,28 +32,13 @@ def user_factory():
     return factory
 
 
-# @pytest.fixture
-# def client_login(client, user):
-#     client = client
-#     token = client.post('/api/v1/user/login',
-#                         data={
-#                             "email": user.email,
-#                             "password": user.password,
-#                         }, )
-#     return client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-
-
 @pytest.mark.django_db
 def test_create_user(client, user_data, user_factory):
-    # Arrange
     user_count = User.objects.count()
-
-    # Act
     response = client.post(path='/api/v1/user/register',
                            data=user_data)
 
-    # Assert
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == {"Status": True}
 
     user_count += 1
@@ -66,13 +51,22 @@ def test_create_user(client, user_data, user_factory):
 @pytest.mark.django_db
 def test_user_login(client, user_factory):
     user = user_factory()
-    response = client.post('/api/v1/user/login',
-                           data={
-                               "email": user.email,
-                               "password": user.password,
-                           },
-                           )
+    response = client.post(
+        '/api/v1/user/login',
+        data={
+            "email": user.email,
+            "password": user.password,
+        },
+    )
     assert response.status_code == status.HTTP_200_OK
+
+    response = client.post(
+        '/api/v1/user/login',
+        data={
+            "email": user.email,
+        },
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 @pytest.mark.django_db
@@ -84,7 +78,6 @@ def test_get_user(client, user_factory):
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     headers = {'HTTP_AUTHORIZATION': f"Token {token.key}"}
-
     response = client.get('/api/v1/user/details', **headers)
 
     assert response.status_code == status.HTTP_200_OK

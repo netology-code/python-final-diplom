@@ -1,7 +1,4 @@
-# from sqlite3 import IntegrityError
-
-# import psycopg2
-# from django.template.backends import django
+from rest_framework import status
 
 from orders.models import Order, OrderItem, ProductInfo
 from django.db.models import Q, F, Sum
@@ -34,14 +31,15 @@ class BasketView(APIView):
                 * F('ordered_items__product_info__price'))).distinct()
 
         serializer = OrderSerializer(basket, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data,
+                        status=status.HTTP_200_OK)
 
     # редактировать корзину
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False,
                                  'Error': 'Log in required'},
-                                status=403)
+                                status=status.HTTP_403_FORBIDDEN)
 
         items_sting = request.data.get('items')
         if items_sting:
@@ -50,7 +48,8 @@ class BasketView(APIView):
                 print("items_dict")
                 pprint(items_dict)
             except ValueError:
-                JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
+                JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'},
+                             status=status.HTTP_400_BAD_REQUEST)
             else:
                 basket, _ = Order.objects.get_or_create(
                     user_id=request.user.id,
@@ -64,7 +63,6 @@ class BasketView(APIView):
                     product = ProductInfo.objects.get(product_id=order_item.get('id'))
                     new_order_item = {
                         'order': basket.id,
-                        # 'product_info': product,
                         'product_info': product.id,
                         'quantity': order_item.get('quantity'),
                         'shop': product.shop.id,
@@ -96,7 +94,8 @@ class BasketView(APIView):
     # удалить товары из корзины
     def delete(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
+            return JsonResponse({'Status': False, 'Error': 'Log in required'},
+                                status=status.HTTP_403_FORBIDDEN)
 
         items_sting = request.data.get('items')
         if items_sting:
@@ -116,13 +115,15 @@ class BasketView(APIView):
                 return JsonResponse({'Status': True,
                                      'Удалено объектов': deleted_count})
         return JsonResponse({'Status': False,
-                             'Errors': 'Не указаны все необходимые аргументы'})
+                             'Errors': 'Не указаны все необходимые аргументы'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
     # добавить позиции в корзину
     def put(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False,
-                                 'Error': 'Log in required'}, status=403)
+                                 'Error': 'Log in required'},
+                                status=status.HTTP_403_FORBIDDEN)
 
         items_sting = request.data.get('items')
 
@@ -131,7 +132,8 @@ class BasketView(APIView):
                 items_dict = load_json(items_sting)
             except ValueError:
                 return JsonResponse({'Status': False,
-                                     'Errors': 'Неверный формат запроса'})
+                                     'Errors': 'Неверный формат запроса'},
+                                    status=status.HTTP_400_BAD_REQUEST)
             else:
                 basket, _ = Order.objects.get_or_create(
                     user_id=request.user.id,
@@ -158,20 +160,21 @@ class BasketView(APIView):
                             objects_updated += 1
                         except IntegrityError:
                             return JsonResponse({'Status': False,
-                                                 'Errors': 'Неверный запрос'})
+                                                 'Errors': 'Неверный запрос'},
+                                                status=status.HTTP_400_BAD_REQUEST)
                         except Exception as error:
                             return JsonResponse({'Status': False, 'Errors': str(error)})
-                        # except ValueError:
-                        #     return JsonResponse({'Status': False,
-                        #                          'Errors': 'Неверный формат запроса'})
                     else:
                         return JsonResponse({'Status': False,
-                                             'Errors': 'Неверный формат запроса'})
+                                             'Errors': 'Неверный формат запроса'},
+                                            status=status.HTTP_400_BAD_REQUEST)
 
                 return JsonResponse(
                     {'Status': True,
-                     'Обновлено объектов': objects_updated})
+                     'Обновлено объектов': objects_updated},
+                    status=status.HTTP_202_ACCEPTED)
 
         return JsonResponse(
             {'Status': False,
-             'Errors': 'Не указаны все необходимые аргументы (items_sting)'})
+             'Errors': 'Не указаны все необходимые аргументы (items_sting)'},
+            status=status.HTTP_400_BAD_REQUEST)

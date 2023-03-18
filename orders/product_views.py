@@ -175,10 +175,6 @@ class ProductInfoViewSet(APIView):
 
     permission_classes = [AllowAny]
 
-    # @extend_schema(
-    #     request=SingleProductViewSerializer,
-    #     responses={200: SingleProductViewSerializer},
-    # )
     def get(self, request, *args, **kwargs):
         """
         Метод get_queryset принимает критерии для поиска,

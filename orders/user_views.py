@@ -37,7 +37,8 @@ class LoginAccount(APIView):
                 if user.is_active:
                     token, _ = Token.objects.get_or_create(user=user)
 
-                    return JsonResponse({'Status': True, 'Token': token.key})
+                    return JsonResponse({'Status': True, 'Token': token.key},
+                                        status=status.HTTP_200_OK)
 
             return JsonResponse(
                 {'Status': False,
@@ -45,7 +46,9 @@ class LoginAccount(APIView):
 
         return JsonResponse(
             {'Status': False,
-             'Errors': 'Не указаны все необходимые аргументы'})
+             'Errors': 'Не указаны все необходимые аргументы'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class RegisterAccount(APIView):
@@ -60,7 +63,7 @@ class RegisterAccount(APIView):
         if {'first_name',
             'last_name', 'email',
             'password', 'company',
-            'position'}\
+            'position'} \
                 .issubset(request.data):
 
             # проверяем пароль на сложность
@@ -74,7 +77,8 @@ class RegisterAccount(APIView):
                     error_array.append(item)
                 return JsonResponse(
                     {'Status': False,
-                     'Errors': {'password': error_array}})
+                     'Errors': {'password': error_array}},
+                    status=status.HTTP_400_BAD_REQUEST)
             else:
                 # проверяем данные для уникальности имени пользователя
                 request.data._mutable = True
@@ -85,15 +89,18 @@ class RegisterAccount(APIView):
                     user = user_serializer.save()
                     user.set_password(request.data['password'])
                     user.save()
-                    return JsonResponse({'Status': True})
+                    return JsonResponse({'Status': True},
+                                        status=status.HTTP_201_CREATED)
                 else:
                     return JsonResponse(
                         {'Status': False,
-                         'Errors': user_serializer.errors})
+                         'Errors': user_serializer.errors},
+                    )
 
         return JsonResponse(
             {'Status': False,
-             'Errors': 'Не указаны все необходимые аргументы'})
+             'Errors': 'Не указаны все необходимые аргументы'},
+            status=status.HTTP_400_BAD_REQUEST)
 
 
 class EditUser(APIView):
@@ -132,8 +139,8 @@ class ConfirmAccount(APIView):
         user = User.objects.filter(email=request.data['email'], is_active=True)
         if user:
             return JsonResponse(
-                {'Status': 200,
-                 'Message': _('Confirmation has been done earlier')})
+                {'Message': _('Confirmation has been done earlier')},
+                status=status.HTTP_200_OK)
 
         # проверяем обязательные аргументы
         if {'email', 'token'}.issubset(request.data):
