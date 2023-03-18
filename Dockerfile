@@ -2,7 +2,6 @@ FROM python:3.10.4-alpine
 WORKDIR /code
 
 RUN python3 -m pip install --upgrade pip
-RUN apt install python3-dev libpq-dev
 
 COPY ./requirements.txt /src/requirements.txt
 RUN pip3 install --no-cache-dir --upgrade -r /src/requirements.txt
