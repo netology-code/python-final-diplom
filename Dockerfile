@@ -1,8 +1,8 @@
-FROM python:3.10-alpine
+FROM python:3.10.4-alpine
 
 WORKDIR /code
 
-RUN pip install --upgrade pip
+RUN pip3 install --upgrade pip
 
 COPY ./requirements.txt /src/requirements.txt
 RUN pip3 install --no-cache-dir --upgrade -r /src/requirements.txt
