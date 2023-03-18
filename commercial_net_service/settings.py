@@ -33,7 +33,7 @@ SECRET_KEY = "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
 DEBUG = True
 
 # ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
-ALLOWED_HOSTS = ("*", "127.0.0.1")
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -99,12 +99,12 @@ if os.getenv('GITHUB_WORKFLOW'):
 else:
     DATABASES = {
         'default': {
-            'ENGINE': os.getenv('DB_ENGINE'),
-            'NAME': os.getenv('DB_NAME'),
-            'HOST': os.getenv('DB_HOST'),
-            'PORT': os.getenv('DB_PORT'),
-            'USER': os.getenv('DB_USER'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'railway',
+            'HOST': 'containers-us-west-31.railway.app',
+            'PORT': '5894',
+            'USER': 'postgres',
+            'PASSWORD': '3dTnQb0xps4iGzyvJLhe',
             'TEST': {
                 'MIRROR': 'default',
             },
