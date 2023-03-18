@@ -31,6 +31,7 @@ SECRET_KEY = "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = os.getenv('DEBUG')
 DEBUG = True
+CSRF_TRUSTED_ORIGINS = ["https://web-production-cde8.up.railway.app"]
 
 # ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 ALLOWED_HOSTS = ["*"]
