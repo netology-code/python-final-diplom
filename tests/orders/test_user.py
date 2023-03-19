@@ -32,6 +32,15 @@ def user_factory():
     return factory
 
 
+@pytest.fixture
+def logged_user_factory():
+    def factory(*args, **kwargs):
+        user = baker.make(User, *args, **kwargs)
+        return Token.objects.create(user=user)
+
+    return factory
+
+
 @pytest.mark.django_db
 def test_create_user(client, user_data, user_factory):
     user_count = User.objects.count()
@@ -70,13 +79,26 @@ def test_user_login(client, user_factory):
 
 
 @pytest.mark.django_db
-def test_get_user(client, user_factory):
-    user = user_factory()
-    token, _ = Token.objects.get_or_create(user=user)
+def test_get_logged_user(client, logged_user_factory):
+    token = logged_user_factory()
     response = client.get('/api/v1/user/details')
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
+    headers = {'HTTP_AUTHORIZATION': f"Token {token.key}"}
+    response = client.get('/api/v1/user/details', **headers)
+
+    assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.mark.django_db
+def test_get_user(client, user_factory):
+    user = user_factory()
+    response = client.get('/api/v1/user/details')
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    token, _ = Token.objects.get_or_create(user=user)
     headers = {'HTTP_AUTHORIZATION': f"Token {token.key}"}
     response = client.get('/api/v1/user/details', **headers)
 
