@@ -47,8 +47,8 @@ def test_create_user(client, user_data, user_factory):
     response = client.post(path='/api/v1/user/register',
                            data=user_data)
 
-    assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == {"Status": True}
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json().get('Message') == 'Check your email to complete registration.'
 
     user_count += 1
     assert User.objects.count() == user_count
