@@ -14,6 +14,24 @@ on:
       - develop
 
 jobs:
+  create-envfile:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_DEBUG: false
+          envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          some_other_variable: foobar
+          directory: .
+          file_name: .env
+          fail_on_empty: false
+
+      - name: check
+        run:  cat .env
+
   health-check-job: # health check job for testing and code formatting check
     runs-on: ubuntu-latest # os for running the job
     services:
@@ -50,7 +68,7 @@ jobs:
       - name: 'Create env file'
         run: |
           touch .env
-          echo "SECRET_KEY:" SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
+          echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
           echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
           cat .env
 
