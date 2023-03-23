@@ -50,16 +50,16 @@ jobs:
         uses: SpicyPizza/create-envfile@v1.3
         with:
           envkey_DEBUG: false
-          envkey_SECRET_KEY: "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
+#          envkey_SECRET_KEY: "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
+          envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
           envkey_ALLOWED_HOSTS: "*"
           directory: .
           file_name: .env
           fail_on_empty: false
 
       - name: check enviroment file
-        run: |
+        run:
           cat .env
-          echo "SECRET_KEY: "${{ secrets.SECRET_KEY }}
 
       - name: Run Migrations # run migrations to create table in side car db container
         run: python manage.py migrate
