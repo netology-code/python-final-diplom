@@ -51,7 +51,7 @@ jobs:
         with:
           envkey_DEBUG: false
 #          envkey_SECRET_KEY: "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
-          envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          envkey_SECRET_KEY: ${{ secrets.SSH_KEY }}
           envkey_ALLOWED_HOSTS: "*"
           directory: .
           file_name: .env
