@@ -50,7 +50,7 @@ jobs:
       - name: 'Create env file'
         run: |
           touch .env
-          echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
+          echo "SECRET_KEY:" SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
           echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
           cat .env
 
