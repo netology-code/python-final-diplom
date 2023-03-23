@@ -25,4 +25,4 @@ def send_email_4_verification(request, user):
         message,
         to=[user.email]
     )
-    # email.send()
+    email.send()

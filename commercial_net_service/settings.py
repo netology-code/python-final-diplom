@@ -89,18 +89,6 @@ WSGI_APPLICATION = 'commercial_net_service.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-# if os.getenv('GITHUB_WORKFLOW'):
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.postgresql',
-#             'NAME': 'github-actions',
-#             'USER': 'postgres',
-#             'PASSWORD': 'postgres',
-#             'HOST': 'localhost',
-#             'PORT': '5432',
-#         }
-#     }
-# else:
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE'),
@@ -174,6 +162,15 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
+
+# Email
+# https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-SERVER_EMAIL
+
+EMAIL_HOST = os.getenv('EM_HOST')
+EMAIL_HOST_USER = os.getenv('EM_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EM_HOST_PASSWORD')
+EMAIL_PORT = os.getenv('EM_PORT')
+EMAIL_USE_TLS = os.getenv('EM_USE_TLS')
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
