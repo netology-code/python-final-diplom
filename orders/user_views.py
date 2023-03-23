@@ -21,8 +21,6 @@ from orders.models import User, ConfirmEmailToken, Contact
 from orders.permissions import IsOwner
 
 
-
-
 class LoginAccount(APIView):
     """
     Класс для авторизации пользователей
@@ -70,7 +68,6 @@ class RegisterAccount(APIView):
                 .issubset(request.data):
 
             # проверяем пароль на сложность
-
             try:
                 validate_password(request.data['password'])
             except Exception as password_error:
@@ -93,7 +90,7 @@ class RegisterAccount(APIView):
                     user.set_password(request.data['password'])
                     user.save()
                     # verification of email
-                    send_email_4_verification()
+                    send_email_4_verification(request, user)
                     return JsonResponse(
                         {'Status': True,
                          'Message':
@@ -111,6 +108,10 @@ class RegisterAccount(APIView):
             {'Status': False,
              'Errors': 'Не указаны все необходимые аргументы'},
             status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserEmailVerify(APIView):
+    pass
 
 
 class EditUser(APIView):

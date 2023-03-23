@@ -8,7 +8,7 @@ from orders.bascket_views import BasketView
 from orders.product_views import PartnerUpdate, ProductsList, \
     ProductsView, SingleProductView, ShopView, ProductInfoViewSet
 from orders.user_views import LoginAccount, RegisterAccount, \
-    ConfirmAccount, ContactViewSet, EditUser
+    ConfirmAccount, ContactViewSet, EditUser, UserEmailVerify
 from orders.views import OrderView
 
 app_name = 'orders'
@@ -18,8 +18,11 @@ router.register(r'user/contact', ContactViewSet, basename='user')
 urlpatterns = [
     path('user/login', LoginAccount.as_view(), name='user-login'),
     path('user/register', RegisterAccount.as_view(), name='user-register'),
-    path('user/register/confirm', ConfirmAccount.as_view(), name='user-register-confirm'),
+    path('user/register/confirm',
+         ConfirmAccount.as_view(), name='user-register-confirm'),
     path('user/details', EditUser.as_view(), name='user-edit'),
+    path('user/verify_email/<uidb64>/<token>/',
+         UserEmailVerify.as_view(), name='verify-email'),
     path('user/password_reset', reset_password_request_token, name='password-reset'),
     path('user/password_reset/confirm',
          reset_password_confirm, name='password-reset-confirm'),
