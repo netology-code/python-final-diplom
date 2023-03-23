@@ -15,20 +15,19 @@ on:
 
 jobs:
   create-envfile:
+    steps:
+    - name: Make envfile
+      uses: SpicyPizza/create-envfile@v1.3
+      with:
+        envkey_DEBUG: false
+        envkey_SECRET_KEY: "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
+        envkey_ALLOWED_HOSTS: "*"
+        directory: .
+        file_name: .env
+        fail_on_empty: false
 
-  steps:
-  - name: Make envfile
-    uses: SpicyPizza/create-envfile@v1.3
-    with:
-      envkey_DEBUG: false
-      envkey_SECRET_KEY: "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
-      envkey_ALLOWED_HOSTS: "*"
-      directory: .
-      file_name: .env
-      fail_on_empty: false
-
-  - name: check enviroment file
-    run: cat .env
+    - name: check enviroment file
+      run: cat .env
 
   health-check-job: # health check job for testing and code formatting check
     runs-on: ubuntu-latest # os for running the job
