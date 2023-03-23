@@ -53,6 +53,14 @@ jobs:
           envkey_SECRET_KEY: "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
 #          envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
           envkey_ALLOWED_HOSTS: "*"
+#          envkey_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+
+          envkey_ENGINE: "django.db.backends.postgresql",
+          envkey_NAME: "github-actions",
+          envkey_USER: "postgres",
+          envkey_PASSWORD: "postgres",
+          envkey_HOST: "localhost",
+          envkey_PORT: "5432"
           directory: .
           file_name: .env
           fail_on_empty: false
