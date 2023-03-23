@@ -100,17 +100,6 @@ if os.getenv('GITHUB_WORKFLOW'):
             'PORT': '5432',
         }
     }
-# # elif os.getenv('LOCAL_DEVELOPMENT'):
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.postgresql',
-#             'NAME': 'commercial_net_service',
-#             'USER': 'postgres',
-#             'PASSWORD': 'vrag',
-#             'HOST': 'localhost',
-#             'PORT': '5432',
-#         }
-#     }
 else:
     DATABASES = {
         'default': {
