@@ -23,7 +23,7 @@ jobs:
         envkey_DEBUG: false
         envkey_SECRET_KEY: "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
         envkey_ALLOWED_HOSTS: "*"
-        directory: .
+#        directory: .
         file_name: .env
         fail_on_empty: false
 
