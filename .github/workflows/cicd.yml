@@ -55,11 +55,11 @@ jobs:
           envkey_ALLOWED_HOSTS: "*"
 #          envkey_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
 
-          envkey_ENGINE: "django.db.backends.postgresql",
-          envkey_NAME: "github-actions",
-          envkey_USER: "postgres",
-          envkey_PASSWORD: "postgres",
-          envkey_HOST: "localhost",
+          envkey_ENGINE: "django.db.backends.postgresql"
+          envkey_NAME: "github-actions"
+          envkey_USER: "postgres"
+          envkey_PASSWORD: "postgres"
+          envkey_HOST: "localhost"
           envkey_PORT: "5432"
           directory: .
           file_name: .env
