@@ -75,8 +75,7 @@ jobs:
           fail_on_empty: false
 
       - name: check enviroment file
-        run: |
-          ls -la
+        run:
           cat .env
 
       - name: Run Migrations # run migrations to create table in side car db container
