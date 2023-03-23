@@ -23,7 +23,7 @@ jobs:
         uses: SpicyPizza/create-envfile@v1.3
         with:
           envkey_DEBUG: false
-          envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          envkey_SECRET_KEY: "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
           envkey_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
           some_other_variable: foobar
           directory: .
