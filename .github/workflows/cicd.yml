@@ -54,7 +54,7 @@ jobs:
 #          envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
           envkey_ALLOWED_HOSTS: "*"
 #          envkey_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
-          envkey_DB_ENGIN: "django.db.backends.postgresql"
+          envkey_DB_ENGINE: "django.db.backends.postgresql"
           envkey_DB_NAME: "github-actions"
           envkey_DB_USER: "postgres"
           envkey_DB_PASSWORD: "postgres"
