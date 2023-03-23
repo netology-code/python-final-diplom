@@ -23,7 +23,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: github-actions
-          ALLOWED_HOSTS: *
+#          ALLOWED_HOSTS: *,
         ports:
           - 5432:5432 # exposing 5432 port for application to use
         # needed because the postgres container does not provide a healthcheck
@@ -49,6 +49,14 @@ jobs:
 
       - name: Run Migrations # run migrations to create table in side car db container
         run: python manage.py migrate
+
+      - name: 'Create env file'
+        run: |
+          touch .env
+          echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
+          echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
+          cat .env
+
       - name: Run Test # running tests
         run: pytest
 
