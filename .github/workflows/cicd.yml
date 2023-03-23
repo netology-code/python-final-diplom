@@ -24,6 +24,7 @@ jobs:
         with:
           envkey_DEBUG: false
           envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          envkey_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
           some_other_variable: foobar
           directory: .
           file_name: .env
