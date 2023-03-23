@@ -34,8 +34,8 @@ DEBUG = os.getenv('DEBUG')
 # DEBUG = True
 CSRF_TRUSTED_ORIGINS = ["https://web-production-cde8.up.railway.app"]
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
-# ALLOWED_HOSTS = ["*"]
+# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
