@@ -59,7 +59,7 @@ jobs:
       - name: check enviroment file
         run: |
           cat .env
-          echo "SECRET_KEY: "${{ secrets:SECRET_KEY }}
+          echo "SECRET_KEY: "${{ secrets.SECRET_KEY }}
 
       - name: Run Migrations # run migrations to create table in side car db container
         run: python manage.py migrate
