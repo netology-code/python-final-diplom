@@ -14,23 +14,23 @@ on:
       - develop
 
 jobs:
-  create-envfile:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Make envfile
-      uses: SpicyPizza/create-envfile@v1.3
-      with:
-        envkey_DEBUG: false
-        envkey_SECRET_KEY: "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
-        envkey_ALLOWED_HOSTS: "*"
-        directory: .
-        file_name: .env
-        fail_on_empty: false
-
-    - name: check enviroment file
-      run: |
-          ls -la
-          cat .env
+#  create-envfile:
+#    runs-on: ubuntu-latest
+#    steps:
+#    - name: Make envfile
+#      uses: SpicyPizza/create-envfile@v1.3
+#      with:
+#        envkey_DEBUG: false
+#        envkey_SECRET_KEY: "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
+#        envkey_ALLOWED_HOSTS: "*"
+#        directory: .
+#        file_name: .env
+#        fail_on_empty: false
+#
+#    - name: check enviroment file
+#      run: |
+#          ls -la
+#          cat .env
 
   health-check-job: # health check job for testing and code formatting check
     runs-on: ubuntu-latest # os for running the job
@@ -64,13 +64,27 @@ jobs:
         run: python --version
       - name: Install requirements # install application requirements
         run: pip install -r requirements.txt
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_DEBUG: false
+          envkey_SECRET_KEY: "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
+          envkey_ALLOWED_HOSTS: "*"
+          directory: .
+          file_name: .env
+          fail_on_empty: false
 
-      - name: Run Migrations # run migrations to create table in side car db container
-        run: python manage.py migrate
       - name: check enviroment file
         run: |
           ls -la
           cat .env
+
+      - name: Run Migrations # run migrations to create table in side car db container
+        run: python manage.py migrate
+#      - name: check enviroment file
+#        run: |
+#          ls -la
+#          cat .env
       - name: Run Test # running tests
         run: pytest
 
