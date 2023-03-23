@@ -15,6 +15,7 @@ import os
 # from pathlib import Path
 
 from dotenv import load_dotenv
+import platform
 
 load_dotenv()
 
@@ -95,6 +96,18 @@ if os.getenv('GITHUB_WORKFLOW'):
             'NAME': 'github-actions',
             'USER': 'postgres',
             'PASSWORD': 'postgres',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
+# elif os.getenv('LOCAL_DEVELOPMENT'):
+elif platform.system() == "Windows":
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'commercial_net_service',
+            'USER': 'postgres',
+            'PASSWORD': 'vrag',
             'HOST': 'localhost',
             'PORT': '5432',
         }
