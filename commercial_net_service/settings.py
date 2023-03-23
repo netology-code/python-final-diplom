@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 
-# from pathlib import Path
+from pathlib import Path
 
 from dotenv import load_dotenv
 import platform
@@ -26,16 +26,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = os.getenv('SECRET_KEY')
-SECRET_KEY = "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
+SECRET_KEY = os.getenv('SECRET_KEY')
+# SECRET_KEY = "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = os.getenv('DEBUG')
-DEBUG = True
+DEBUG = os.getenv('DEBUG')
+# DEBUG = True
 CSRF_TRUSTED_ORIGINS = ["https://web-production-cde8.up.railway.app"]
 
-# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
+# ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -115,12 +115,12 @@ elif platform.system() == "Windows":
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'railway',
-            'HOST': 'containers-us-west-31.railway.app',
-            'PORT': '5894',
-            'USER': 'postgres',
-            'PASSWORD': '3dTnQb0xps4iGzyvJLhe',
+            'ENGINE': os.getenv('DB_ENGINE'),
+            'NAME': os.getenv('DB_NAME'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
             'TEST': {
                 'MIRROR': 'default',
             },
@@ -190,5 +190,3 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
