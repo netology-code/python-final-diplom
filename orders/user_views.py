@@ -15,9 +15,12 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
+from orders.send_email import send_email_4_verification
 from orders.serializers import UserSerializer, ContactSerializer
 from orders.models import User, ConfirmEmailToken, Contact
 from orders.permissions import IsOwner
+
+
 
 
 class LoginAccount(APIView):
@@ -89,8 +92,15 @@ class RegisterAccount(APIView):
                     user = user_serializer.save()
                     user.set_password(request.data['password'])
                     user.save()
-                    return JsonResponse({'Status': True},
-                                        status=status.HTTP_201_CREATED)
+                    # verification of email
+                    send_email_4_verification()
+                    return JsonResponse(
+                        {'Status': True,
+                         'Message':
+                             'Check your email to complete registration.'},
+                        status=status.HTTP_200_OK)
+                    # return JsonResponse({'Status': True},
+                    #                     status=status.HTTP_201_CREATED)
                 else:
                     return JsonResponse(
                         {'Status': False,
