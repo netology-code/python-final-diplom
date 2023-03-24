@@ -166,6 +166,7 @@ USE_TZ = True
 # Email
 # https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-SERVER_EMAIL
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EM_HOST')
 EMAIL_HOST_USER = os.getenv('EM_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EM_HOST_PASSWORD')
