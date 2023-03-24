@@ -65,8 +65,7 @@ jobs:
           fail_on_empty: false
 
       - name: check enviroment file
-        run:
-          cat .env
+        run: echo "ALLOWED_HOSTS:" ${{ secrets.ALLOWED_HOSTS }}
 
       - name: Run Migrations # run migrations to create table in side car db container
         run: python manage.py migrate
