@@ -111,7 +111,16 @@ class RegisterAccount(APIView):
 
 
 class UserEmailVerify(APIView):
-    pass
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        token = kwargs['token']
+        user_id = get_object_or_404(Token.objects.all(), key=token).user_id
+        user = get_object_or_404(User.objects.all(), pk=user_id)
+        return Response({'User': user.email,
+                         'Message': 'Yor registration is confirmed.'},
+                        status=status.HTTP_200_OK)
 
 
 class EditUser(APIView):

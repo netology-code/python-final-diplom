@@ -21,7 +21,7 @@ urlpatterns = [
     path('user/register/confirm',
          ConfirmAccount.as_view(), name='user-register-confirm'),
     path('user/details', EditUser.as_view(), name='user-edit'),
-    path('user/verify_email/<uidb64>/<token>/',
+    path('user/verify_email/<token>/',
          UserEmailVerify.as_view(), name='verify-email'),
     path('user/password_reset', reset_password_request_token, name='password-reset'),
     path('user/password_reset/confirm',
