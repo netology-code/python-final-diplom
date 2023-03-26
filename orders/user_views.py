@@ -34,6 +34,12 @@ class LoginAccount(APIView):
                                 username=request.data['email'],
                                 password=request.data['password'])
 
+            if not user.email_is_verified:
+                return JsonResponse({
+                    'Status': False,
+                    'Message': 'Please make an email verification procedure.'},
+                    status=status.HTTP_403_FORBIDDEN)
+
             if user is not None:
                 if user.is_active:
                     token, _ = Token.objects.get_or_create(user=user)
@@ -118,9 +124,19 @@ class UserEmailVerify(APIView):
         token = kwargs['token']
         user_id = get_object_or_404(Token.objects.all(), key=token).user_id
         user = get_object_or_404(User.objects.all(), pk=user_id)
-        return Response({'User': user.email,
-                         'Message': 'Yor registration is confirmed.'},
-                        status=status.HTTP_200_OK)
+
+        serializer = UserSerializer(instance=user,
+                                    data={'email_is_verified': True},
+                                    partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'User': user.email,
+                             'Message': 'Yor registration is confirmed.'},
+                            status=status.HTTP_200_OK)
+
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class EditUser(APIView):
