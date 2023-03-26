@@ -126,7 +126,8 @@ class UserEmailVerify(APIView):
         user = get_object_or_404(User.objects.all(), pk=user_id)
 
         serializer = UserSerializer(instance=user,
-                                    data={'email_is_verified': True},
+                                    data={'email_is_verified': True,
+                                          'is_active': True},
                                     partial=True)
 
         if serializer.is_valid():
