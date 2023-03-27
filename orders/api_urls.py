@@ -8,7 +8,8 @@ from orders.bascket_views import BasketView
 from orders.product_views import PartnerUpdate, ProductsList, \
     ProductsView, SingleProductView, ShopView, ProductInfoViewSet
 from orders.user_views import LoginAccount, RegisterAccount, \
-    ConfirmAccount, ContactViewSet, EditUser, UserEmailVerify
+    ConfirmAccount, ContactViewSet, EditUser, UserEmailVerify, \
+    ResetPasswordRequestToken, ResetPasswordConfirm
 from orders.views import OrderView
 
 app_name = 'orders'
@@ -23,9 +24,10 @@ urlpatterns = [
     path('user/details', EditUser.as_view(), name='user-edit'),
     path('user/verify_email/<token>/',
          UserEmailVerify.as_view(), name='verify-email'),
-    path('user/password_reset', reset_password_request_token, name='password-reset'),
-    path('user/password_reset/confirm',
-         reset_password_confirm, name='password-reset-confirm'),
+    path('user/password_reset', ResetPasswordRequestToken.as_view(),
+         name='password-reset'),
+    path('user/password_reset/confirm', ResetPasswordConfirm.as_view(),
+         name='password-reset-confirm'),
     path('partner/update', PartnerUpdate.as_view(), name='partner-update'),
     path('token/', obtain_auth_token),
 

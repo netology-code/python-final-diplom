@@ -15,3 +15,15 @@ def send_email_4_verification(request, user):
         to=[user.email],
     )
     email.send()
+
+
+def send_email_4_reset_passw(user, token):
+    token, _ = Token.objects.get_or_create(user=user)
+    message = f"Please use this token for you request : \n " \
+              f"{token}"
+    email = EmailMessage(
+        'reset_password',
+        message,
+        to=[user.email],
+    )
+    email.send()
