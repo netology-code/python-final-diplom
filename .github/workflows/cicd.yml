@@ -63,7 +63,6 @@ jobs:
           directory: .
           file_name: .env
           fail_on_empty: false
-
       - name: check enviroment file
         run: echo "SECRET_KEY:" ${{ secrets.SECRET_KEY }} | sed 's/./& /g'
 

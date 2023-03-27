@@ -34,13 +34,13 @@ class LoginAccount(APIView):
                                 username=request.data['email'],
                                 password=request.data['password'])
 
-            if not user.email_is_verified:
-                return JsonResponse({
-                    'Status': False,
-                    'Message': 'Please make an email verification procedure.'},
-                    status=status.HTTP_403_FORBIDDEN)
-
             if user is not None:
+                if not user.email_is_verified:
+                    return JsonResponse({
+                        'Status': False,
+                        'Message': 'Please make an email verification procedure.'},
+                        status=status.HTTP_403_FORBIDDEN)
+
                 if user.is_active:
                     token, _ = Token.objects.get_or_create(user=user)
 
