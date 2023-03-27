@@ -42,7 +42,7 @@ def logged_user_factory(client):
         user.email_is_verified = True
         token = Token.objects.create(user=user)
 
-        response = client.get(path=f'/api/v1/user/verify_email/{token}/')
+        client.get(path=f'/api/v1/user/verify_email/{token}/')
 
         return token
 
