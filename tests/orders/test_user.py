@@ -116,3 +116,27 @@ def test_get_user(client, user_factory):
 
     assert response.status_code == status.HTTP_200_OK
     assert response.data.get('email') == user.email
+
+
+@pytest.mark.django_db
+def test_user_contacts(client, logged_user_factory):
+    token = logged_user_factory()
+    response = client.get('/api/v1/user/details')
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    headers = {'HTTP_AUTHORIZATION': f"Token {token.key}"}
+
+    response = client.get('/api/v1/user/contact', follow=True, **headers)
+
+    assert response.status_code == status.HTTP_200_OK
+    print(f'response.data: {response.data}')
+    assert response.data['count'] == 0
+
+    response = client.post('/api/v1/user/contact',
+                           follow=True, data={'building': '123',
+                                              'apartment': '123',
+                                              'phone': '+212151454',
+                                              'user': '7'},
+                           **headers)
+    assert response.status_code == status.HTTP_200_OK
