@@ -1,17 +1,11 @@
-# from pprint import pprint
-
 import pytest
-from rest_framework import status
 from rest_framework.test import APIClient
-from orders.models import User
 from model_bakery import baker
+from rest_framework import status
+from orders.models import User
 from rest_framework.authtoken.models import Token
 
-# from django.urls import reverse
-# from orders.api_urls import app_name
-# from pprint import pprint
-
-base_url = 'http://localhost:8000/api/v1/user/'
+from .test_utils import base_url_user
 
 
 @pytest.fixture
@@ -50,7 +44,7 @@ def logged_user_factory(client):
         user.email_is_verified = True
         token = Token.objects.create(user=user)
 
-        client.get(path=f'{base_url}verify_email/{token}/')
+        client.get(path=f'{base_url_user}verify_email/{token}/')
 
         return token
 
@@ -60,7 +54,7 @@ def logged_user_factory(client):
 @pytest.mark.django_db
 def test_create_user(client, user_data, user_factory):
     user_count = User.objects.count()
-    response = client.post(path=f'{base_url}register',
+    response = client.post(path=f'{base_url_user}register',
                            data=user_data)
 
     assert response.status_code == status.HTTP_200_OK
@@ -78,7 +72,7 @@ def test_user_login(client, user_factory):
     user = user_factory()
 
     response = client.post(
-        f'{base_url}login',
+        f'{base_url_user}login',
         data={
             "email": user.email,
         },
@@ -86,7 +80,7 @@ def test_user_login(client, user_factory):
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     response = client.post(
-        f'{base_url}login',
+        f'{base_url_user}login',
         data={
             "email": user.email,
             "password": user.password,
@@ -98,12 +92,12 @@ def test_user_login(client, user_factory):
 @pytest.mark.django_db
 def test_get_logged_user(client, logged_user_factory):
     token = logged_user_factory()
-    response = client.get(f'{base_url}details')
+    response = client.get(f'{base_url_user}details')
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     headers = {'HTTP_AUTHORIZATION': f"Token {token.key}"}
-    response = client.get(f'{base_url}details', **headers)
+    response = client.get(f'{base_url_user}details', **headers)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -111,17 +105,17 @@ def test_get_logged_user(client, logged_user_factory):
 @pytest.mark.django_db
 def test_get_user(client, user_factory):
     user = user_factory()
-    response = client.get(f'{base_url}details')
+    response = client.get(f'{base_url_user}details')
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     token, _ = Token.objects.get_or_create(user=user)
 
-    response = client.get(path=f'{base_url}verify_email/{token}/')
+    response = client.get(path=f'{base_url_user}verify_email/{token}/')
     assert response.status_code == status.HTTP_200_OK
 
     headers = {'HTTP_AUTHORIZATION': f"Token {token.key}"}
-    response = client.get(f'{base_url}details', **headers)
+    response = client.get(f'{base_url_user}details', **headers)
 
     assert response.status_code == status.HTTP_200_OK
     assert response.data.get('email') == user.email
@@ -133,7 +127,8 @@ def test_user_contacts(client,
     token = logged_user_factory()
 
     # get
-    response = client.get(f'{base_url}details')
+    response = client.get(f'{base_url_user}contact',
+                          follow=True)
 
     print(f'token.user.pk: {token.user.pk}')
 
@@ -141,7 +136,7 @@ def test_user_contacts(client,
 
     headers = {'HTTP_AUTHORIZATION': f"Token {token.key}"}
 
-    response = client.get(f'{base_url}contact', follow=True, **headers)
+    response = client.get(path=f'{base_url_user}contact', follow=True, **headers)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -149,7 +144,7 @@ def test_user_contacts(client,
     assert contacts_count == 0
 
     # post
-    response = client.post(f'{base_url}contact/',
+    response = client.post(f'{base_url_user}contact/',
                            follow=True,
                            data={
                                'city': 'city',
@@ -167,13 +162,13 @@ def test_user_contacts(client,
     contact_id = response.data.get('id')
     assert contact_id != 0
 
-    response = client.get(f'{base_url}contact', follow=True, **headers)
+    response = client.get(f'{base_url_user}contact', follow=True, **headers)
 
     assert response.status_code == status.HTTP_200_OK
     assert response.data.get('count') == contacts_count + 1
 
     # put
-    response = client.put(f'{base_url}contact/{contact_id}',
+    response = client.put(f'{base_url_user}contact/{contact_id}',
                           follow=True,
                           data={
                               'city': 'new_city',
@@ -191,7 +186,7 @@ def test_user_contacts(client,
     assert response.status_code == status.HTTP_200_OK
 
     # delete
-    response = client.delete(f'{base_url}contact/',
+    response = client.delete(f'{base_url_user}contact/',
                              data={
                                  'items': str(contact_id),
                              },
@@ -199,7 +194,7 @@ def test_user_contacts(client,
 
     assert response.status_code == status.HTTP_200_OK
 
-    response = client.get(f'{base_url}contact', follow=True, **headers)
+    response = client.get(f'{base_url_user}contact', follow=True, **headers)
 
     assert response.data.get('count') == contacts_count
 
@@ -210,11 +205,11 @@ def test_user_details(client, logged_user_factory):
     user_id = token.user.id
     headers = {'HTTP_AUTHORIZATION': f"Token {token.key}"}
 
-    response = client.get(f'{base_url}details', follow=True, **headers)
+    response = client.get(f'{base_url_user}details', follow=True, **headers)
     assert response.status_code == status.HTTP_200_OK
     assert response.data.get('id') == user_id
 
-    response = client.post(f'{base_url}details',
+    response = client.post(f'{base_url_user}details',
                            data={
                                'first_name': 'new_name',
                            },
@@ -230,7 +225,7 @@ def test_user_password_reset(client, logged_user_factory):
     token = logged_user_factory()
     user_email = token.user.email
 
-    response = client.post(f'{base_url}password_reset',
+    response = client.post(f'{base_url_user}password_reset',
                            data={
                                'email': user_email,
                            },
@@ -238,7 +233,7 @@ def test_user_password_reset(client, logged_user_factory):
     assert response.status_code == status.HTTP_200_OK
     assert response.data.get('Message') == "Check your email.."
 
-    response = client.post(f'{base_url}password_reset/confirm',
+    response = client.post(f'{base_url_user}password_reset/confirm',
                            data={
                                'email': user_email,
                                'password': 'qwer1234A',
