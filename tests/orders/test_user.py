@@ -4,7 +4,8 @@ from rest_framework.test import APIClient
 from orders.models import User, Contact
 from model_bakery import baker
 from rest_framework.authtoken.models import Token
-
+from django.urls import reverse
+from orders.api_urls import app_name
 
 @pytest.fixture
 def client():
@@ -134,7 +135,7 @@ def test_user_contacts(client,
     assert response.status_code == status.HTTP_200_OK
     assert response.data['count'] == 0
 
-    response = client.post(path='/api/v1/user/contact',
+    response = client.post('http://localhost:8000/api/v1/user/contact/',
                            follow=True,
                            data={
                                'city': 'city',
@@ -147,4 +148,4 @@ def test_user_contacts(client,
                                'user': token.user
                            },
                            **headers)
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_201_CREATED

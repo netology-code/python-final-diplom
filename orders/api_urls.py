@@ -12,7 +12,7 @@ from orders.views import OrderView
 
 app_name = 'orders'
 router = DefaultRouter()
-router.register(r'user/contact', ContactViewSet, basename='user')
+router.register(r'user/contact', ContactViewSet, basename='user-contact')
 
 urlpatterns = [
     path('user/login', LoginAccount.as_view(), name='user-login'),
