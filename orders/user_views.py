@@ -233,7 +233,6 @@ class ContactViewSet(ModelViewSet):
         This view should return CRUD of all the contacts
         for the currently authenticated user.
         """
-        print('get_queryset')
         return super().get_queryset().filter(user_id=self.request.user)
 
     def create(self, request, *args, **kwargs):
