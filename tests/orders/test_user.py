@@ -1,7 +1,7 @@
 import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
-from orders.models import User
+from orders.models import User, Contact
 from model_bakery import baker
 from rest_framework.authtoken.models import Token
 
@@ -30,7 +30,6 @@ def user_factory():
         return baker.make(User, *args, **kwargs)
 
     return factory
-
 
 @pytest.fixture
 def logged_user_factory(client):
@@ -119,9 +118,12 @@ def test_get_user(client, user_factory):
 
 
 @pytest.mark.django_db
-def test_user_contacts(client, logged_user_factory):
+def test_user_contacts(client,
+                       logged_user_factory):
     token = logged_user_factory()
     response = client.get('/api/v1/user/details')
+
+    print(f'token.user.pk: {token.user.pk}')
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -130,13 +132,19 @@ def test_user_contacts(client, logged_user_factory):
     response = client.get('/api/v1/user/contact', follow=True, **headers)
 
     assert response.status_code == status.HTTP_200_OK
-    print(f'response.data: {response.data}')
     assert response.data['count'] == 0
 
-    response = client.post('/api/v1/user/contact',
-                           follow=True, data={'building': '123',
-                                              'apartment': '123',
-                                              'phone': '+212151454',
-                                              'user': '7'},
+    response = client.post(path='/api/v1/user/contact',
+                           follow=True,
+                           data={
+                               'city': 'city',
+                               'street': 'street',
+                               'house': 'house',
+                               'structure': 'structure',
+                               'building': 'building',
+                               'apartment': 'apartment',
+                               'phone': '+phone',
+                               'user': token.user
+                           },
                            **headers)
     assert response.status_code == status.HTTP_200_OK
