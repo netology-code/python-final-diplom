@@ -5,6 +5,11 @@ networks:
 
 services:
 
+  redis:
+    image: redis:7.0-alpine3.17
+    ports:
+      - "6379:6379"
+
   postgres:
     image: postgres:latest
     environment:

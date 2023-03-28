@@ -1,11 +1,15 @@
 import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
-from orders.models import User, Contact
+from orders.models import User
 from model_bakery import baker
 from rest_framework.authtoken.models import Token
-from django.urls import reverse
-from orders.api_urls import app_name
+
+
+# from django.urls import reverse
+# from orders.api_urls import app_name
+# from pprint import pprint
+
 
 @pytest.fixture
 def client():
@@ -31,6 +35,7 @@ def user_factory():
         return baker.make(User, *args, **kwargs)
 
     return factory
+
 
 @pytest.fixture
 def logged_user_factory(client):
@@ -133,8 +138,11 @@ def test_user_contacts(client,
     response = client.get('/api/v1/user/contact', follow=True, **headers)
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.data['count'] == 0
 
+    contacts_count = response.data.get('count')
+    assert contacts_count == 0
+
+    # response=client.post(reverse('user-contact-list'),
     response = client.post('http://localhost:8000/api/v1/user/contact/',
                            follow=True,
                            data={
@@ -145,7 +153,29 @@ def test_user_contacts(client,
                                'building': 'building',
                                'apartment': 'apartment',
                                'phone': '+phone',
-                               'user': token.user
+                               'user': token.user,
                            },
                            **headers)
     assert response.status_code == status.HTTP_201_CREATED
+
+    response = client.get('/api/v1/user/contact', follow=True, **headers)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data.get('count') == contacts_count + 1
+
+    contact_id = response.data.get('results')[0].get('id')
+    assert contact_id != 0
+
+    print(f'contact_id: {contact_id}')
+
+    response = client.delete('http://localhost:8000/api/v1/user/contact/',
+                             data={
+                                 'items': str(contact_id),
+                             },
+                             follow=True, **headers)
+
+    assert response.status_code == status.HTTP_200_OK
+
+    response = client.get('/api/v1/user/contact', follow=True, **headers)
+
+    assert response.data.get('count') == contacts_count
