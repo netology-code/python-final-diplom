@@ -7,8 +7,7 @@ def send_email_4_verification(request, user):
     current_site = get_current_site(request)
     token, _ = Token.objects.get_or_create(user=user)
     message = f"Please follow this link to confirm your password: \n " \
-              f"http://{current_site.domain}/api/v1/user/verify_email/" \
-              f"{token}"
+              f"http://{current_site.domain}/api/v1/user/verify_email/{token}"
     email = EmailMessage(
         'Verify email',
         message,

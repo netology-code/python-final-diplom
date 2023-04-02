@@ -16,6 +16,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 import platform
+from decouple import config
+
 
 load_dotenv()
 
@@ -51,6 +53,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_rest_passwordreset',
+
+    'django_celery_beat',
+    'django_celery_results',
 
     'orders',
 ]
@@ -146,6 +151,14 @@ REST_FRAMEWORK = {
     # 'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 
 }
+
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_BROKER_URL = config('CELERY_BROKER_REDIS_URL', default='redis://localhost:6379')
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

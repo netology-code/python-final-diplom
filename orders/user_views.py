@@ -16,7 +16,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from orders.send_email import send_email_4_verification
+from orders.tasks import send_email_4_verification
 from orders.serializers import UserSerializer, ContactSerializer
 from orders.models import User, ConfirmEmailToken, Contact
 from orders.permissions import IsOwner
@@ -33,7 +33,8 @@ from rest_framework import exceptions
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import get_password_validators
 from django.conf import settings
-from orders.send_email import send_email_4_reset_passw
+from orders.tasks import send_email_4_reset_passw
+from django.contrib.sites.shortcuts import get_current_site
 
 
 class LoginAccount(APIView):
@@ -111,7 +112,12 @@ class RegisterAccount(APIView):
                     user.set_password(request.data['password'])
                     user.save()
                     # verification of email
-                    send_email_4_verification(request, user)
+                    token, _ = Token.objects.get_or_create(user=user)
+                    send_email_4_verification.delay(
+                        current_site=get_current_site(request).domain,
+                        user_email=user.email,
+                        token=token,
+                    )
                     return JsonResponse(
                         {'Status': True,
                          'Message':
