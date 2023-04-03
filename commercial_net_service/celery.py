@@ -7,7 +7,7 @@ from decouple import config
 # this is also used in manage.py
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'commercial_net_service.settings')
 
-app = Celery('orders')
+app = Celery('commercial_net_service')
 
 # Using a string here means the worker don't have to serialize
 # the configuration object to child processes.

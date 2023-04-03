@@ -51,7 +51,7 @@ def logged_user_factory(client):
     return factory
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(serializer='json')
 def test_create_user(client, user_data, user_factory):
     user_count = User.objects.count()
     response = client.post(path=f'{base_url_user}register',
