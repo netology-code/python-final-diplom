@@ -151,15 +151,20 @@ REST_FRAMEWORK = {
 
 }
 
-# save Celery task results in Django's database
-CELERY_RESULT_BACKEND = "django-db"
-
 # This configures Redis as the datastore between Django + Celery
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_REDIS_URL', 'redis://localhost:6379')
 
+# save Celery task results in Django's database
+CELERY_RESULT_BACKEND = "django-db"
 
 # this allows you to schedule items in the Django admin.
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Lisbon'
+# CELERY_BEAT_SCHEDULE = {}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

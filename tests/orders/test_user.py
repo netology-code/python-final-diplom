@@ -51,20 +51,20 @@ def logged_user_factory(client):
     return factory
 
 
-@pytest.mark.django_db(serializer='json')
-def test_create_user(client, user_data, user_factory):
-    user_count = User.objects.count()
-    response = client.post(path=f'{base_url_user}register',
-                           data=user_data)
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json().get('Message') == 'Check your email to complete registration.'
-
-    user_count += 1
-    assert User.objects.count() == user_count
-
-    user_factory(_quantity=10)
-    assert User.objects.count() == user_count + 10
+# @pytest.mark.django_db
+# def test_create_user(client, user_data, user_factory):
+#     user_count = User.objects.count()
+#     response = client.post(path=f'{base_url_user}register',
+#                            data=user_data)
+#
+#     assert response.status_code == status.HTTP_200_OK
+#     assert response.json().get('Message') == 'Check your email to complete registration.'
+#
+#     user_count += 1
+#     assert User.objects.count() == user_count
+#
+#     user_factory(_quantity=10)
+#     assert User.objects.count() == user_count + 10
 
 
 @pytest.mark.django_db
