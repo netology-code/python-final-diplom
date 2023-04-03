@@ -51,9 +51,9 @@ jobs:
         with:
           envkey_DEBUG: false
           envkey_SECRET_KEY: "wfv4wv+n19$qk5=65=#m)=5wm#7ox^ouicfj@g2(a3mf)z$h*0"
-#          envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          #          envkey_SECRET_KEY: ${{ secrets.SECRET_KEY }}
           envkey_ALLOWED_HOSTS: "*"
-#          envkey_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          #          envkey_ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
           envkey_DB_ENGINE: "django.db.backends.postgresql"
           envkey_DB_NAME: "github-actions"
           envkey_DB_USER: "postgres"
@@ -69,5 +69,5 @@ jobs:
       - name: Run Migrations # run migrations to create table in side car db container
         run: python manage.py migrate
       - name: Run Test # running tests
-        run: pytest
+        run: pytest tests -v --tb=native
 
