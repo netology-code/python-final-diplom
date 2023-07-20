@@ -1,0 +1,834 @@
+{
+	"info": {
+		"_postman_id": "fb5bffeb-d9ba-4c04-83fa-6e9f9a9e1aa9",
+		"name": "diploma",
+		"description": "Дипломная работа к профессии Python-разработчик «API Сервис заказа товаров для розничных сетей».",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27607971"
+	},
+	"item": [
+		{
+			"name": "Регистрация покупателя",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "buyer@example.com",
+							"type": "default"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "default"
+						},
+						{
+							"key": "type",
+							"value": "buyer",
+							"type": "default"
+						},
+						{
+							"key": "company",
+							"value": "Lalala GmbH",
+							"type": "default"
+						},
+						{
+							"key": "position",
+							"value": "Buyer",
+							"type": "default"
+						},
+						{
+							"key": "full_name",
+							"value": "Дергач Ефим",
+							"type": "default"
+						},
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/register/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"register",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Регистрация продавца",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "shop@example.com",
+							"type": "default"
+						},
+						{
+							"key": "username",
+							"value": "shop_username",
+							"type": "default"
+						},
+						{
+							"key": "type",
+							"value": "shop",
+							"type": "default"
+						},
+						{
+							"key": "company",
+							"value": "Связной",
+							"type": "default"
+						},
+						{
+							"key": "position",
+							"value": "Shop Manager",
+							"type": "default"
+						},
+						{
+							"key": "full_name",
+							"value": "Быстрокот Семён",
+							"type": "default"
+						},
+						{
+							"key": "password",
+							"value": "shop123",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/register/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"register",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Вход в учётную запись продавца",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "username",
+							"value": "shop_username",
+							"type": "default"
+						},
+						{
+							"key": "password",
+							"value": "shop123",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/login/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Загрузка товаров в базу данных",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "shop123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "shop_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/update/shop1.yaml/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"update",
+						"shop1.yaml",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Заполнение контактной формы покупателем",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "city",
+							"value": "Москва",
+							"type": "text"
+						},
+						{
+							"key": "street",
+							"value": "Московская",
+							"type": "text"
+						},
+						{
+							"key": "house",
+							"value": "11",
+							"type": "text"
+						},
+						{
+							"key": "structure",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "building",
+							"value": "а",
+							"type": "text"
+						},
+						{
+							"key": "apartment",
+							"value": "121",
+							"type": "text"
+						},
+						{
+							"key": "phone",
+							"value": "+0 000 000-00-00",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/get_contact/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"get_contact",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получение всех магазинов (1)",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/shops/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"shops",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получение всех магазинов со статусом \"открыт\" (1)",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/shops/?state=true",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"shops",
+						""
+					],
+					"query": [
+						{
+							"key": "state",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получение всех магазинов со статусом \"закрыт\" (0)",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/shops/?state=false",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"shops",
+						""
+					],
+					"query": [
+						{
+							"key": "state",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получение всех категорий (3)",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/categories/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"categories",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получение всех категорий в определённом магазине (3)",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/categories/?shops=1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"categories",
+						""
+					],
+					"query": [
+						{
+							"key": "shops",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получение всех продуктов (4)",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/products/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"products",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получение всех продуктов определённой категории (4)",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/products/?category_id=224",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"products",
+						""
+					],
+					"query": [
+						{
+							"key": "category_id",
+							"value": "224"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Создание заказа в корзину",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    {\r\n        \"quantity\": 1,\r\n        \"product_info\": 2\r\n    },\r\n    {\r\n        \"product_info\": 3,\r\n        \"quantity\": 2\r\n    }\r\n]",
+					"options": {
+						"raw": {
+							"language": "javascript"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/new_order/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"new_order",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Заполнение контактов в корзине",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "contacts",
+							"value": "1",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/basket/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"basket",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "(не) Подтверждение заказа покупателем",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "action",
+							"value": "approve",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/order_confirmation/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"order_confirmation",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Просмотр всех заказов пользователя",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "action",
+							"value": "approve",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/orders/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"orders",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Просмотр информации о заказе",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "buyer123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "buyer_username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/orders/1/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"orders",
+						"1",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
