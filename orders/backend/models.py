@@ -87,7 +87,7 @@ class User(AbstractUser):
     type = models.CharField(verbose_name='Тип пользователя', choices=USER_TYPE_CHOICES, max_length=5, default='buyer')
 
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+        return f'{self.username}'
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -143,6 +143,7 @@ class ProductInfo(models.Model):
     quantity = models.PositiveIntegerField(verbose_name='Кол-во')
     price = models.PositiveIntegerField(verbose_name='Цена')
     price_rrc = models.PositiveIntegerField(verbose_name='Рекомендованная розничная цена')
+    model = models.CharField(max_length=40, blank=True, verbose_name='Модель')
 
     class Meta:
         verbose_name = 'Информация о продукте'
@@ -209,7 +210,7 @@ class Order(models.Model):
         ordering = ('-dt',)
 
     def __str__(self):
-        return f'Order:{self.id} of {self.user.username}'
+        return f'Order of {self.user}'
 
 
 class OrderItem(models.Model):
