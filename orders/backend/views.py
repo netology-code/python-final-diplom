@@ -1,3 +1,4 @@
+from django.contrib.auth.password_validation import validate_password
 from django.core.validators import URLValidator
 from django.http import JsonResponse
 from requests import get
@@ -6,13 +7,16 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 
 from backend.models import Category, Shop, ProductInfo, Product, Parameter, ProductParameter
+from backend.serializers import UserSerializer
+from backend.signals import new_user_registered
 
 
 class PartnerUpdate(APIView):
     """
     Класс для обновления прайса от поставщика
     """
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'Status': False, 'Error': 'Log in required'}, status=403)
 
@@ -55,3 +59,35 @@ class PartnerUpdate(APIView):
                 return JsonResponse({'Status': True})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class RegisterAccount(APIView):
+
+    def post(self, request, *args, **kwargs):
+
+        if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
+            try:
+                validate_password(request.data['password'])
+            except Exception as password_error:
+                errors = []
+                for item in [password_error]:
+                    errors.append(item)
+                return JsonResponse({'Status': False, 'Errors': {'password': errors}})
+            else:
+                user_serializer = UserSerializer(data=request.data)
+                if user_serializer.is_valid():
+                    user = user_serializer.save()
+                    user.set_password(request.data['password'])
+                    user.save()
+                    try:
+                        new_user_registered.send(sender=self.__class__, user_id=user.id)
+                    except Exception as err:
+                        return JsonResponse({'Status': False, 'Errors': err.__str__()})
+
+                    return JsonResponse({'Status': 'OK'})
+                else:
+                    return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
+
+        return JsonResponse({'Status': False, 'Errors': 'Need of fields not found'})
+
+
