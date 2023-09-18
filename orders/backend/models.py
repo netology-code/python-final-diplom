@@ -216,7 +216,7 @@ class Order(models.Model):
         ordering = ('-dt',)
 
     def __str__(self):
-        return f'Order of {self.user}'
+        return f'{self.dt}'
 
 
 class OrderItem(models.Model):
