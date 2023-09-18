@@ -152,6 +152,9 @@ class ProductInfo(models.Model):
             models.UniqueConstraint(fields=['product', 'shop'], name='unique_product_info'),
         ]
 
+    def __str__(self):
+        return f'{self.shop}: {self.product} - {self.model}'
+
 
 class Parameter(models.Model):
     name = models.CharField(max_length=60, verbose_name='Название')
