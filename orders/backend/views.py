@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from requests import get
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from yaml import load as load_yaml, Loader
 from rest_framework.exceptions import ValidationError
@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 from ujson import loads as load_json
 
 from backend.models import Category, Shop, ProductInfo, Product, Parameter, ProductParameter, ConfirmEmailToken, \
-    Contact, OrderItem, Order
+    Contact, OrderItem, Order, STATE_CHOICES
 from backend.permissions import IsShopUser
 from backend.serializers import UserSerializer, ContactSerializer, ShopSerializer, CategorySerializer, \
     ProductInfoSerializer, OrderSerializer, OrderItemSerializer
@@ -377,7 +377,6 @@ class PartnerState(APIView):
 
 
 class PartnerOrders(APIView):
-
     permission_classes = (IsAuthenticated, IsShopUser)
 
     def get(self, request, *args, **kwargs):
@@ -392,10 +391,21 @@ class PartnerOrders(APIView):
 
 
 class OrderView(APIView):
-
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
+        if type(request.data['id']) == int:
+            order = Order.objects.filter(
+                user_id=request.user.id).filter(id=request.data['id']).exclude(state='basket').prefetch_related(
+                'ordered_items__product_info__product__category',
+                'ordered_items__product_info__product_parameters__parameter').select_related('contact').annotate(
+                total_sum=Sum(F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
+            if not order:
+                return JsonResponse({'Error': f'Заказа {request.data["id"]} не существует'})
+
+            serializer = OrderSerializer(order, many=True)
+            return Response(serializer.data)
+
         order = Order.objects.filter(
             user_id=request.user.id).exclude(state='basket').prefetch_related(
             'ordered_items__product_info__product__category',
@@ -422,3 +432,28 @@ class OrderView(APIView):
                         return JsonResponse({'Status': True})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class AdminView(APIView):
+    permission_classes = (IsAdminUser,)
+
+    def put(self, request, *args, **kwargs):
+
+        if {'id', 'state'}.issubset(request.data):
+            dict_state = dict(STATE_CHOICES)
+            if request.data['state'] not in dict_state.keys():
+                return JsonResponse({'Error': 'Неверный статус'})
+            try:
+                Order.objects.filter(id=request.data['id']).update(state=request.data['state'])
+            except IntegrityError as error:
+                return JsonResponse({'Error': error})
+            order_info = Order.objects.get(id=request.data['id'])
+            new_order.send(
+                sender=__class__,
+                user_id=order_info.user_id,
+                order_id=order_info.id,
+                state=dict_state[request.data['state']]
+                           )
+            return JsonResponse({"Status": True})
+
+        return JsonResponse({'Error': 'Указанны не все поля'})

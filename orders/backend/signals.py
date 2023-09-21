@@ -7,8 +7,9 @@ from backend.models import ConfirmEmailToken, User
 
 new_user_registered = Signal('user_id')
 
-
 new_order = Signal('user_id')
+
+update_order = Signal('user_id')
 
 
 @receiver(reset_password_token_created)
@@ -58,11 +59,12 @@ def new_user_registered_signal(user_id, **kwargs):
     msg.send()
 
 
-@receiver(new_order)
+@receiver(update_order)
 def new_order_signal(user_id, **kwargs):
     """
     отправяем письмо при изменении статуса заказа
     """
+
     # send an e-mail to the user
     user = User.objects.get(id=user_id)
 
@@ -70,7 +72,25 @@ def new_order_signal(user_id, **kwargs):
         # title:
         f"Обновление статуса заказа",
         # message:
-        'Заказ сформирован',
+        f'Заказ сформирован',
+        # from:
+        settings.EMAIL_HOST_USER,
+        # to:
+        [user.email]
+    )
+    msg.send()
+
+
+@receiver(new_order)
+def update_order_signal(user_id, state, order_id, **kwargs):
+
+    user = User.objects.get(id=user_id)
+
+    msg = EmailMultiAlternatives(
+        # title:
+        f"Обновление статуса заказа {order_id}",
+        # message:
+        f'Новый статус заказа: \n{state}',
         # from:
         settings.EMAIL_HOST_USER,
         # to:
