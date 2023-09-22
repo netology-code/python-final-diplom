@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from rest_framework.permissions import IsAdminUser
 
 
 class IsShopUser(permissions.BasePermission):
@@ -6,3 +7,7 @@ class IsShopUser(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return request.user.type == 'shop'
+
+
+class CustomAdminUser(IsAdminUser):
+    message = "Only for admin"

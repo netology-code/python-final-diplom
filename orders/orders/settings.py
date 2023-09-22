@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_rest_passwordreset',
+    'django_celery_results',
 
     'backend',
 ]
@@ -158,3 +159,7 @@ REST_FRAMEWORK = {
     ),
 
 }
+
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'orders.settings')

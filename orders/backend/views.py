@@ -6,22 +6,21 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.validators import URLValidator
 from django.db.models import Q, Sum, F
 from django.http import JsonResponse
-from requests import get
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from yaml import load as load_yaml, Loader
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from ujson import loads as load_json
 
-from backend.models import Category, Shop, ProductInfo, Product, Parameter, ProductParameter, ConfirmEmailToken, \
-    Contact, OrderItem, Order, STATE_CHOICES
-from backend.permissions import IsShopUser
+from backend.models import Category, Shop, ProductInfo, ConfirmEmailToken, Contact, OrderItem, Order, STATE_CHOICES
+from backend.permissions import IsShopUser, CustomAdminUser
 from backend.serializers import UserSerializer, ContactSerializer, ShopSerializer, CategorySerializer, \
     ProductInfoSerializer, OrderSerializer, OrderItemSerializer
-from backend.signals import new_user_registered, new_order
+from backend.signals import new_user_registered, new_order, update_order
+
+from backend.tasks import do_import
 
 
 class RegisterAccount(APIView):
@@ -208,33 +207,8 @@ class PartnerUpdate(APIView):
             except ValidationError as e:
                 return JsonResponse({'Status': False, 'Error': str(e)})
             else:
-                stream = get(url).content
-
-                data = load_yaml(stream, Loader=Loader)
-
-                shop, _ = Shop.objects.get_or_create(name=data['shop'], user_id=request.user.id)
-                for category in data['categories']:
-                    category_object, _ = Category.objects.get_or_create(id=category['id'], name=category['name'])
-                    category_object.shops.add(shop.id)
-                    category_object.save()
-                ProductInfo.objects.filter(shop_id=shop.id).delete()
-                for item in data['goods']:
-                    product, _ = Product.objects.get_or_create(name=item['name'], category_id=item['category'])
-
-                    product_info = ProductInfo.objects.create(product_id=product.id,
-                                                              external_id=item['id'],
-                                                              model=item['model'],
-                                                              price=item['price'],
-                                                              price_rrc=item['price_rrc'],
-                                                              quantity=item['quantity'],
-                                                              shop_id=shop.id)
-                    for name, value in item['parameters'].items():
-                        parameter_object, _ = Parameter.objects.get_or_create(name=name)
-                        ProductParameter.objects.create(product_info_id=product_info.id,
-                                                        parameter_id=parameter_object.id,
-                                                        value=value)
-
-                return JsonResponse({'Status': True})
+                status = do_import(url=url, user_id=request.user.id)
+                return JsonResponse({'Status': status})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
@@ -390,6 +364,52 @@ class PartnerOrders(APIView):
         return Response(serializer.data)
 
 
+class PatherExport(APIView):
+    permission_classes = (IsAuthenticated, IsShopUser,)
+
+    def put(self, request, *args, **kwargs):
+        if {'id'}.issubset(request.data):
+            product = ProductInfo.objects.filter(shop__user_id=request.user.id, external_id=request.data['id']).first()
+            if product:
+                serializer = ProductInfoSerializer(product, data=request.data, partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    return JsonResponse({'Status': True})
+
+                return JsonResponse({**serializer.errors})
+
+            return JsonResponse({
+                'Status': False,
+                'Error': f'Продукта с id:{request.data["id"]} нету в вашем магазине'
+            })
+        return JsonResponse({
+            'Status': False,
+            'Error': 'Не указанный необходимые поля'
+        })
+
+    def delete(self, request, *args, **kwargs):
+
+        items_sting = request.data.get('items')
+
+        if items_sting:
+            items_list = items_sting.split(',')
+            query = Q()
+            objects_deleted = False
+            for product_item_id in items_list:
+                if product_item_id.isdigit():
+                    query = query | Q(shop__user_id=request.user.id, external_id=product_item_id)
+                    objects_deleted = True
+
+            if objects_deleted:
+                deleted_info = ProductInfo.objects.filter(query).delete()
+                deleted_count = deleted_info[1].get('backend.ProductInfo', 0)
+                return JsonResponse({
+                    'Status': True,
+                    'Удалено объектов': deleted_count
+                })
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
 class OrderView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -423,19 +443,21 @@ class OrderView(APIView):
                     is_updated = Order.objects.filter(
                         user_id=request.user.id, id=request.data['id']).update(
                         contact_id=request.data['contact'],
-                        state='new')
+                        state='new'
+                    )
                 except IntegrityError as error:
                     return JsonResponse({'Status': False, 'Errors': f'{error}'})
                 else:
                     if is_updated:
-                        new_order.send(sender=self.__class__, user_id=request.user.id)
+                        new_order.send(sender=self.__class__,
+                                       user_id=request.user.id)
                         return JsonResponse({'Status': True})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
 
 class AdminView(APIView):
-    permission_classes = (IsAdminUser,)
+    permission_classes = (CustomAdminUser,)
 
     def put(self, request, *args, **kwargs):
 
@@ -448,12 +470,12 @@ class AdminView(APIView):
             except IntegrityError as error:
                 return JsonResponse({'Error': error})
             order_info = Order.objects.get(id=request.data['id'])
-            new_order.send(
-                sender=__class__,
+            update_order.send(
+                sender=self.__class__,
                 user_id=order_info.user_id,
                 order_id=order_info.id,
                 state=dict_state[request.data['state']]
-                           )
+            )
             return JsonResponse({"Status": True})
 
         return JsonResponse({'Error': 'Указанны не все поля'})
