@@ -10,7 +10,6 @@ from backend.forms import ShopImportForm
 from backend.models import (Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem,
                             Contact, ConfirmEmailToken, User, ShopImport)
 from backend.tasks import do_import
-from backend.views import ProductListView
 
 
 @admin.register(User)

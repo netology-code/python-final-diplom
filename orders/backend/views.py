@@ -6,7 +6,6 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.validators import URLValidator
 from django.db.models import Q, Sum, F
 from django.http import JsonResponse
-from django.views import generic
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -15,8 +14,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from ujson import loads as load_json
 
-from backend.models import Category, Shop, ProductInfo, ConfirmEmailToken, Contact, OrderItem, Order, STATE_CHOICES, \
-    Product
+from backend.models import Category, Shop, ProductInfo, ConfirmEmailToken, Contact, OrderItem, Order, STATE_CHOICES
 from backend.permissions import IsShopUser, CustomAdminUser
 from backend.serializers import UserSerializer, ContactSerializer, ShopSerializer, CategorySerializer, \
     ProductInfoSerializer, OrderSerializer, OrderItemSerializer
@@ -191,6 +189,42 @@ class ContactView(APIView):
                         return JsonResponse({'Status': False, 'Errors': serializer.errors})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class PartnerState(APIView):
+    permission_classes = (IsAuthenticated, IsShopUser)
+
+    def get(self, request, *args, **kwargs):
+
+        shop = request.user.shop
+        serializer = ShopSerializer(shop)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+
+        state = request.data.get('state')
+        if state:
+            try:
+                Shop.objects.filter(user_id=request.user.id).update(state=strtobool(state))
+                return JsonResponse({'Status': True})
+            except ValueError as error:
+                return JsonResponse({'Status': False, 'Errors': str(error)})
+
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class PartnerOrders(APIView):
+    permission_classes = (IsAuthenticated, IsShopUser)
+
+    def get(self, request, *args, **kwargs):
+        order = Order.objects.filter(
+            ordered_items__product_info__shop__user_id=request.user.id).exclude(state='basket').prefetch_related(
+            'ordered_items__product_info__product__category',
+            'ordered_items__product_info__product_parameters__parameter').select_related('contact').annotate(
+            total_sum=Sum(F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
+
+        serializer = OrderSerializer(order, many=True)
+        return Response(serializer.data)
 
 
 class PartnerUpdate(APIView):
@@ -373,42 +407,6 @@ class BasketView(APIView):
 
                 return JsonResponse({'Status': True, 'Обновлено объектов': objects_updated})
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
-
-
-class PartnerState(APIView):
-    permission_classes = (IsAuthenticated, IsShopUser)
-
-    def get(self, request, *args, **kwargs):
-
-        shop = request.user.shop
-        serializer = ShopSerializer(shop)
-        return Response(serializer.data)
-
-    def post(self, request, *args, **kwargs):
-
-        state = request.data.get('state')
-        if state:
-            try:
-                Shop.objects.filter(user_id=request.user.id).update(state=strtobool(state))
-                return JsonResponse({'Status': True})
-            except ValueError as error:
-                return JsonResponse({'Status': False, 'Errors': str(error)})
-
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
-
-
-class PartnerOrders(APIView):
-    permission_classes = (IsAuthenticated, IsShopUser)
-
-    def get(self, request, *args, **kwargs):
-        order = Order.objects.filter(
-            ordered_items__product_info__shop__user_id=request.user.id).exclude(state='basket').prefetch_related(
-            'ordered_items__product_info__product__category',
-            'ordered_items__product_info__product_parameters__parameter').select_related('contact').annotate(
-            total_sum=Sum(F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
-
-        serializer = OrderSerializer(order, many=True)
-        return Response(serializer.data)
 
 
 class OrderView(APIView):
