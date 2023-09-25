@@ -87,7 +87,7 @@ class User(AbstractUser):
     type = models.CharField(verbose_name='Тип пользователя', choices=USER_TYPE_CHOICES, max_length=5, default='buyer')
 
     def __str__(self):
-        return f'{self.email}'
+        return self.email
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -102,12 +102,27 @@ class Shop(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Пользователь', blank=True, null=True)
 
     class Meta:
-        verbose_name = 'Shop'
-        verbose_name_plural = 'List of shops'
+        verbose_name = 'Магазин'
+        verbose_name_plural = 'Список магазинов'
         ordering = ('-name',)
 
     def __str__(self):
         return self.name
+
+
+class ShopImport(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name='imports',
+                             verbose_name='Пользователь')
+    yml_url = models.URLField()
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Импорт товаров'
+        verbose_name_plural = 'Импорты товаров'
+        ordering = ('-date_added',)
+
+    def __str__(self):
+        return self.date_added.strftime("%m/%d/%Y %I:%M:%S %p")
 
 
 class Category(models.Model):
@@ -155,7 +170,7 @@ class ProductInfo(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.shop}: {self.product} - {self.model}'
+        return self.product.__str__()
 
 
 class Parameter(models.Model):
@@ -183,6 +198,9 @@ class ProductParameter(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['product_info', 'parameter'], name='unique_product_parameter')
         ]
+
+    def __str__(self):
+        return f'Параметры: {self.product_info}'
 
 
 class Contact(models.Model):
@@ -216,7 +234,7 @@ class Order(models.Model):
         ordering = ('-dt',)
 
     def __str__(self):
-        return f'{self.dt}'
+        return self.dt.strftime("%m/%d/%Y %I:%M:%S %p")
 
 
 class OrderItem(models.Model):
@@ -232,6 +250,9 @@ class OrderItem(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['order_id', 'product_info'], name='unique_order_item')
         ]
+
+    def __str__(self):
+        return f'Заказ №{self.id}'
 
 
 class ConfirmEmailToken(models.Model):

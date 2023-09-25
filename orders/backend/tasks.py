@@ -20,7 +20,6 @@ def send_email(title, message, email, *args, **kwargs):
     msg.send()
 
 
-
 @app.task()
 def do_import(url, user_id, *args, **kwargs):
     stream = get(url).content
@@ -30,8 +29,8 @@ def do_import(url, user_id, *args, **kwargs):
         categories = data['categories']
         goods = data['goods']
 
-    except Exception as error:
-        return error
+    except Exception as err:
+        return False
     shop, _ = Shop.objects.get_or_create(name=shop, user_id=user_id)
     for category in categories:
         category_object, _ = Category.objects.get_or_create(id=category['id'], name=category['name'])

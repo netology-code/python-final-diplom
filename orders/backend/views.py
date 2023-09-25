@@ -6,6 +6,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.validators import URLValidator
 from django.db.models import Q, Sum, F
 from django.http import JsonResponse
+from django.views import generic
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -14,7 +15,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from ujson import loads as load_json
 
-from backend.models import Category, Shop, ProductInfo, ConfirmEmailToken, Contact, OrderItem, Order, STATE_CHOICES
+from backend.models import Category, Shop, ProductInfo, ConfirmEmailToken, Contact, OrderItem, Order, STATE_CHOICES, \
+    Product
 from backend.permissions import IsShopUser, CustomAdminUser
 from backend.serializers import UserSerializer, ContactSerializer, ShopSerializer, CategorySerializer, \
     ProductInfoSerializer, OrderSerializer, OrderItemSerializer
@@ -212,6 +214,51 @@ class PartnerUpdate(APIView):
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
+    def put(self, request, *args, **kwargs):
+        if {'id'}.issubset(request.data):
+            product = ProductInfo.objects.filter(
+                shop__user_id=request.user.id,
+                external_id=request.data['id']
+            ).first()
+            if product:
+                serializer = ProductInfoSerializer(product, data=request.data, partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    return JsonResponse({'Status': True})
+
+                return JsonResponse({**serializer.errors})
+
+            return JsonResponse({
+                'Status': False,
+                'Error': f'Продукта с id:{request.data["id"]} нету в вашем магазине'
+            })
+        return JsonResponse({
+            'Status': False,
+            'Error': 'Не указанный необходимые поля'
+        })
+
+    def delete(self, request, *args, **kwargs):
+
+        items_sting = request.data.get('items')
+
+        if items_sting:
+            items_list = items_sting.split(',')
+            query = Q()
+            objects_deleted = False
+            for product_item_id in items_list:
+                if product_item_id.isdigit():
+                    query = query | Q(shop__user_id=request.user.id, external_id=product_item_id)
+                    objects_deleted = True
+
+            if objects_deleted:
+                deleted_info = ProductInfo.objects.filter(query).delete()
+                deleted_count = deleted_info[1].get('backend.ProductInfo', 0)
+                return JsonResponse({
+                    'Status': True,
+                    'Удалено объектов': deleted_count
+                })
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
 
 class ShopsView(ListAPIView):
     queryset = Shop.objects.filter(state=True)
@@ -362,52 +409,6 @@ class PartnerOrders(APIView):
 
         serializer = OrderSerializer(order, many=True)
         return Response(serializer.data)
-
-
-class PatherExport(APIView):
-    permission_classes = (IsAuthenticated, IsShopUser,)
-
-    def put(self, request, *args, **kwargs):
-        if {'id'}.issubset(request.data):
-            product = ProductInfo.objects.filter(shop__user_id=request.user.id, external_id=request.data['id']).first()
-            if product:
-                serializer = ProductInfoSerializer(product, data=request.data, partial=True)
-                if serializer.is_valid():
-                    serializer.save()
-                    return JsonResponse({'Status': True})
-
-                return JsonResponse({**serializer.errors})
-
-            return JsonResponse({
-                'Status': False,
-                'Error': f'Продукта с id:{request.data["id"]} нету в вашем магазине'
-            })
-        return JsonResponse({
-            'Status': False,
-            'Error': 'Не указанный необходимые поля'
-        })
-
-    def delete(self, request, *args, **kwargs):
-
-        items_sting = request.data.get('items')
-
-        if items_sting:
-            items_list = items_sting.split(',')
-            query = Q()
-            objects_deleted = False
-            for product_item_id in items_list:
-                if product_item_id.isdigit():
-                    query = query | Q(shop__user_id=request.user.id, external_id=product_item_id)
-                    objects_deleted = True
-
-            if objects_deleted:
-                deleted_info = ProductInfo.objects.filter(query).delete()
-                deleted_count = deleted_info[1].get('backend.ProductInfo', 0)
-                return JsonResponse({
-                    'Status': True,
-                    'Удалено объектов': deleted_count
-                })
-        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
 
 class OrderView(APIView):
