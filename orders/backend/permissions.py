@@ -9,5 +9,5 @@ class IsShopUser(permissions.BasePermission):
         return request.user.type == 'shop'
 
 
-class CustomAdminUser(IsAdminUser):
+class IsCustomAdminUser(IsAdminUser):
     message = "Only for admin"

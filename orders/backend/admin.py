@@ -18,6 +18,7 @@ class CustomUserAdmin(UserAdmin):
         (None, {'fields': ('email', 'password',)}),
         ('Personal info', {'fields': ('first_name', 'last_name',)}),
         ('Permissions', {'fields': (
+            'type',
             'is_active',
             'is_staff',
             'is_superuser',
@@ -39,7 +40,8 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
 
-    list_display = ('id', 'email', 'first_name', 'last_name', 'company', 'type',)
+    list_display = ('id', 'email', 'first_name', 'last_name', 'company', 'type',
+                    'is_staff', 'is_active', 'is_superuser')
     list_filter = ('is_staff', 'is_active', 'is_superuser', 'groups',)
     search_fields = ("email", 'last_name',)
     ordering = ('email',)
@@ -54,10 +56,10 @@ class ShopAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         urls = super().get_urls()
-        urls.insert(-1, path('yml-upload/', self.upload_yml, name='yml-upload'))
+        urls.insert(-1, path('yml-upload/', self.yml_upload, name='yml-upload'))
         return urls
 
-    def upload_yml(self, request):
+    def yml_upload(self, request):
         if request.method == 'POST':
             type_user = User.objects.get(id=request.POST['user']).type
             if type_user != 'shop':

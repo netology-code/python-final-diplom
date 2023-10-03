@@ -14,6 +14,7 @@ import os
 
 from dotenv import load_dotenv
 
+
 load_dotenv()
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 0)
+DEBUG = int(os.environ.get('DEBUG', default=0))
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
 
@@ -85,7 +86,7 @@ DATABASES = {
         'ENGINE': os.environ.get('ENGINE', 'django.db.backends.postgresql'),
         'NAME': os.environ.get('NAME', 'my_diplom'),
         'PORT': os.environ.get('PORT', '5432'),
-        'HOST': os.environ.get('HOST', 'db'),
+        'HOST': os.environ.get('HOST', '127.0.0.1'),
         'USER': os.environ.get('USER', 'postgres'),
         'PASSWORD': os.environ.get('PASSWORD', '1234')
     }
@@ -157,9 +158,19 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+
+    'DEFAULT_THROTTLE_RATES': {
+            'anon': '100/day',
+            'user': '10000/day'
+        }
 
 }
 
+APPEND_SLASH = False
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_BROKER_TRANSPORT = 'redis'
 CELERY_RESULT_BACKEND = 'django-db'
-CELERY_CACHE_BACKEND = 'django-cache'
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'orders.settings')

@@ -1,15 +1,14 @@
+from celery import shared_task
 from yaml import load as load_yaml, Loader
 
 from django.conf.global_settings import EMAIL_HOST_USER
 from django.core.mail.message import EmailMultiAlternatives
 from requests import get
 
-from orders.celery import app
-
 from .models import Category, Parameter, ProductParameter, Product, Shop, ProductInfo
 
 
-@app.task()
+@shared_task()
 def send_email(title, message, email, *args, **kwargs):
     msg = EmailMultiAlternatives(
         subject=title,
@@ -20,7 +19,7 @@ def send_email(title, message, email, *args, **kwargs):
     msg.send()
 
 
-@app.task()
+@shared_task()
 def do_import(url, user_id, *args, **kwargs):
     stream = get(url).content
     try:

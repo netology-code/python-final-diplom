@@ -22,6 +22,7 @@ urlpatterns = [
     path('partner/state/', PartnerState.as_view(), name='partner-state'),
     path('partner/orders/', PartnerOrders.as_view(), name='partner-orders'),
     path('order/', OrderView.as_view(), name='order'),
+    path('order/<int:pk>/', OrderView.as_view(), name='order_pk'),
     path('user/password_reset/', reset_password_request_token, name='password-reset'),
     path('user/password_reset/confirm', reset_password_confirm, name='password-reset-confirm'),
     path('admin/', AdminView.as_view(), name='admin'),
