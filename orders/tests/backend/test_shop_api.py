@@ -1,9 +1,10 @@
 import pytest
-
 from django.urls import reverse
-from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_400_BAD_REQUEST
-from backend.models import Contact, Shop, Category, ProductInfo, Product, Order, OrderItem, Parameter, ProductParameter
-from tests.conftest import get_token, model_factory, get_shop_token, get_admin_token, headers_token, URL_SHOP
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+
+from backend.models import (Category, Contact, Order, OrderItem, Parameter, Product, ProductInfo, ProductParameter,
+                            Shop)
+from tests.conftest import URL_SHOP, headers_token
 
 
 @pytest.mark.parametrize(

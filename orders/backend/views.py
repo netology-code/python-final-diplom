@@ -1,26 +1,25 @@
 from distutils.util import strtobool
 
-from django.db import IntegrityError
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
-from django.db.models import Q, Sum, F
+from django.db import IntegrityError
+from django.db.models import F, Q, Sum
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.core.exceptions import ValidationError
 from rest_framework.views import APIView
 from ujson import loads as load_json
 
-from backend.models import Category, Shop, ProductInfo, ConfirmEmailToken, Contact, OrderItem, Order, STATE_CHOICES
-from backend.permissions import IsShopUser, IsCustomAdminUser
-from backend.serializers import UserSerializer, ContactSerializer, ShopSerializer, CategorySerializer, \
-    ProductInfoSerializer, OrderSerializer, OrderItemSerializer
-from backend.signals import new_user_registered, new_order, update_order
-
+from backend.models import STATE_CHOICES, Category, ConfirmEmailToken, Contact, Order, OrderItem, ProductInfo, Shop
+from backend.permissions import IsCustomAdminUser, IsShopUser
+from backend.serializers import (CategorySerializer, ContactSerializer, OrderItemSerializer, OrderSerializer,
+                                 ProductInfoSerializer, ShopSerializer, UserSerializer)
+from backend.signals import new_order, new_user_registered, update_order
 from backend.tasks import do_import
 
 
@@ -170,9 +169,7 @@ class Logout(APIView):
 
 
 class ContactView(APIView):
-    """
-    Класс для работы с контактами покупателей
-    """
+
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
@@ -226,7 +223,7 @@ class ContactView(APIView):
 
     def put(self, request, *args, **kwargs):
         if 'id' in request.data:
-            if type(request.data['id']) == str and request.data['id'].isdigit():
+            if type(request.data['id']) is str and request.data['id'].isdigit():
                 contact = Contact.objects.filter(id=request.data['id'], user_id=request.user.id).first()
                 if contact:
                     serializer = ContactSerializer(contact, data=request.data, partial=True)
@@ -320,7 +317,7 @@ class PartnerUpdate(APIView):
         )
 
     def put(self, request, *args, **kwargs):
-        if {'id'}.issubset(request.data) and type(request.data['id']) == int:
+        if {'id'}.issubset(request.data) and type(request.data['id']) is int:
             product = ProductInfo.objects.filter(
                 shop__user_id=request.user.id,
                 external_id=request.data['id']
@@ -499,7 +496,7 @@ class BasketView(APIView):
                 basket, _ = Order.objects.get_or_create(user_id=request.user.id, state='basket')
                 objects_updated = 0
                 for order_item in items_dict:
-                    if type(order_item['id']) == int and type(order_item['quantity']) == int:
+                    if type(order_item['id']) is int and type(order_item['quantity']) is int:
                         objects_updated += OrderItem.objects.filter(order_id=basket.id, id=order_item['id']).update(
                             quantity=order_item['quantity'])
 

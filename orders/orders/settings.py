@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'debug_toolbar',
     'rest_framework',
     'rest_framework.authtoken',
     'django_rest_passwordreset',
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -59,6 +61,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'orders.urls'
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
 
 TEMPLATES = [
     {
@@ -158,13 +164,13 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
-    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 
     'DEFAULT_THROTTLE_RATES': {
             'anon': '100/day',
             'user': '10000/day'
-        }
+        },
 
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
 APPEND_SLASH = False

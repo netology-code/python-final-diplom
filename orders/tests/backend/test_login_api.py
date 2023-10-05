@@ -3,9 +3,9 @@ from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
 
-from backend.models import User, ConfirmEmailToken
+from backend.models import ConfirmEmailToken, User
 from backend.serializers import UserSerializer
-from tests.conftest import create_bayer_user, create_user_is_active, get_token, headers_token
+from tests.conftest import headers_token
 
 
 @pytest.mark.parametrize(

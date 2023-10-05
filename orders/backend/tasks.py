@@ -1,11 +1,11 @@
 from celery import shared_task
-from yaml import load as load_yaml, Loader
-
 from django.conf.global_settings import EMAIL_HOST_USER
 from django.core.mail.message import EmailMultiAlternatives
 from requests import get
+from yaml import Loader
+from yaml import load as load_yaml
 
-from .models import Category, Parameter, ProductParameter, Product, Shop, ProductInfo
+from .models import Category, Parameter, Product, ProductInfo, ProductParameter, Shop
 
 
 @shared_task()
@@ -28,7 +28,7 @@ def do_import(url, user_id, *args, **kwargs):
         categories = data['categories']
         goods = data['goods']
 
-    except Exception as err:
+    except Exception:
         return False
     shop, _ = Shop.objects.get_or_create(name=shop, user_id=user_id)
     for category in categories:

@@ -1,14 +1,12 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import path
-from django.urls import reverse
-from django.contrib import messages
+from django.urls import path, reverse
 
 from backend.forms import ShopImportForm
-from backend.models import (Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem,
-                            Contact, ConfirmEmailToken, User, ShopImport)
+from backend.models import (Category, ConfirmEmailToken, Contact, Order, OrderItem, Parameter, Product, ProductInfo,
+                            ProductParameter, Shop, ShopImport, User)
 from backend.tasks import do_import
 
 
@@ -35,7 +33,7 @@ class CustomUserAdmin(UserAdmin):
          ),
         (
             'Person Info', {'fields': (
-                'first_name', 'first_name', 'company', 'position', 'type',
+                'first_name', 'last_name', 'company', 'position', 'type',
             )}
         ),
     )
