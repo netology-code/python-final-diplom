@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  web:
+    build: ./orders
+    entrypoint: /usr/src/orders/entrypoint.sh
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./orders/:/usr/src/orders/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./orders/.env.dev
+    depends_on:
+      - db
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=${USER}
+      - POSTGRES_PASSWORD=${PASSWORD}
+      - POSTGRES_DB=${NAME}
+      - PGDATA=${PGDATA}
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+  celery:
+    build: ./orders
+    command: celery -A orders worker -l info
+    volumes:
+      - .:/orders
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:
