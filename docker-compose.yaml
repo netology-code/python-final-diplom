@@ -17,11 +17,8 @@ services:
     image: postgres:13.0-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=${USER}
-      - POSTGRES_PASSWORD=${PASSWORD}
-      - POSTGRES_DB=${NAME}
-      - PGDATA=${PGDATA}
+    env_file:
+      - ./orders/.env.dev
   redis:
     image: redis
     ports:
