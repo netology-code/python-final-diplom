@@ -46,6 +46,10 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'django_celery_results',
 
+    'drf_social_oauth2',
+    'oauth2_provider',
+    'social_django',
+
     'backend.apps.BackendConfig',
 ]
 
@@ -77,6 +81,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -163,6 +169,8 @@ REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'drf_social_oauth2.authentication.SocialAuthentication',
     ),
 
     'DEFAULT_THROTTLE_RATES': {
@@ -180,3 +188,15 @@ CELERY_BROKER_TRANSPORT = 'redis'
 CELERY_RESULT_BACKEND = 'django-db'
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'orders.settings')
+
+
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
+
+AUTHENTICATION_BACKENDS = [
+    'social_core.backends.github.GithubOAuth2',
+    'drf_social_oauth2.backends.DjangoOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+SOCIAL_AUTH_GITHUB_KEY = os.environ.get('SOCIAL_AUTH_GITHUB_KEY')
+SOCIAL_AUTH_GITHUB_SECRET = os.environ.get('SOCIAL_AUTH_GITHUB_SECRET')

@@ -22,5 +22,6 @@ from django.urls import include, path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('backend.urls', namespace='backend')),
+    path('auth/', include('drf_social_oauth2.urls', namespace='drf')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]
