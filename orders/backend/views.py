@@ -7,6 +7,9 @@ from django.core.validators import URLValidator
 from django.db import IntegrityError
 from django.db.models import F, Q, Sum
 from django.http import JsonResponse
+from drf_yasg import openapi
+from drf_yasg.openapi import Parameter as yasg_param, IN_PATH
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import ListAPIView
@@ -15,7 +18,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from ujson import loads as load_json
 
-from backend.models import STATE_CHOICES, Category, ConfirmEmailToken, Contact, Order, OrderItem, ProductInfo, Shop
+from backend.models import STATE_CHOICES, Category, ConfirmEmailToken, Contact, Order, OrderItem, ProductInfo, Shop, \
+    USER_TYPE_CHOICES
 from backend.permissions import IsCustomAdminUser, IsShopUser
 from backend.serializers import (CategorySerializer, ContactSerializer, OrderItemSerializer, OrderSerializer,
                                  ProductInfoSerializer, ShopSerializer, UserSerializer)
@@ -24,7 +28,30 @@ from backend.tasks import do_import
 
 
 class RegisterAccount(APIView):
+    """
+    Класс для регистрации новых пользователей
+    """
 
+    @swagger_auto_schema(
+        operation_summary='Register users',
+        operation_description='Register a new user account',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "email": openapi.Schema(type=openapi.FORMAT_EMAIL, description='user email'),
+                "password": openapi.Schema(type=openapi.FORMAT_PASSWORD, description="password"),
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING, description='str first name'),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING, description='str last name'),
+                'company': openapi.Schema(type=openapi.TYPE_STRING, description='str company'),
+                'position': openapi.Schema(type=openapi.TYPE_STRING, description='str position in the company'),
+                "type": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    enum=[type[0] for type in USER_TYPE_CHOICES],
+                )
+            },
+            required=['email', 'password', 'first_name', 'last_name', 'company', 'position']),
+        responses={201: "OK", 400: False}
+    )
     def post(self, request, *args, **kwargs):
 
         if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
@@ -66,7 +93,23 @@ class RegisterAccount(APIView):
 
 
 class ConfirmAccount(APIView):
+    """
+    Класс для подтверждения почты пользователя
+    и выдача ему статуса is_active
+    """
 
+    @swagger_auto_schema(
+        operation_summary='Confirm email',
+        operation_description='Confirm registered email of user',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "email": openapi.Schema(type=openapi.FORMAT_EMAIL, description='user email'),
+                'token': openapi.Schema(type=openapi.TYPE_STRING, description='token from email'),
+
+            },
+            required=['email', 'token'])
+    )
     def post(self, request, *args, **kwargs):
 
         if {'token', 'email'}.issubset(request.data):
@@ -92,7 +135,24 @@ class ConfirmAccount(APIView):
 
 
 class LoginAccount(APIView):
+    """
+    Класс для авторизации пользователя
+    и выдачи ему токена
+    """
 
+    @swagger_auto_schema(
+        operation_summary='Login account',
+        operation_description='Login in the app',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "email": openapi.Schema(type=openapi.FORMAT_EMAIL, description='confirm email'),
+                'password': openapi.Schema(type=openapi.FORMAT_PASSWORD, description='users password'),
+            },
+            required=['email', 'password']
+        ), responses={200: "OK",
+                      400: False}
+    )
     def post(self, request, *args, **kwargs):
 
         if {'email', 'password'}.issubset(request.data):
@@ -125,12 +185,37 @@ class LoginAccount(APIView):
 
 
 class AccountDetails(APIView):
+    """
+    Класс для просмотра и редактирования информации
+    в аккаунте пользователя
+    """
+
     permission_classes = (IsAuthenticated,)
 
+    @swagger_auto_schema(
+        operation_summary='Account info',
+        operation_description='Viewing the user profile',
+        responses={200: openapi.Response(description='Профиль пользователя',
+                                         schema=UserSerializer(read_only=True))})
     def get(self, request, *args, **kwargs):
         user_serializer = UserSerializer(request.user)
         return JsonResponse(user_serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_summary='Update account info',
+        operation_description='Changing account info',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'password': openapi.Schema(type=openapi.FORMAT_PASSWORD, description='users password'),
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING, description='str first name'),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING, description='str last name'),
+                'company': openapi.Schema(type=openapi.TYPE_STRING, description='str company'),
+                'position': openapi.Schema(type=openapi.TYPE_STRING, description='str position in the company'),
+            },
+        ), responses={200: "OK",
+                      400: False}
+    )
     def post(self, request, *args, **kwargs):
 
         if 'password' in request.data:
@@ -161,23 +246,50 @@ class AccountDetails(APIView):
 
 
 class Logout(APIView):
+    """
+    Класс для выхода из приложения
+    и удаление токена доступа пользователя
+    """
     permission_classes = (IsAuthenticated,)
 
+    @swagger_auto_schema(
+        operation_summary='Logout the app',
+        operation_description='Logout user from the app',
+        responses={200: "OK"},
+    )
     def get(self, request):
         request.user.auth_token.delete()
         return JsonResponse({'LogoutStatus': 'OK'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class ContactView(APIView):
-
+    """
+    Класс для работы с контактами пользователя
+    их просмотр, создание, изменение и удаление
+    """
     permission_classes = (IsAuthenticated,)
 
+    @swagger_auto_schema(
+        operation_summary='Contact info',
+        operation_description='Viewing the user contact',
+        responses={200: openapi.Response(description='User contact',
+                                         schema=ContactSerializer(read_only=True))}
+    )
     def get(self, request, *args, **kwargs):
+
         contact = Contact.objects.filter(
-            user_id=request.user.id)
+            user_id=request.user.id
+        )
         serializer = ContactSerializer(contact, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_summary='Create contact',
+        operation_description='Creating a contact of user',
+        request_body=ContactSerializer,
+        responses={201: 'True',
+                   400: False}
+    )
     def post(self, request, *args, **kwargs):
 
         if {'city', 'street', 'phone'}.issubset(request.data):
@@ -198,6 +310,22 @@ class ContactView(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    @swagger_auto_schema(
+        operation_summary='Delete contact',
+        operation_description='Deleting the contact or multiple contacts',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'items': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='A comma-separated ids list of the user contacts'
+                )
+            },
+            required=['items'],
+        ),
+        responses={200: 'True',
+                   400: False}
+    )
     def delete(self, request, *args, **kwargs):
 
         items_sting = request.data.get('items')
@@ -221,6 +349,22 @@ class ContactView(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    @swagger_auto_schema(
+        operation_summary='Change contact',
+        operation_description='Changing the user contact by several fields',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='User contact id'
+                )
+            },
+            required=['id'],
+        ),
+        responses={200: 'True',
+                   400: False}
+    )
     def put(self, request, *args, **kwargs):
         if 'id' in request.data:
             if type(request.data['id']) is str and request.data['id'].isdigit():
@@ -248,14 +392,41 @@ class ContactView(APIView):
 
 
 class PartnerState(APIView):
+    """
+    Класс для просмотра и изменение
+    статуса магазина
+    """
+
     permission_classes = (IsAuthenticated, IsShopUser)
 
+    @swagger_auto_schema(
+        operation_summary='Shop status info',
+        operation_description='Viewing the shop status',
+        responses={200: openapi.Response(description='Status',
+                                         schema=ShopSerializer(read_only=True))}
+    )
     def get(self, request, *args, **kwargs):
 
         shop = request.user.shop
         serializer = ShopSerializer(shop)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_summary='Change status',
+        operation_description='Changing the shop status',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'state': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    enum=[True, False],
+                )
+            },
+            required=['state']
+        ),
+        responses={200: openapi.Response(description='Status',
+                                         schema=ShopSerializer(read_only=True))}
+    )
     def post(self, request, *args, **kwargs):
 
         state = request.data.get('state')
@@ -276,8 +447,21 @@ class PartnerState(APIView):
 
 
 class PartnerOrders(APIView):
+    """
+    Класс для получения заказов магазина
+    """
     permission_classes = (IsAuthenticated, IsShopUser)
 
+    @swagger_auto_schema(
+        operation_summary='Shop orders',
+        operation_description='Viewing the shop orders',
+        responses={200: openapi.Response(description='Orders',
+                                         schema=OrderSerializer(many=True),
+                                         total_sum=openapi.Schema(type=openapi.TYPE_INTEGER,
+                                                                  description='Total order price')
+                                         )
+                   }
+    )
     def get(self, request, *args, **kwargs):
         order = Order.objects.filter(
             ordered_items__product_info__shop__user_id=request.user.id).exclude(state='basket').prefetch_related(
@@ -291,10 +475,27 @@ class PartnerOrders(APIView):
 
 class PartnerUpdate(APIView):
     """
-    Класс для обновления прайса от поставщика
+    Класс для добавления, изменения и удаления
+    прайса от поставщика
     """
     permission_classes = (IsAuthenticated, IsShopUser)
 
+    @swagger_auto_schema(
+        operation_summary='Update price',
+        operation_description='Updating te shop price',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'url': openapi.Schema(
+                    type=openapi.FORMAT_URI,
+                    description='The url must have data about the stores price list in yml format'
+                )
+            },
+            required=['url']
+        ),
+        responses={201: 'True',
+                   400: False}
+    )
     def post(self, request, *args, **kwargs):
 
         url = request.data.get('url')
@@ -316,6 +517,38 @@ class PartnerUpdate(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    @swagger_auto_schema(
+        operation_summary='Change shop product',
+        operation_description='Changing product info according to the specified parameters',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description='The external id of the product info that need to be changed'
+                ),
+                'quantity': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description='Positive number'
+                ),
+                'price': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description='Positive number'
+                ),
+                'price_rcc': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description='Positive number'
+                ),
+                'model': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='Model name'
+                )
+            },
+            required=['id']
+        ),
+        responses={200: 'True',
+                   400: False}
+    )
     def put(self, request, *args, **kwargs):
         if {'id'}.issubset(request.data) and type(request.data['id']) is int:
             product = ProductInfo.objects.filter(
@@ -339,6 +572,22 @@ class PartnerUpdate(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    @swagger_auto_schema(
+        operation_summary='Delete product of shop',
+        operation_description='Removing the product from the store price list',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'items': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='A comma-separated list of the external id of product info'
+                )
+            },
+            required=['items']
+        ),
+        responses={200: 'True',
+                   400: False}
+    )
     def delete(self, request, *args, **kwargs):
 
         items_sting = request.data.get('items')
@@ -366,17 +615,38 @@ class PartnerUpdate(APIView):
 
 
 class ShopsView(ListAPIView):
+    """
+    Класс для предоставления списка магазинов
+    с активным статусом получения заказов
+    """
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
 
 
 class CategoryView(ListAPIView):
+    """
+    Класс для предоставления
+    списка категорий
+    """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class ProductInfoView(APIView):
 
+    @swagger_auto_schema(
+        operation_summary='Products search',
+        operation_description='Searching and receiving a list of products '
+                              'according to the specified parameters.',
+        manual_parameters=[
+            yasg_param('shop_id', IN_PATH, type='int'),
+            yasg_param('category_id', IN_PATH, type='int'),
+        ],
+        responses={200: openapi.Response(description='Orders',
+                                         schema=ProductInfoSerializer(many=True)
+                                         )
+                   },
+    )
     def get(self, request, *args, **kwargs):
 
         query = Q(shop__state=True)
@@ -400,8 +670,25 @@ class ProductInfoView(APIView):
 
 
 class BasketView(APIView):
+    """
+    Класс для работы с корзиной пользователя:
+    :get: Получение списка товаров в корзине,
+    :post: Добавление товара в корзину,
+    :put: Изменение параметров товаров в корзине,
+    :delete: Удаление товаров из корзины
+    """
     permission_classes = (IsAuthenticated,)
 
+    @swagger_auto_schema(
+        operation_summary='List of products in Basket',
+        operation_description='Receiving info about the user products in a basket.',
+        responses={200: openapi.Response(description='Orders',
+                                         schema=OrderSerializer(many=True),
+                                         total_sum=openapi.Schema(type=openapi.TYPE_INTEGER,
+                                                                  description='Total order price')
+                                         )
+                   }
+    )
     def get(self, request, *args, **kwargs):
 
         basket = Order.objects.filter(
@@ -413,6 +700,23 @@ class BasketView(APIView):
         serializer = OrderSerializer(basket, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_summary='Adding products in Basket',
+        operation_description='Adding products into the user basket',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'items': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    default='[{"product_info": ... , "quantity": ...}, ...]',
+                    description='List from id of product info and quantity in dict format'
+                )
+            },
+            required=['items']
+        ),
+        responses={201: 'True',
+                   400: False}
+    )
     def post(self, request, *args, **kwargs):
 
         items_sting = request.data.get('items')
@@ -457,6 +761,23 @@ class BasketView(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    @swagger_auto_schema(
+        operation_summary='Delete products in Basket',
+        operation_description='Removing a product from a user basket',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'items': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    default='"items": "id", ...',
+                    description='A comma-separated list of the id product info'
+                )
+            },
+            required=['items']
+        ),
+        responses={200: 'True',
+                   400: False}
+    )
     def delete(self, request, *args, **kwargs):
 
         items_sting = request.data.get('items')
@@ -481,6 +802,23 @@ class BasketView(APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    @swagger_auto_schema(
+        operation_summary='Change products in Basket',
+        operation_description='Changing products in user basket',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'items': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    default='[{"id": int, "quantity": int}, ]',
+                    description='List from id of product info and quantity'
+                )
+            },
+            required=['items']
+        ),
+        responses={200: 'True',
+                   400: False}
+    )
     def put(self, request, *args, **kwargs):
 
         items_sting = request.data.get('items')
@@ -511,8 +849,22 @@ class BasketView(APIView):
 
 
 class OrderView(APIView):
+    """
+    Класс для подтверждения заказов пользователя
+    и получения подтвержденных заказов
+    """
     permission_classes = (IsAuthenticated,)
 
+    @swagger_auto_schema(
+        operation_summary='Orders list',
+        operation_description='Receiving the user order list',
+        responses={200: openapi.Response(description='Orders',
+                                         schema=OrderSerializer(many=True),
+                                         total_sum=openapi.Schema(type=openapi.TYPE_INTEGER,
+                                                                  description='Total order price')
+                                         )
+                   }
+    )
     def get(self, request, pk=None, *args, **kwargs):
         if pk is not None:
             order = Order.objects.filter(
@@ -538,6 +890,26 @@ class OrderView(APIView):
         serializer = OrderSerializer(order, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_summary='Accept orders',
+        operation_description='Order confirmation and assignment of the "new" status',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='user order id'
+                ),
+                'contact': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='id of the created users contact'
+                )
+            },
+            required=['id', 'contact']
+        ),
+        responses={201: 'True',
+                   400: False}
+    )
     def post(self, request, *args, **kwargs):
 
         if {'id', 'contact'}.issubset(request.data):
@@ -569,8 +941,32 @@ class OrderView(APIView):
 
 
 class AdminView(APIView):
+    """
+    Класс для изменения статуса заказов пользователей
+    с помощью администратора
+    """
     permission_classes = (IsCustomAdminUser,)
 
+    @swagger_auto_schema(
+        operation_summary='Change state of order',
+        operation_description='Changing the status of a specific user order',
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description='order id'
+                ),
+                'state': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    enum=[state[0] for state in STATE_CHOICES]
+                )
+            },
+            required=['id', 'state']
+        ),
+        responses={200: 'True',
+                   400: 'Указанны не все поля'}
+    )
     def put(self, request, *args, **kwargs):
 
         if {'id', 'state'}.issubset(request.data):
