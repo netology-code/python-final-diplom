@@ -95,6 +95,9 @@ def delete_image(image: VersatileImageField, *args, **kwargs):
 
 @shared_task()
 def create_product_image(image: VersatileImageField, product: ProductInfo, *args, **kwargs):
+    """
+    Создает картинку пользователя или возвращает ошибку
+    """
     data = {
         'image': image
     }
@@ -108,6 +111,9 @@ def create_product_image(image: VersatileImageField, product: ProductInfo, *args
 
 @shared_task()
 def create_user_image(image: VersatileImageField, user: User, *args, **kwargs):
+    """
+    Создает картинку продукта или возвращает ошибку
+    """
     data = {
         'image': image
     }
