@@ -12,7 +12,8 @@ from drf_yasg.openapi import Parameter as yasg_param, IN_PATH
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, get_object_or_404
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -22,14 +23,14 @@ from backend.models import STATE_CHOICES, Category, ConfirmEmailToken, Contact, 
     USER_TYPE_CHOICES
 from backend.permissions import IsCustomAdminUser, IsShopUser
 from backend.serializers import (CategorySerializer, ContactSerializer, OrderItemSerializer, OrderSerializer,
-                                 ProductInfoSerializer, ShopSerializer, UserSerializer)
+                                 ProductInfoSerializer, ShopSerializer, UserSerializer, ImageSerializers)
 from backend.signals import new_order, new_user_registered, update_order
-from backend.tasks import do_import
+from backend.tasks import do_import, delete_image
 
 
 class RegisterAccount(APIView):
     """
-    Класс для регистрации новых пользователей
+    Class for registering new users
     """
 
     @swagger_auto_schema(
@@ -94,8 +95,7 @@ class RegisterAccount(APIView):
 
 class ConfirmAccount(APIView):
     """
-    Класс для подтверждения почты пользователя
-    и выдача ему статуса is_active
+    Class for confirming the user's mail
     """
 
     @swagger_auto_schema(
@@ -136,8 +136,7 @@ class ConfirmAccount(APIView):
 
 class LoginAccount(APIView):
     """
-    Класс для авторизации пользователя
-    и выдачи ему токена
+    Class for user authorization
     """
 
     @swagger_auto_schema(
@@ -186,8 +185,10 @@ class LoginAccount(APIView):
 
 class AccountDetails(APIView):
     """
-    Класс для просмотра и редактирования информации
-    в аккаунте пользователя
+    Class for viewing and editing information
+    in the user account:
+    :get: Receiving information about the user's account.
+    :post: Updating user's account information.
     """
 
     permission_classes = (IsAuthenticated,)
@@ -247,8 +248,7 @@ class AccountDetails(APIView):
 
 class Logout(APIView):
     """
-    Класс для выхода из приложения
-    и удаление токена доступа пользователя
+    Class fot Logout the app.
     """
     permission_classes = (IsAuthenticated,)
 
@@ -264,8 +264,11 @@ class Logout(APIView):
 
 class ContactView(APIView):
     """
-    Класс для работы с контактами пользователя
-    их просмотр, создание, изменение и удаление
+    Class for working with user contacts:
+    :get: Receiving the user's contacts list.
+    :post: Create a new contact for the user.
+    :put: Change the user's contact by several fields.
+    :delete: Delete one contact or more contacts of the user.
     """
     permission_classes = (IsAuthenticated,)
 
@@ -393,8 +396,9 @@ class ContactView(APIView):
 
 class PartnerState(APIView):
     """
-    Класс для просмотра и изменение
-    статуса магазина
+    Class for viewing and changing the status of the store:
+    :get: Receiving info about status of shop.
+    :post: Change shop status between True or False.
     """
 
     permission_classes = (IsAuthenticated, IsShopUser)
@@ -448,7 +452,7 @@ class PartnerState(APIView):
 
 class PartnerOrders(APIView):
     """
-    Класс для получения заказов магазина
+    Class for receiving shop orders
     """
     permission_classes = (IsAuthenticated, IsShopUser)
 
@@ -475,8 +479,11 @@ class PartnerOrders(APIView):
 
 class PartnerUpdate(APIView):
     """
-    Класс для добавления, изменения и удаления
-    прайса от поставщика
+    Class for adding, changing and deleting
+    a price list from a supplier:
+    :post: Creating or updating a supplier's price list using the url.
+    :put: Changing product info according to the specified parameters.
+    :delete: Removing the product from the store's price list.
     """
     permission_classes = (IsAuthenticated, IsShopUser)
 
@@ -616,8 +623,8 @@ class PartnerUpdate(APIView):
 
 class ShopsView(ListAPIView):
     """
-    Класс для предоставления списка магазинов
-    с активным статусом получения заказов
+    Class for receiving a list of stores
+    with the active status of receiving orders.
     """
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
@@ -625,15 +632,16 @@ class ShopsView(ListAPIView):
 
 class CategoryView(ListAPIView):
     """
-    Класс для предоставления
-    списка категорий
+    Class for receiving a list of categories.
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class ProductInfoView(APIView):
-
+    """
+    Class for searching a product in the app.
+    """
     @swagger_auto_schema(
         operation_summary='Products search',
         operation_description='Searching and receiving a list of products '
@@ -671,11 +679,11 @@ class ProductInfoView(APIView):
 
 class BasketView(APIView):
     """
-    Класс для работы с корзиной пользователя:
-    :get: Получение списка товаров в корзине,
-    :post: Добавление товара в корзину,
-    :put: Изменение параметров товаров в корзине,
-    :delete: Удаление товаров из корзины
+    Class for work with user's basket:
+    :get: Receiving info about the user's products in a basket.
+    :post: Adding products into the user's basket.
+    :put: Changing products in user's basket.
+    :delete: Removing a product from a user's basket.
     """
     permission_classes = (IsAuthenticated,)
 
@@ -850,8 +858,9 @@ class BasketView(APIView):
 
 class OrderView(APIView):
     """
-    Класс для подтверждения заказов пользователя
-    и получения подтвержденных заказов
+    Class for confirm user's order and receiving confirm order.
+    :get: Receiving all user orders or the specific order,
+    :post: Confirm user's order.
     """
     permission_classes = (IsAuthenticated,)
 
@@ -942,8 +951,7 @@ class OrderView(APIView):
 
 class AdminView(APIView):
     """
-    Класс для изменения статуса заказов пользователей
-    с помощью администратора
+    Class for changing status of the user's order
     """
     permission_classes = (IsCustomAdminUser,)
 
@@ -997,5 +1005,131 @@ class AdminView(APIView):
 
         return JsonResponse(
             {'Error': 'Указанны не все поля'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class CreateNewUserImage(APIView):
+    """
+    Class for updating a user's image
+    """
+    permission_classes = (IsAuthenticated,)
+    parser_classes = (MultiPartParser,)
+
+    @swagger_auto_schema(
+        operation_summary='Change user image',
+        operation_description='Updating image in user profile',
+        manual_parameters=[
+            openapi.Parameter(
+                name='image',
+                in_=openapi.IN_FORM,
+                type=openapi.TYPE_FILE,
+                required=True,
+                description='File with image. Max size image up to 800x800'
+            )
+        ],
+        responses={
+            200: 'OK',
+            400: False
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        if 'image' in self.request.FILES:
+
+            user = request.user
+            image = self.request.FILES["image"]
+            old_image = user.image
+
+            data = {
+                'image': image
+            }
+            serializer = ImageSerializers(data=data)
+            if serializer.is_valid():
+                delete_image(old_image)
+                user.image = image
+                user.save()
+                return JsonResponse(
+                    {
+                        'Status': 'OK',
+                        'message': 'Картинка успешно загружена'
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return JsonResponse(
+            {'Status': False, 'message': 'Не переданы основные аргументы'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class CreateNewProductInfoImage(APIView):
+    """
+    Class for updating a photo of the shop's product
+    """
+    permission_classes = (IsAuthenticated, IsShopUser)
+    parser_classes = (MultiPartParser,)
+
+    @swagger_auto_schema(
+        operation_summary='Change product image',
+        operation_description='Updating image in product info',
+        manual_parameters=[
+            openapi.Parameter(
+                name='image',
+                in_=openapi.IN_FORM,
+                type=openapi.TYPE_FILE,
+                required=True,
+                description='File with image. Max size image up to 800x800'
+            ),
+            openapi.Parameter(
+                name='external_id',
+                in_=openapi.IN_PATH,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description='The external id of the product info'
+            )
+        ],
+        responses={
+            200: 'OK',
+            400: False
+        }
+    )
+    def post(self, request):
+
+        if 'image' in self.request.FILES and 'external_id' in self.request.data:
+
+            product = get_object_or_404(
+                ProductInfo,
+                shop=request.user.shop,
+                external_id=self.request.data['external_id']
+            )
+            old_image = product.photo
+            image = self.request.FILES['image']
+
+            data = {
+                'image': image
+            }
+
+            serializer = ImageSerializers(data=data)
+            if serializer.is_valid():
+                delete_image(old_image)
+                product.photo = image
+                product.save()
+
+                return JsonResponse(
+                    {
+                        'Status': 'OK',
+                        'message': 'Фото успешно загружено'
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return JsonResponse(
+            {
+                'Status': False,
+                'message': 'Не переданы основные аргументы'
+            },
             status=status.HTTP_400_BAD_REQUEST
         )

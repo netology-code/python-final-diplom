@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from backend.models import Category, Contact, Order, OrderItem, ProductInfo, Shop, User
 
@@ -13,12 +14,23 @@ class ContactSerializer(serializers.ModelSerializer):
         }
 
 
+class ImageSerializers(serializers.Serializer):
+    image = serializers.ImageField()
+
+    def validate_image(self, value):
+        height, width = value.image.size
+        if height + width > 2000:
+            raise serializers.ValidationError('Большой размер картинки')
+        return value
+
+
 class UserSerializer(serializers.ModelSerializer):
     contacts = ContactSerializer(read_only=True, many=True)
+    image = VersatileImageFieldSerializer(read_only=True, sizes='person_image')
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'company', 'last_name', 'first_name', 'position', 'contacts', 'type')
+        fields = ('id', 'email', 'company', 'last_name', 'first_name', 'position', 'contacts', 'type', 'image')
         read_only_fields = ('id',)
 
 

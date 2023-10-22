@@ -1,9 +1,12 @@
+import os
+
 import pytest
 from django.urls import reverse
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from backend.models import (Category, Contact, Order, OrderItem, Parameter, Product, ProductInfo, ProductParameter,
                             Shop)
+from backend.tasks import delete_image
 from tests.conftest import URL_SHOP, headers_token
 
 
@@ -487,3 +490,39 @@ def test_put_admin(client, get_admin_token, get_token, model_factory, state, sta
     elif status_code == HTTP_400_BAD_REQUEST:
         assert new_state != state
         assert response.json()['Error'] == 'Неверный статус'
+
+
+@pytest.mark.parametrize(
+    ['file_end', 'external_id', 'status_code'], (
+            ('.png', '345162', HTTP_201_CREATED),
+            ('.exe', '345162', HTTP_400_BAD_REQUEST),
+            ('.jpg', '555555', HTTP_404_NOT_FOUND),
+    )
+)
+@pytest.mark.django_db
+def test_upload_product_image(client, get_shop_token, model_factory, file_end, external_id, status_code, settings):
+    url = reverse('backend:product-image')
+    token = get_shop_token
+    user = token.user
+    old_list_files = os.listdir(settings.MEDIA_ROOT + '/image/products_image')
+    shop = model_factory(Shop, user=user)
+    category = model_factory(Category)
+    product = model_factory(Product, category=category)
+    model_factory(ProductInfo, product=product, shop=shop, price=6543, quantity=4, external_id=345162)
+
+    with open(settings.TEST_IMAGE_PATH + 'test_image' + file_end, 'rb') as file:
+        data = {
+            'image': file,
+            'external_id': external_id
+        }
+
+        response = client.post(url, headers=headers_token(token), data=data, format="multipart")
+
+    assert response.status_code == status_code
+    if status_code != HTTP_400_BAD_REQUEST and status_code != HTTP_404_NOT_FOUND:
+        product_info = ProductInfo.objects.get(external_id=external_id)
+        new_product_image = product_info.photo.name.split('/')[-1]
+        new_list_file = os.listdir(settings.MEDIA_ROOT + '/image/products_image')
+        delete_image(product_info.photo)
+        assert new_product_image in new_list_file
+        assert len(new_list_file) == len(old_list_files) + 1

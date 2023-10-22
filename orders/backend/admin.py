@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import path, reverse
+from django.utils.html import format_html
 
 from backend.forms import ShopImportForm
 from backend.models import (Category, ConfirmEmailToken, Contact, Order, OrderItem, Parameter, Product, ProductInfo,
@@ -14,7 +15,8 @@ from backend.tasks import do_import
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'password',)}),
-        ('Personal info', {'fields': ('first_name', 'last_name',)}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'company', 'position')}),
+        ('Photo', {'fields': ('image', 'image_tag',)}),
         ('Permissions', {'fields': (
             'type',
             'is_active',
@@ -33,17 +35,28 @@ class CustomUserAdmin(UserAdmin):
          ),
         (
             'Person Info', {'fields': (
-                'first_name', 'last_name', 'company', 'position', 'type',
+                'first_name', 'last_name', 'company', 'position', 'type', 'image',
             )}
         ),
     )
 
-    list_display = ('id', 'email', 'first_name', 'last_name', 'company', 'type',
+    list_display = ('id', 'image_tag', 'email', 'first_name', 'last_name', 'company', 'type',
                     'is_staff', 'is_active', 'is_superuser')
     list_filter = ('is_staff', 'is_active', 'is_superuser', 'groups',)
     search_fields = ("email", 'last_name',)
     ordering = ('email',)
     filter_horizontal = ('groups', 'user_permissions',)
+    readonly_fields = ('image_tag',)
+
+    def image_tag(self, obj):
+        if obj.image:
+            new_image = obj.image.thumbnail['100x100']
+            return format_html(
+                f'<img src="{new_image.url}">'
+            )
+        return '-'
+
+    image_tag.short_description = 'Profile picture'
 
 
 @admin.register(Shop)
@@ -98,8 +111,18 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(ProductInfo)
 class ProductInfoAdmin(admin.ModelAdmin):
-    list_display = ('product', 'external_id', 'shop', 'quantity', 'price', 'price_rrc', 'model',)
+    list_display = ('product', 'external_id', 'shop', 'quantity', 'price', 'price_rrc', 'model', 'image_tag')
     list_filter = ('price', 'price_rrc', 'shop',)
+
+    def image_tag(self, obj):
+        if obj.photo:
+            new_photo = obj.photo.thumbnail['150x150']
+            return format_html(
+                f'<img src="{new_photo.url}">'
+            )
+        return '-'
+
+    image_tag.short_description = 'Profile picture'
 
 
 @admin.register(Parameter)

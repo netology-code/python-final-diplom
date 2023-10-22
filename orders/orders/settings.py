@@ -32,6 +32,7 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
 # Application definition
 
 INSTALLED_APPS = [
+    'baton',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,14 +45,18 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_rest_passwordreset',
     'django_celery_results',
-
+    'versatileimagefield',
+    'social_django',
     'drf_spectacular',
     'drf_yasg',
+    'silk',
 
     'backend.apps.BackendConfig',
+    'baton.autodiscover',
 ]
 
 MIDDLEWARE = [
+    'silk.middleware.SilkyMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -79,6 +84,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -138,6 +145,12 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+MEDIA_URL = '/media/'
+
+TEST_IMAGE_PATH = os.path.join(BASE_DIR, 'tests/backend/test_image/')
+
 AUTH_USER_MODEL = 'backend.User'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -164,9 +177,9 @@ REST_FRAMEWORK = {
     ),
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-        # 'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-        # 'drf_social_oauth2.authentication.SocialAuthentication',
     ),
 
     'DEFAULT_THROTTLE_RATES': {
@@ -181,20 +194,41 @@ REST_FRAMEWORK = {
 
 APPEND_SLASH = False
 
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_BROKER_TRANSPORT = 'redis'
-CELERY_RESULT_BACKEND = 'django-db'
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', default='redis://redis:6379/0')
+CELERY_BROKER_TRANSPORT = os.environ.get('CELERY_BROKER_TRANSPORT', default='redis')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', default='django-db')
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'orders.settings')
 
-SOCIAL_AUTH_JSONFIELD_ENABLED = True
-
-AUTHENTICATION_BACKENDS = [
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.github.GithubOAuth2',
+    'social_core.backends.mailru.MRGOAuth2',
     'django.contrib.auth.backends.ModelBackend',
-]
+)
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.social_auth.associate_by_email',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
+
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
+SOCIAL_AUTH_USER_MODEL = 'backend.User'
+SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
+SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'first_name', 'email']
 
 SOCIAL_AUTH_GITHUB_KEY = os.environ.get('SOCIAL_AUTH_GITHUB_KEY')
 SOCIAL_AUTH_GITHUB_SECRET = os.environ.get('SOCIAL_AUTH_GITHUB_SECRET')
+SOCIAL_AUTH_GITHUB_SCOPE = ['user']
+
+SOCIAL_AUTH_MAILRU_KEY = os.environ.get('SOCIAL_AUTH_MAILRU_KEY')
+SOCIAL_AUTH_MAILRU_SECRET = os.environ.get('SOCIAL_AUTH_MAILRU_SECRET')
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
@@ -202,11 +236,187 @@ SWAGGER_SETTINGS = {
             'type': 'apiKey',
             'name': 'Authorization',
             'in': 'header'
-        },
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header'
         }
     }
+}
+
+BATON = {
+    'SITE_HEADER': 'My diploma',
+    'SITE_TITLE': 'My diploma',
+    'INDEX_TITLE': 'Backend',
+    'SUPPORT_HREF': 'https://github.com/OlegSungyrovsky',
+    'COPYRIGHT': 'copyright © 2023 <a href="https://github.com/OlegSungyrovsky">Oleg srl</a>',
+    'POWERED_BY': '<a href="https://github.com/OlegSungyrovsky">Oleg srl</a>',
+    'CONFIRM_UNSAVED_CHANGES': True,
+    'SHOW_MULTIPART_UPLOADING': True,
+    'ENABLE_IMAGES_PREVIEW': True,
+    'CHANGELIST_FILTERS_IN_MODAL': True,
+    'CHANGELIST_FILTERS_ALWAYS_OPEN': False,
+    'CHANGELIST_FILTERS_FORM': True,
+    'COLLAPSABLE_USER_AREA': False,
+    'MENU_ALWAYS_COLLAPSED': False,
+    'MENU_TITLE': 'Menu',
+    'MESSAGES_TOASTS': False,
+    'GRAVATAR_ENABLED': False,
+    'FORCE_THEME': None,
+    'LOGIN_SPLASH': 'https://mykaleidoscope.ru/x/uploads/posts/'
+                    '2022-09/1663154918_37-mykaleidoscope-ru-p-buenos-aires-argentina-krasivo-38.jpg',
+    'MENU': (
+        {'type': 'title', 'label': 'main', 'apps': ('auth', 'rest_framework.authtoken')},
+        {
+            'type': 'app',
+            'name': 'auth',
+            'label': 'Authentication',
+            'models': (
+                {
+                    'name': 'group',
+                    'label': 'Groups'
+                },
+
+            )
+        },
+        {
+            'type': 'app',
+            'name': 'authtoken',
+            'label': 'Rest Authentication Token',
+        },
+        {
+            'type': 'app',
+            'name': 'social_django',
+            'label': 'Social Django',
+        },
+        {
+            'type': 'app',
+            'name': 'django_celery_results',
+            'label': 'Celery',
+        },
+        {
+            'type': 'app',
+            'name': 'django_rest_passwordreset',
+            'label': 'Password Reset',
+        },
+        {
+            'type': 'app',
+            'name': 'backend',
+            'label': 'Confirm Email',
+            'models': (
+                {
+                    'name': 'confirmemailtoken',
+                    'label': 'Confirm Email Token'
+                },
+            )
+        },
+        {
+            'type': 'app',
+            'name': 'backend',
+            'label': 'User',
+            'default_open': True,
+            'models': (
+                {
+                    'name': 'user',
+                    'label': 'Users'
+                },
+                {
+                    'name': 'contact',
+                    'label': 'Contacts'
+                },
+                {
+                    'name': 'confirmemailtoken',
+                    'label': 'Confirm Email Tokens'
+                }
+            )
+        },
+        {
+            'type': 'app',
+            'name': 'backend',
+            'label': 'Shop',
+            'default_open': True,
+            'models': (
+                {
+                    'name': 'shop',
+                    'label': 'Shop'
+                },
+                {
+                    'name': 'shopimport',
+                    'label': 'Shop Import'
+                }
+            )
+        },
+        {
+            'type': 'app',
+            'name': 'backend',
+            'label': 'Products',
+            'default_open': True,
+            'models': (
+                {
+                    'name': 'category',
+                    'label': 'Category'
+                },
+                {
+                    'name': 'product',
+                    'label': 'Product'
+                },
+                {
+                    'name': 'productinfo',
+                    'label': 'Product Info'
+                },
+                {
+                    'name': 'parameter',
+                    'label': 'Parameter'
+                },
+                {
+                    'name': 'productparameter',
+                    'label': 'Product Parameter'
+                },
+            )
+        },
+        {
+            'type': 'app',
+            'name': 'backend',
+            'label': 'Orders',
+            'default_open': True,
+            'models': (
+                {
+                    'name': 'order',
+                    'label': 'Order'
+                },
+                {
+                    'name': 'orderitem',
+                    'label': 'Order Item'
+                }
+            )
+        },
+
+        {'type': 'free',
+         'label': 'Documentation Swagger Redoc',
+         'url': 'http://localhost:8000/redoc/',
+         },
+        {'type': 'free',
+         'label': 'Documentation Swagger ',
+         'url': 'http://localhost:8000/swagger/',
+         },
+        {'type': 'free',
+         'label': 'Documentation Postmen ',
+         'url': 'https://documenter.getpostman.com/view/24872439/2s9YJez1xd',
+         },
+    ),
+    'ANALYTICS': {
+        'CREDENTIALS': os.path.join(BASE_DIR, 'credentials.json'),
+        'VIEW_ID': os.environ.get('ANALYTICS_VIEW_ID', default='11111'),
+    }
+}
+
+VERSATILEIMAGEFIELD_SETTINGS = {
+    'cache_length': 2592000,
+    'cache_name': 'versatileimagefield_cache',
+    'jpeg_resize_quality': 70,
+    'create_images_on_demand': True,
+    'image_key_post_processor': None,
+}
+
+VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
+    'person_image': [
+        ('full_size', 'url'),
+        ('thumbnail', 'thumbnail__100x100'),
+    ]
 }

@@ -14,7 +14,6 @@ click-plugins==1.1.1
 click-repl==0.3.0
 colorama==0.4.6
 cryptography==41.0.4
-defusedxml==0.8.0rc2
 Deprecated==1.2.14
 Django==4.2.5
 django-baton==2.8.0
@@ -64,8 +63,6 @@ pytest-django==4.5.2
 python-dateutil==2.8.2
 python-dotenv==1.0.0
 python-jose==3.3.0
-python-magic==0.4.27
-python-magic-bin==0.4.14
 python3-openid==3.2.0
 pytz==2023.3.post1
 PyYAML==6.0.1

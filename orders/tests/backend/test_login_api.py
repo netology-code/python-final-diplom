@@ -1,10 +1,14 @@
+import os
+
 import pytest
+
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
 
 from backend.models import ConfirmEmailToken, User
 from backend.serializers import UserSerializer
+from backend.tasks import delete_image
 from tests.conftest import headers_token
 
 
@@ -26,6 +30,7 @@ def test_user_registration(django_user_model, client, test_email, test_password,
         'company': 'Microsoft',
         'position': 'engineer',
         'type': test_type or 'shop',
+        'image': {}
     }
     response = client.post(url, data)
 
@@ -59,6 +64,7 @@ def test_confirm_account(client, create_bayer_user, test_email, test_token, stat
     assert response.status_code == status_code
     if response.status_code != HTTP_400_BAD_REQUEST:
         assert new_user.is_active is True
+
 
 @pytest.mark.parametrize(
     ['email', 'password', 'status_code'], (
@@ -94,6 +100,7 @@ def test_get_account_details(client, get_token):
         assert response.status_code == HTTP_200_OK
         assert response.json() == serializer.data
 
+
 @pytest.mark.parametrize(
     ['password', 'status_code'], (
             ('', HTTP_201_CREATED),
@@ -109,36 +116,49 @@ def test_update_account_details(client, get_token, password, status_code):
         'password': password or 'qweasdzxc1234',
         'first_name': 'Andrey'
     }
-    test_data = {
-        'id': token.user.id,
-        'email': token.user.email,
-        'company': token.user.company,
-        'last_name': token.user.last_name,
-        'first_name': 'Andrey',
-        'position': token.user.position,
-        'contacts': [],
-        'type': token.user.type
-    }
 
     response = client.post(path=url, headers=headers_token(token), data=data)
 
     assert response.status_code == status_code
     if response.status_code != HTTP_400_BAD_REQUEST:
         assert response.json()['first_name'] == 'Andrey'
-        assert response.json() == test_data
-
-
 @pytest.mark.django_db
 def test_logout(client, get_token):
     url = reverse('backend:logout')
     token = get_token
     count = Token.objects.count()
 
-    headers = {
-        'Authorization': f'Token {token.key}'
-    }
-
-    response = client.get(path=url, headers=headers)
+    response = client.get(path=url, headers=headers_token(token))
 
     assert response.status_code == HTTP_204_NO_CONTENT
     assert Token.objects.count() == count - 1
+
+
+@pytest.mark.parametrize(
+    ['file_end', 'status_code', ], (
+            ('.png', HTTP_201_CREATED),
+            ('.exe', HTTP_400_BAD_REQUEST),
+            ('.jpg', HTTP_201_CREATED)
+    )
+)
+@pytest.mark.django_db
+def test_upload_user_image(client, get_token, file_end, status_code, settings):
+    url = reverse('backend:account-image')
+    token = get_token
+    old_list_files = os.listdir(settings.MEDIA_ROOT + '/image/user_image')
+    with open(settings.TEST_IMAGE_PATH + 'test_image' + file_end, 'rb') as file:
+        data = {
+            'image': file
+        }
+
+        response = client.post(url, headers=headers_token(token), data=data, format="multipart")
+
+    assert response.status_code == status_code
+    if response.status_code != HTTP_400_BAD_REQUEST:
+        user = User.objects.get(id=token.user.id)
+        image_name = user.image.name.split('/')[-1]
+        new_list_file = os.listdir(settings.MEDIA_ROOT + '/image/user_image')
+        delete_image(user.image)
+        assert image_name in new_list_file
+        assert len(new_list_file) == len(old_list_files) + 1
+

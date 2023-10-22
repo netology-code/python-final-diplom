@@ -4,6 +4,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_rest_passwordreset.tokens import get_token_generator
+from versatileimagefield.fields import VersatileImageField
 
 STATE_CHOICES = (
     ('basket', 'Статус корзины'),
@@ -21,6 +22,16 @@ USER_TYPE_CHOICES = (
 )
 
 
+def get_path_image(instance, filename):
+    exe = filename.split('.')[-1]
+    if isinstance(instance, User):
+        email = instance.email
+        return f'image/user_image/{email}.{exe}'
+    if isinstance(instance, ProductInfo):
+        external_id = instance.external_id
+        return f'image/products_image/{external_id}.{exe}'
+
+
 class UserManager(BaseUserManager):
     """
     Миксин для управления пользователями
@@ -35,6 +46,8 @@ class UserManager(BaseUserManager):
             raise ValueError('The given email must be set')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
+        if self.model.objects.filter(social_auth__user=user).first():
+            user.is_active = True
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -86,6 +99,14 @@ class User(AbstractUser):
         ),
     )
     type = models.CharField(verbose_name='Тип пользователя', choices=USER_TYPE_CHOICES, max_length=5, default='buyer')
+    image = VersatileImageField(
+        verbose_name='Аватарка',
+        upload_to=get_path_image,
+        blank=True,
+        null=True,
+        default='image/user_image/default_image.png',
+        help_text=_('Max size image up to 800x800')
+    )
 
     def __str__(self):
         return self.email
@@ -162,6 +183,14 @@ class ProductInfo(models.Model):
     price = models.PositiveIntegerField(verbose_name='Цена')
     price_rrc = models.PositiveIntegerField(verbose_name='Рекомендованная розничная цена')
     model = models.CharField(max_length=40, blank=True, verbose_name='Модель')
+    photo = VersatileImageField(
+        upload_to=get_path_image,
+        blank=True,
+        null=True,
+        verbose_name='Фото',
+        default='image/products_image/default_product_image.jpg',
+        help_text=_('Max image size up to 800x800')
+    )
 
     class Meta:
         verbose_name = 'Информация о продукте'
