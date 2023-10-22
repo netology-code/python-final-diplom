@@ -6,7 +6,8 @@ from versatileimagefield.fields import VersatileImageField
 from yaml import Loader
 from yaml import load as load_yaml
 
-from .models import Category, Parameter, Product, ProductInfo, ProductParameter, Shop
+from .models import Category, Parameter, Product, ProductInfo, ProductParameter, Shop, User
+from .serializers import ImageSerializers
 
 
 @shared_task()
@@ -91,3 +92,28 @@ def delete_image(image: VersatileImageField, *args, **kwargs):
         image.delete_all_created_images()
         image.delete(False)
 
+
+@shared_task()
+def create_product_image(image: VersatileImageField, product: ProductInfo, *args, **kwargs):
+    data = {
+        'image': image
+    }
+    serializer = ImageSerializers(data=data)
+    if serializer.is_valid():
+        product.photo = image
+        product.save()
+        return 'success'
+    return serializer.errors
+
+
+@shared_task()
+def create_user_image(image: VersatileImageField, user: User, *args, **kwargs):
+    data = {
+        'image': image
+    }
+    serializer = ImageSerializers(data=data)
+    if serializer.is_valid():
+        user.image = image
+        user.save()
+        return 'success'
+    return serializer.errors

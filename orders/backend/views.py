@@ -23,9 +23,9 @@ from backend.models import STATE_CHOICES, Category, ConfirmEmailToken, Contact, 
     USER_TYPE_CHOICES
 from backend.permissions import IsCustomAdminUser, IsShopUser
 from backend.serializers import (CategorySerializer, ContactSerializer, OrderItemSerializer, OrderSerializer,
-                                 ProductInfoSerializer, ShopSerializer, UserSerializer, ImageSerializers)
+                                 ProductInfoSerializer, ShopSerializer, UserSerializer)
 from backend.signals import new_order, new_user_registered, update_order
-from backend.tasks import do_import, delete_image
+from backend.tasks import do_import, delete_image, create_product_image, create_user_image
 
 
 class RegisterAccount(APIView):
@@ -642,6 +642,7 @@ class ProductInfoView(APIView):
     """
     Class for searching a product in the app.
     """
+
     @swagger_auto_schema(
         operation_summary='Products search',
         operation_description='Searching and receiving a list of products '
@@ -1040,14 +1041,10 @@ class CreateNewUserImage(APIView):
             image = self.request.FILES["image"]
             old_image = user.image
 
-            data = {
-                'image': image
-            }
-            serializer = ImageSerializers(data=data)
-            if serializer.is_valid():
+            status_image = create_user_image(image, user)
+            if status_image == 'success':
                 delete_image(old_image)
-                user.image = image
-                user.save()
+
                 return JsonResponse(
                     {
                         'Status': 'OK',
@@ -1055,7 +1052,7 @@ class CreateNewUserImage(APIView):
                     },
                     status=status.HTTP_201_CREATED
                 )
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status_image, status=status.HTTP_400_BAD_REQUEST)
 
         return JsonResponse(
             {'Status': False, 'message': 'Не переданы основные аргументы'},
@@ -1105,16 +1102,9 @@ class CreateNewProductInfoImage(APIView):
             )
             old_image = product.photo
             image = self.request.FILES['image']
-
-            data = {
-                'image': image
-            }
-
-            serializer = ImageSerializers(data=data)
-            if serializer.is_valid():
+            status_image = create_product_image(image, product)
+            if status_image == 'success':
                 delete_image(old_image)
-                product.photo = image
-                product.save()
 
                 return JsonResponse(
                     {
@@ -1124,7 +1114,7 @@ class CreateNewProductInfoImage(APIView):
                     status=status.HTTP_201_CREATED
                 )
 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status_image, status=status.HTTP_400_BAD_REQUEST)
 
         return JsonResponse(
             {
