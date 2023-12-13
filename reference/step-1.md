@@ -9,7 +9,7 @@
 
 1. Система контроля версий Git;
 2. Аккаунт на Github;
-3. Установленный локально (на вашем компьютере) Python >= 3.5.
+3. Установленный локально (на вашем компьютере) Python >= 3.10.
 
 ## Порядок выполнения
 
@@ -18,8 +18,8 @@
 2. Клонируйте репозиторий командой в вашем терминале 
 ```git clone адрес_вашего_репозитория```
 3. Создайте виртуальное окружение для своего проекта
-```virtualenv --python=python3.7 env```
+```virtualenv --python=python3.10 env```
 4. Установите все необходимые пакеты проекта командой 
-```pip install -r ./requirements.txt```
-5. Создайте проект django
-```django-admin startproject orders```
+```pip install -r requirements.txt```
+5. Создайте проект django, в случае если создаете проект с нуля без использования примера
+```django-admin startproject orders```, ```django-admin startapp backend```

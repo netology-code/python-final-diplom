@@ -51,6 +51,7 @@ class UserManager(BaseUserManager):
     def create_superuser(self, email, password, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
@@ -100,6 +101,7 @@ class User(AbstractUser):
 
 
 class Shop(models.Model):
+    objects = models.manager.Manager()
     name = models.CharField(max_length=50, verbose_name='Название')
     url = models.URLField(verbose_name='Ссылка', null=True, blank=True)
     user = models.OneToOneField(User, verbose_name='Пользователь',
@@ -119,6 +121,7 @@ class Shop(models.Model):
 
 
 class Category(models.Model):
+    objects = models.manager.Manager()
     name = models.CharField(max_length=40, verbose_name='Название')
     shops = models.ManyToManyField(Shop, verbose_name='Магазины', related_name='categories', blank=True)
 
@@ -132,6 +135,7 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    objects = models.manager.Manager()
     name = models.CharField(max_length=80, verbose_name='Название')
     category = models.ForeignKey(Category, verbose_name='Категория', related_name='products', blank=True,
                                  on_delete=models.CASCADE)
@@ -146,6 +150,7 @@ class Product(models.Model):
 
 
 class ProductInfo(models.Model):
+    objects = models.manager.Manager()
     model = models.CharField(max_length=80, verbose_name='Модель', blank=True)
     external_id = models.PositiveIntegerField(verbose_name='Внешний ИД')
     product = models.ForeignKey(Product, verbose_name='Продукт', related_name='product_infos', blank=True,
@@ -165,6 +170,7 @@ class ProductInfo(models.Model):
 
 
 class Parameter(models.Model):
+    objects = models.manager.Manager()
     name = models.CharField(max_length=40, verbose_name='Название')
 
     class Meta:
@@ -177,6 +183,7 @@ class Parameter(models.Model):
 
 
 class ProductParameter(models.Model):
+    objects = models.manager.Manager()
     product_info = models.ForeignKey(ProductInfo, verbose_name='Информация о продукте',
                                      related_name='product_parameters', blank=True,
                                      on_delete=models.CASCADE)
@@ -193,6 +200,7 @@ class ProductParameter(models.Model):
 
 
 class Contact(models.Model):
+    objects = models.manager.Manager()
     user = models.ForeignKey(User, verbose_name='Пользователь',
                              related_name='contacts', blank=True,
                              on_delete=models.CASCADE)
@@ -214,6 +222,7 @@ class Contact(models.Model):
 
 
 class Order(models.Model):
+    objects = models.manager.Manager()
     user = models.ForeignKey(User, verbose_name='Пользователь',
                              related_name='orders', blank=True,
                              on_delete=models.CASCADE)
@@ -237,6 +246,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
+    objects = models.manager.Manager()
     order = models.ForeignKey(Order, verbose_name='Заказ', related_name='ordered_items', blank=True,
                               on_delete=models.CASCADE)
 
@@ -254,6 +264,7 @@ class OrderItem(models.Model):
 
 
 class ConfirmEmailToken(models.Model):
+    objects = models.manager.Manager()
     class Meta:
         verbose_name = 'Токен подтверждения Email'
         verbose_name_plural = 'Токены подтверждения Email'
