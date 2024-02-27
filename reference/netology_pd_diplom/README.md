@@ -1,4 +1,4 @@
-# Пример API Сервиса для магазина
+# Пример API-сервиса для магазина
 
 [Документация по запросам в PostMan](https://documenter.getpostman.com/view/5037826/SVfJUrSc) 
 
