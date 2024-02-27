@@ -1,8 +1,8 @@
-Пример API Сервиса для магазина
+# Пример API Сервиса для магазина
 
 [Документация по запросам в PostMan](https://documenter.getpostman.com/view/5037826/SVfJUrSc) 
 
-## **установка СУБД**
+## **Установить СУБД**
 
     sudo nano  /etc/apt/sources.list.d/pgdg.list
     
@@ -57,7 +57,7 @@
     python3 manage.py createsuperuser    
     
  
-**Проверяем работу модулей**
+## **Проверить работу модулей**
     
     
     python3 manage.py runserver 0.0.0.0:8000
