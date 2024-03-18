@@ -35,10 +35,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'backend.apps.BackendConfig',
     'rest_framework',
     'rest_framework.authtoken',
     'django_rest_passwordreset',
+    'backend',
 ]
 
 MIDDLEWARE = [
@@ -129,7 +129,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.mail.ru'
 
 EMAIL_HOST_USER = 'netology.diplom@mail.ru'
-EMAIL_HOST_PASSWORD = 'RANGVKPEZ61jsCgTbsbG'
+EMAIL_HOST_PASSWORD = 'CLdm7yW4U9nivz9mbexu'
 EMAIL_PORT = '465'
 EMAIL_USE_SSL = True
 SERVER_EMAIL = EMAIL_HOST_USER
